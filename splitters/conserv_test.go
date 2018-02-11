@@ -22,7 +22,7 @@ func TestConservSplitting(t *testing.T) {
 		{"mySql", []string{"my", "Sql"}},
 		{"mySQl", []string{"my", "S", "Ql"}},
 		{"9999", []string{"9999"}},
-		{"", nil},
+		{"", []string{""}},
 	}
 
 	conserv := new(Conserv)
@@ -33,5 +33,12 @@ func TestConservSplitting(t *testing.T) {
 		}
 
 		assert.Equal(t, c.expected, got, "elements should match in number and order")
+	}
+}
+
+func BenchmarkConservSplitting(b *testing.B) {
+	conserv := new(Conserv)
+	for i := 0; i < b.N; i++ {
+		conserv.Split("spongebob_squarePants")
 	}
 }
