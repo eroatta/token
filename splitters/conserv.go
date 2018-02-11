@@ -19,8 +19,19 @@ func (c Conserv) Split(token string) ([]string, error) {
 	ccRegex := regexp.MustCompile("([a-z])([A-Z])")
 	cc := ccRegex.ReplaceAllString(t, "${1}_$2")
 
-	regex := regexp.MustCompile("_")
-	s := regex.Split(cc, -1)
+	endCcRegex := regexp.MustCompile("([A-Z])([a-z])")
+	rcc := endCcRegex.ReplaceAllString(cc, "_${1}${2}")
 
-	return s, nil
+	regex := regexp.MustCompile("_")
+	s := regex.Split(rcc, -1)
+
+	//remove the empty items
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+
+	return r, nil
 }

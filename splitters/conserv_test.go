@@ -15,7 +15,6 @@ func TestConservSplitting(t *testing.T) {
 		{"Extraordinaire", []string{"Extraordinaire"}},
 		{"extraordinairE", []string{"extraordinair", "E"}},
 		{"extraordinaire", []string{"extraordinaire"}},
-		{"extra-ordinaire", []string{"extra", "ordinaire"}},
 		{"extra_ordinaire", []string{"extra", "ordinaire"}},
 		{"leto2nd", []string{"leto", "2", "nd"}},
 		{"brooklyn99", []string{"brooklyn", "99"}},
@@ -23,7 +22,7 @@ func TestConservSplitting(t *testing.T) {
 		{"mySql", []string{"my", "Sql"}},
 		{"mySQl", []string{"my", "S", "Ql"}},
 		{"9999", []string{"9999"}},
-		{"", []string{""}},
+		{"", nil},
 	}
 
 	conserv := new(Conserv)
