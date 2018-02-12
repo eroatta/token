@@ -10,7 +10,7 @@ type Conserv struct {
 }
 
 // Split on Conserv receives a token and returns an array of hard/soft words,
-// splitted by:
+// split by:
 // * Underscores
 // * Numbers
 // * CamelCase.
