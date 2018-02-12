@@ -34,3 +34,10 @@ func addMarkersOnUpperToLowerCase(token string) string {
 
 	return processedToken
 }
+
+func splitOnMarkers(token string) []string {
+	regex := regexp.MustCompile("_")
+	splitToken := regex.Split(token, -1)
+
+	return splitToken
+}

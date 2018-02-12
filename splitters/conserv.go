@@ -1,9 +1,5 @@
 package splitters
 
-import (
-	"regexp"
-)
-
 // Conserv represents a conservative splitter.
 type Conserv struct {
 	Splitter
@@ -19,8 +15,5 @@ func (c Conserv) Split(token string) ([]string, error) {
 	processedToken = addMarkersOnLowerToUpperCase(processedToken)
 	processedToken = addMarkersOnUpperToLowerCase(processedToken)
 
-	regex := regexp.MustCompile("_")
-	splitToken := regex.Split(processedToken, -1)
-
-	return splitToken, nil
+	return splitOnMarkers(processedToken), nil
 }
