@@ -20,7 +20,9 @@ func (g Greedy) Split(token string) ([]string, error) {
 		if inAnyList(s) != true {
 			preffixSplittings := splitOnMarkers(findPreffix(s, ""))
 			suffixSplittings := splitOnMarkers(findSuffix(s, ""))
-			compare(preffixSplittings, suffixSplittings)
+			chosenSplittings := compare(preffixSplittings, suffixSplittings)
+
+			splitToken = append(splitToken, chosenSplittings...)
 		} else {
 			splitToken = append(splitToken, s)
 		}
