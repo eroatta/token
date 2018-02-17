@@ -13,7 +13,8 @@ func TestGreedySplitting(t *testing.T) {
 		expected []string
 	}{}
 
-	greedy := new(Greedy)
+	list := make(map[string]interface{})
+	greedy := NewGreedy(&list, &list, &list)
 	for _, c := range cases {
 		got, err := greedy.Split(c.token)
 		if err != nil {
