@@ -45,19 +45,24 @@ func (g *Greedy) Split(token string) ([]string, error) {
 	return splitToken, nil
 }
 
+// inAnyList checks if the token exits on any lists used by the Greedy algorithm instance.
 func (g *Greedy) inAnyList(token string) bool {
 	return (*g.dictionary)[token] != nil ||
 		(*g.knownAbbreviations)[token] != nil ||
 		(*g.stopList)[token] != nil
 }
 
+// findPreffix looks for the longest preffix that exists on any list.
+// If the token exists on any list, the process continues to look for the longest
+// preffix within the remaining token. If not, then the process continues the search
+// with a smaller token.
 func (g *Greedy) findPreffix(token string, splitToken string) string {
 	if len(token) == 0 {
 		return ""
 	}
 
 	if g.inAnyList(token) {
-		return token + "_" + g.findPreffix(token, "")
+		return token + "_" + g.findPreffix(splitToken, "")
 	}
 
 	sToken := string(token[0]) + splitToken
@@ -66,6 +71,10 @@ func (g *Greedy) findPreffix(token string, splitToken string) string {
 	return g.findPreffix(s, sToken)
 }
 
+// findSuffix looks for the longest suffix that exists on any list.
+// If the token exists on any list, the process continues to look for the longest
+// suffix within the remaining token. If not, the the process continues the search
+// with a smaller token.
 func (g *Greedy) findSuffix(token string, splitToken string) string {
 	if len(token) == 0 {
 		return ""
