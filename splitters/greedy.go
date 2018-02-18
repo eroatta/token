@@ -1,5 +1,10 @@
 package splitters
 
+import (
+	"log"
+	"strings"
+)
+
 var defaultDictionary map[string]interface{}
 var defaultKnownAbbreviations map[string]interface{}
 var defaultStopList map[string]interface{}
@@ -29,12 +34,19 @@ func (g *Greedy) Split(token string) ([]string, error) {
 	preprocessedToken := addMarkersOnDigits(token)
 	preprocessedToken = addMarkersOnLowerToUpperCase(preprocessedToken)
 
+	log.Println("Preprocessed Token: " + preprocessedToken)
+
 	splitToken := make([]string, 0, 10)
 	for _, s := range splitOnMarkers(preprocessedToken) {
+		log.Println("Processing S: " + s)
 		if g.inAnyList(s) != true {
 			preffixSplittings := splitOnMarkers(g.findPreffix(s, ""))
 			suffixSplittings := splitOnMarkers(g.findSuffix(s, ""))
 			chosenSplittings := g.compare(preffixSplittings, suffixSplittings)
+
+			log.Println("Preffix splittings: " + strings.Join(preffixSplittings, ","))
+			log.Println("Suffix splittings: " + strings.Join(suffixSplittings, ","))
+			log.Println("Chosen splittings: " + strings.Join(chosenSplittings, ","))
 
 			splitToken = append(splitToken, chosenSplittings...)
 		} else {
@@ -58,15 +70,17 @@ func (g *Greedy) inAnyList(token string) bool {
 // with a smaller token.
 func (g *Greedy) findPreffix(token string, splitToken string) string {
 	if len(token) == 0 {
-		return ""
+		return splitToken
 	}
 
 	if g.inAnyList(token) {
 		return token + "_" + g.findPreffix(splitToken, "")
 	}
 
-	sToken := string(token[0]) + splitToken
+	sToken := string(token[len(token)-1]) + splitToken
 	s := token[:len(token)-1]
+
+	log.Println("sToken: " + sToken + " ### S: " + s)
 
 	return g.findPreffix(s, sToken)
 }
@@ -77,7 +91,7 @@ func (g *Greedy) findPreffix(token string, splitToken string) string {
 // with a smaller token.
 func (g *Greedy) findSuffix(token string, splitToken string) string {
 	if len(token) == 0 {
-		return ""
+		return splitToken
 	}
 
 	if g.inAnyList(token) {

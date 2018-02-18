@@ -11,7 +11,9 @@ func TestGreedySplitting(t *testing.T) {
 		ID       int
 		token    string
 		expected []string
-	}{}
+	}{
+		{0, "car", []string{"car"}},
+	}
 
 	list := make(map[string]interface{})
 	greedy := NewGreedy(&list, &list, &list)
