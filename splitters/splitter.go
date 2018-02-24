@@ -1,6 +1,9 @@
 package splitters
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 // Splitter defines the required behavior for any token splitter.
 type Splitter interface {
@@ -37,7 +40,7 @@ func addMarkersOnUpperToLowerCase(token string) string {
 
 func splitOnMarkers(token string) []string {
 	regex := regexp.MustCompile("_")
-	splitToken := regex.Split(token, -1)
+	splitToken := regex.Split(strings.Trim(token, "_"), -1)
 
 	return splitToken
 }

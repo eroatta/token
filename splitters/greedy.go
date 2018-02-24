@@ -59,9 +59,11 @@ func (g *Greedy) Split(token string) ([]string, error) {
 
 // inAnyList checks if the token exits on any lists used by the Greedy algorithm instance.
 func (g *Greedy) inAnyList(token string) bool {
-	return (*g.dictionary)[token] != nil ||
-		(*g.knownAbbreviations)[token] != nil ||
-		(*g.stopList)[token] != nil
+	word := strings.ToLower(token)
+
+	return (*g.dictionary)[word] != nil ||
+		(*g.knownAbbreviations)[word] != nil ||
+		(*g.stopList)[word] != nil
 }
 
 // findPreffix looks for the longest preffix that exists on any list.
