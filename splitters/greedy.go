@@ -1,7 +1,6 @@
 package splitters
 
 import (
-	"log"
 	"strings"
 )
 
@@ -36,7 +35,6 @@ func (g *Greedy) Split(token string) ([]string, error) {
 
 	splitToken := make([]string, 0, 10)
 	for _, s := range splitOnMarkers(preprocessedToken) {
-		log.Println("Processing S: " + s)
 		if g.inAnyList(s) != true {
 			preffixSplittings := splitOnMarkers(g.findPreffix(s, ""))
 			suffixSplittings := splitOnMarkers(g.findSuffix(s, ""))

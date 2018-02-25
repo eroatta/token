@@ -47,7 +47,8 @@ func createTestWords() map[string]interface{} {
 }
 
 func BenchmarkGreedySplitting(b *testing.B) {
-	greedy := new(Greedy)
+	emtpyList := make(map[string]interface{})
+	greedy := NewGreedy(&emtpyList, &emtpyList, &emtpyList)
 	for i := 0; i < b.N; i++ {
 		greedy.Split("spongebob_squarePants")
 	}
