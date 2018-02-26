@@ -43,15 +43,15 @@ func (s *Samurai) Split(token string) ([]string, error) {
 	preprocessedToken := addMarkersOnDigits(token)
 	preprocessedToken = addMarkersOnLowerToUpperCase(preprocessedToken)
 
-	reg := regexp.MustCompile("[A-Z][a-z]")
+	cutLocationRegex := regexp.MustCompile("[A-Z][a-z]")
 
 	var processedToken string
 	for _, word := range splitOnMarkers(preprocessedToken) {
-		cutLocation := reg.FindStringIndex(word)
+		cutLocation := cutLocationRegex.FindStringIndex(word)
 		if len(word) > 1 && cutLocation != nil {
 			n := len(word) - 1
-
 			i := cutLocation[0]
+
 			var camelScore float64
 			if i > 0 {
 				camelScore = s.score(word[i:n])
@@ -81,10 +81,38 @@ func (s *Samurai) Split(token string) ([]string, error) {
 	return splitToken, nil
 }
 
-func (s *Samurai) sameCaseSplit(token string, score float64) []string {
+func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
+	maxScore := -1.0
+
+	n := len(token)
+	for i := 0; i < n-1; i++ {
+		scoreLeft := s.score(token[0:i])
+		shouldSplitLeft := math.Sqrt(scoreLeft) > math.Max(s.score(token), baseScore)
+
+		scoreRight := s.score(token[i+1 : n])
+		shouldSplitRight := math.Sqrt(scoreRight) > math.Max(s.score(token), baseScore)
+
+		isPreffixOrSuffix := isPreffix(token[0:i]) || isSuffix(token[i+1:n])
+		if !isPreffixOrSuffix && shouldSplitLeft && shouldSplitRight {
+			if (scoreLeft + scoreRight) > maxScore {
+				maxScore = scoreLeft + scoreRight
+			}
+		} else if !isPreffixOrSuffix && shouldSplitLeft {
+
+		}
+	}
+
 	return []string{}
 }
 
 func (s *Samurai) score(word string) float64 {
 	return 0.0
+}
+
+func isPreffix(word string) bool {
+	return false
+}
+
+func isSuffix(word string) bool {
+	return false
 }
