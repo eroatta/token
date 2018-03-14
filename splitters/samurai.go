@@ -5,7 +5,11 @@ import (
 	"regexp"
 )
 
-type frequencyTable map[string]float32
+type frequencyTable map[string]float64
+
+func (t frequencyTable) getFrequency(word string) float64 {
+	return map[string]float64(t)[word]
+}
 
 var defaultLocalFreqTable frequencyTable
 var defaultGlobalFreqTable frequencyTable
@@ -16,6 +20,7 @@ type Samurai struct {
 
 	localFreqTable  *frequencyTable
 	globalFreqTable *frequencyTable
+	allStringsFreq  float64
 }
 
 // NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
@@ -84,8 +89,10 @@ func (s *Samurai) Split(token string) ([]string, error) {
 func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 	maxScore := -1.0
 
-	n := len(token)
-	for i := 0; i < n-1; i++ {
+	splitToken := []string{token}
+	n := len(token) - 1
+
+	for i := 0; i < n; i++ {
 		scoreLeft := s.score(token[0:i])
 		shouldSplitLeft := math.Sqrt(scoreLeft) > math.Max(s.score(token), baseScore)
 
@@ -96,17 +103,26 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 		if !isPreffixOrSuffix && shouldSplitLeft && shouldSplitRight {
 			if (scoreLeft + scoreRight) > maxScore {
 				maxScore = scoreLeft + scoreRight
+				splitToken = []string{token[0:i], token[i+1 : n]}
 			}
 		} else if !isPreffixOrSuffix && shouldSplitLeft {
-
+			temp := s.sameCaseSplit(token[i+1:n], baseScore)
+			if len(temp) > 1 {
+				splitToken = []string{token[0:i]}
+				splitToken = append(splitToken, temp...)
+			}
 		}
 	}
 
-	return []string{}
+	return splitToken
 }
 
+// score calculates the a score for a string based on how frequently a word
+// appears in the program under analysis and in a more global scope of a large
+// set of programs.
 func (s *Samurai) score(word string) float64 {
-	return 0.0
+	// Freq(s,p) + (globalFreq(s) / log_10 (AllStrsFreq(p))
+	return s.localFreqTable.getFrequency(word) + s.globalFreqTable.getFrequency(word)/math.Log10(s.allStringsFreq)
 }
 
 func isPreffix(word string) bool {
