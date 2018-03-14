@@ -11,8 +11,16 @@ func (t frequencyTable) getFrequency(word string) float64 {
 	return map[string]float64(t)[word]
 }
 
+type set map[string]bool
+
+func (s set) found(word string) bool {
+	return s[word]
+}
+
 var defaultLocalFreqTable frequencyTable
 var defaultGlobalFreqTable frequencyTable
+var defaultPrefixes set
+var defaultSuffixes set
 
 // Samurai represents the Samurai splitting algorithm, proposed by Hill et all.
 type Samurai struct {
@@ -21,11 +29,13 @@ type Samurai struct {
 	localFreqTable  *frequencyTable
 	globalFreqTable *frequencyTable
 	allStringsFreq  float64
+	prefixes        *set
+	suffixes        *set
 }
 
 // NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
 // tables are provided, the default tables are used.
-func NewSamurai(localFreqTable *frequencyTable, globalFreqTable *frequencyTable) *Samurai {
+func NewSamurai(localFreqTable *frequencyTable, globalFreqTable *frequencyTable, prefixes *set, suffixes *set) *Samurai {
 	local := &defaultLocalFreqTable
 	if localFreqTable != nil {
 		local = localFreqTable
@@ -36,9 +46,21 @@ func NewSamurai(localFreqTable *frequencyTable, globalFreqTable *frequencyTable)
 		global = globalFreqTable
 	}
 
+	commonPrefixes := &defaultPrefixes
+	if prefixes != nil {
+		commonPrefixes = prefixes
+	}
+
+	commonSuffixes := &defaultSuffixes
+	if suffixes != nil {
+		commonSuffixes = suffixes
+	}
+
 	return &Samurai{
 		localFreqTable:  local,
 		globalFreqTable: global,
+		prefixes:        commonPrefixes,
+		suffixes:        commonSuffixes,
 	}
 }
 
@@ -99,7 +121,7 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 		scoreRight := s.score(token[i+1 : n])
 		shouldSplitRight := math.Sqrt(scoreRight) > math.Max(s.score(token), baseScore)
 
-		isPreffixOrSuffix := isPreffix(token[0:i]) || isSuffix(token[i+1:n])
+		isPreffixOrSuffix := s.isPrefix(token[0:i]) || s.isSuffix(token[i+1:n])
 		if !isPreffixOrSuffix && shouldSplitLeft && shouldSplitRight {
 			if (scoreLeft + scoreRight) > maxScore {
 				maxScore = scoreLeft + scoreRight
@@ -125,10 +147,12 @@ func (s *Samurai) score(word string) float64 {
 	return s.localFreqTable.getFrequency(word) + s.globalFreqTable.getFrequency(word)/math.Log10(s.allStringsFreq)
 }
 
-func isPreffix(word string) bool {
-	return false
+// isPrefix checks if the current token is found on a list of common prefixes.
+func (s *Samurai) isPrefix(token string) bool {
+	return s.prefixes.found(token)
 }
 
-func isSuffix(word string) bool {
-	return false
+// isSuffix checks if the current token is found on a list of common suffixes.
+func (s *Samurai) isSuffix(token string) bool {
+	return s.suffixes.found(token)
 }
