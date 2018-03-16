@@ -14,13 +14,18 @@ func (t frequencyTable) getFrequency(word string) float64 {
 type set map[string]bool
 
 func (s set) found(word string) bool {
-	return s[word]
+	return map[string]bool(s)[word]
 }
 
 var defaultLocalFreqTable frequencyTable
 var defaultGlobalFreqTable frequencyTable
 var defaultPrefixes set
 var defaultSuffixes set
+
+func init() {
+	defaultPrefixes = buildDefaultPrefixes()
+	defaultSuffixes = buildDefaultSuffixes()
+}
 
 // Samurai represents the Samurai splitting algorithm, proposed by Hill et all.
 type Samurai struct {
@@ -155,4 +160,65 @@ func (s *Samurai) isPrefix(token string) bool {
 // isSuffix checks if the current token is found on a list of common suffixes.
 func (s *Samurai) isSuffix(token string) bool {
 	return s.suffixes.found(token)
+}
+
+func buildDefaultPrefixes() set {
+	commonPrefixes := []string{
+		"afro", "ambi", "amphi", "ana", "anglo", "apo", "astro", "bi", "bio", "circum", "cis", "co", "col",
+		"com", "con", "contra", "cor", "cryo", "crypto", "de", "de", "demi", "di", "dif", "dis", "du", "duo",
+		"eco", "electro", "em", "en", "epi", "euro", "ex", "franco", "geo", "hemi", "hetero", "homo", "hydro",
+		"hypo", "ideo", "idio", "il", "im", "infra", "inter", "intra", "ir", "iso", "macr", "mal", "maxi",
+		"mega", "megalo", "micro", "midi", "mini", "mis", "mon", "multi", "neo", "omni", "paleo", "para", "ped",
+		"peri", "poly", "pre", "preter", "proto", "pyro", "re", "retro", "semi", "socio", "supra", "sur", "sy",
+		"syl", "sym", "syn", "tele", "trans", "tri", "twi", "ultra", "un", "uni",
+	}
+
+	prefixes := make(map[string]bool)
+	for _, prefix := range commonPrefixes {
+		prefixes[prefix] = true
+	}
+
+	return prefixes
+}
+
+func buildDefaultSuffixes() set {
+	commonSuffixes := []string{
+		"a", "ac", "acea", "aceae", "acean", "aceous", "ade", "aemia", "agogue", "aholic", "al", "ales",
+		"algia", "amine", "ana", "anae", "ance", "ancy", "androus", "andry", "ane", "ar", "archy", "ard",
+		"aria", "arian", "arium", "ary", "ase", "athon", "ation", "ative", "ator", "atory", "biont",
+		"biosis", "cade", "caine", "carp", "carpic", "carpous", "cele", "cene", "centric", "cephalic",
+		"cephalous", "cephaly", "chory", "chrome", "cide", "clast", "clinal", "cline", "coccus", "coel",
+		"coele", "colous", "cracy", "crat", "cratic", "cratical", "cy", "cyte", "derm", "derma", "dermatous",
+		"dom", "drome", "dromous", "eae", "ectomy", "ed", "ee", "eer", "ein", "eme", "emia", "en", "ence",
+		"enchyma", "ency", "ene", "ent", "eous", "er", "ergic", "ergy", "es", "escence", "escent", "ese",
+		"esque", "ess", "est", "et", "eth", "etic", "ette", "ey", "facient", "fer", "ferous", "fic",
+		"fication", "fid", "florous", "foliate", "foliolate", "fuge", "ful", "fy", "gamous", "gamy", "gen",
+		"genesis", "genic", "genous", "geny", "gnathous", "gon", "gony", "grapher", "graphy", "gyne",
+		"gynous", "gyny", "ia", "ial", "ian", "iana", "iasis", "iatric", "iatrics", "iatry", "ibility",
+		"ible", "ic", "icide", "ician", "ick obsolete", "ics", "idae", "ide", "ie", "ify", "ile", "ina",
+		"inae", "ine", "ineae", "ing", "ini", "ious", "isation", "ise", "ish", "ism", "ist", "istic",
+		"istical", "istically", "ite", "itious", "itis", "ity", "ium", "ive", "ization", "ize", "kinesis",
+		"kins", "latry", "lepry", "ling", "lite", "lith", "lithic", "logue", "logist", "logy", "ly", "lyse",
+		"lysis", "lyte", "lytic", "lyze", "mancy", "mania", "meister", "ment", "merous", "metry", "mo",
+		"morph", "morphic", "morphism", "morphous", "mycete", "mycetes", "mycetidae", "mycin", "mycota",
+		"mycotina", "ness", "nik", "nomy", "odon", "odont", "odontia", "oholic", "oic", "oid", "oidea",
+		"oideae", "ol", "ole", "oma", "ome", "ont", "onym", "onymy", "opia", "opsida", "opsis", "opsy",
+		"orama", "ory", "ose", "osis", "otic", "otomy", "ous", "para", "parous", "pathy", "ped", "pede",
+		"penia", "phage", "phagia", "phagous", "phagy", "phane", "phasia", "phil", "phile", "philia",
+		"philiac", "philic", "philous", "phobe", "phobia", "phobic", "phony", "phore", "phoresis", "phorous",
+		"phrenia", "phyll", "phyllous", "phyceae", "phycidae", "phyta", "phyte", "phytina", "plasia", "plasm",
+		"plast", "plasty", "plegia", "plex", "ploid", "pode", "podous", "poieses", "poietic", "pter",
+		"rrhagia", "rrhea", "ric", "ry", "s", "scopy", "sepalous", "sperm", "sporous", "st", "stasis", "stat",
+		"ster", "stome", "stomy", "taxy", "th", "therm", "thermal", "thermic", "thermy", "thon", "thymia",
+		"tion", "tome", "tomy", "tonia", "trichous", "trix", "tron", "trophic", "tropism", "tropous", "tropy",
+		"tude", "ty", "ular", "ule", "ure", "urgy", "uria", "uronic", "urous", "valent", "virile", "vorous",
+		"xor", "y", "yl", "yne", "zoic", "zoon", "zygous", "zyme",
+	}
+
+	suffixes := make(map[string]bool)
+	for _, suffix := range commonSuffixes {
+		suffixes[suffix] = true
+	}
+
+	return suffixes
 }
