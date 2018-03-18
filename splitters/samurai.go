@@ -104,25 +104,27 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 	maxScore := -1.0
 
 	splitToken := []string{token}
-	n := len(token) - 1
+	n := len(token)
 
 	for i := 0; i < n; i++ {
-		scoreLeft := s.score(token[0:i])
+		left := token[0:i]
+		scoreLeft := s.score(left)
 		shouldSplitLeft := math.Sqrt(scoreLeft) > math.Max(s.score(token), baseScore)
 
-		scoreRight := s.score(token[i+1 : n])
+		right := token[i:n]
+		scoreRight := s.score(right)
 		shouldSplitRight := math.Sqrt(scoreRight) > math.Max(s.score(token), baseScore)
 
-		isPreffixOrSuffix := s.isPrefix(token[0:i]) || s.isSuffix(token[i+1:n])
+		isPreffixOrSuffix := s.isPrefix(left) || s.isSuffix(right)
 		if !isPreffixOrSuffix && shouldSplitLeft && shouldSplitRight {
 			if (scoreLeft + scoreRight) > maxScore {
 				maxScore = scoreLeft + scoreRight
-				splitToken = []string{token[0:i], token[i+1 : n]}
+				splitToken = []string{left, right}
 			}
 		} else if !isPreffixOrSuffix && shouldSplitLeft {
-			temp := s.sameCaseSplit(token[i+1:n], baseScore)
+			temp := s.sameCaseSplit(right, baseScore)
 			if len(temp) > 1 {
-				splitToken = []string{token[0:i]}
+				splitToken = []string{left}
 				splitToken = append(splitToken, temp...)
 			}
 		}

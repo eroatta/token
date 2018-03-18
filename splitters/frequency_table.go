@@ -2,6 +2,7 @@ package splitters
 
 import (
 	"errors"
+	"strings"
 )
 
 // FrequencyTable is a lookup table that stores the number of occurrences
@@ -25,7 +26,7 @@ func (f *FrequencyTable) Frequency(token string) float64 {
 		return 0.0
 	}
 
-	return float64(f.occurrences[token]) / float64(f.totalOccurrences)
+	return float64(f.occurrences[strings.ToLower(token)]) / float64(f.totalOccurrences)
 }
 
 // SetCount sets how many times a token occurs in a set of strings.
@@ -34,8 +35,10 @@ func (f *FrequencyTable) SetCount(token string, count int) error {
 		return errors.New("Count must be greater or equal than 0")
 	}
 
-	f.totalOccurrences = f.totalOccurrences + (count - f.occurrences[token])
-	f.occurrences[token] = count
+	key := strings.ToLower(token)
+	f.totalOccurrences = f.totalOccurrences + (count - f.occurrences[key])
+	f.occurrences[key] = count
+
 	return nil
 }
 
