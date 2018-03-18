@@ -28,7 +28,7 @@ func TestSamuraiSplitting(t *testing.T) {
 	globalFreqTable := createTestGlobalFrequencyTable()
 	prefixes := createTestPrefixes()
 	suffixes := createTestSuffixes()
-	samurai := NewSamurai(&freqTable, &globalFreqTable, &prefixes, &suffixes)
+	samurai := NewSamurai(freqTable, globalFreqTable, &prefixes, &suffixes)
 	for _, c := range cases {
 		got, err := samurai.Split(c.token)
 		if err != nil {
@@ -39,11 +39,11 @@ func TestSamuraiSplitting(t *testing.T) {
 	}
 }
 
-func createTestFrequencyTable() frequencyTable {
+func createTestFrequencyTable() *FrequencyTable {
 	return nil
 }
 
-func createTestGlobalFrequencyTable() frequencyTable {
+func createTestGlobalFrequencyTable() *FrequencyTable {
 	return nil
 }
 

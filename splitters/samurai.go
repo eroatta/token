@@ -5,20 +5,14 @@ import (
 	"regexp"
 )
 
-type frequencyTable map[string]float64
-
-func (t frequencyTable) getFrequency(word string) float64 {
-	return map[string]float64(t)[word]
-}
-
 type set map[string]bool
 
 func (s set) found(word string) bool {
 	return map[string]bool(s)[word]
 }
 
-var defaultLocalFreqTable frequencyTable
-var defaultGlobalFreqTable frequencyTable
+var defaultLocalFreqTable FrequencyTable
+var defaultGlobalFreqTable FrequencyTable
 var defaultPrefixes set
 var defaultSuffixes set
 
@@ -29,18 +23,15 @@ func init() {
 
 // Samurai represents the Samurai splitting algorithm, proposed by Hill et all.
 type Samurai struct {
-	Splitter
-
-	localFreqTable  *frequencyTable
-	globalFreqTable *frequencyTable
-	allStringsFreq  float64
+	localFreqTable  *FrequencyTable
+	globalFreqTable *FrequencyTable
 	prefixes        *set
 	suffixes        *set
 }
 
 // NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
 // tables are provided, the default tables are used.
-func NewSamurai(localFreqTable *frequencyTable, globalFreqTable *frequencyTable, prefixes *set, suffixes *set) *Samurai {
+func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes *set, suffixes *set) *Samurai {
 	local := &defaultLocalFreqTable
 	if localFreqTable != nil {
 		local = localFreqTable
@@ -148,8 +139,12 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 // appears in the program under analysis and in a more global scope of a large
 // set of programs.
 func (s *Samurai) score(word string) float64 {
+	freqS := s.localFreqTable.Frequency(word)
+	globalFreqS := s.globalFreqTable.Frequency(word)
+	allStrsFreqP := float64(s.localFreqTable.TotalOccurrences())
+
 	// Freq(s,p) + (globalFreq(s) / log_10 (AllStrsFreq(p))
-	return s.localFreqTable.getFrequency(word) + s.globalFreqTable.getFrequency(word)/math.Log10(s.allStringsFreq)
+	return freqS + globalFreqS/math.Log10(allStrsFreqP)
 }
 
 // isPrefix checks if the current token is found on a list of common prefixes.
