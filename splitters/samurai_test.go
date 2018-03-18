@@ -3,6 +3,8 @@ package splitters
 import (
 	"testing"
 
+	"github.com/deckarep/golang-set"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +30,7 @@ func TestSamuraiSplitting(t *testing.T) {
 	globalFreqTable := createTestGlobalFrequencyTable()
 	prefixes := createTestPrefixes()
 	suffixes := createTestSuffixes()
-	samurai := NewSamurai(freqTable, globalFreqTable, &prefixes, &suffixes)
+	samurai := NewSamurai(freqTable, globalFreqTable, prefixes, suffixes)
 	for _, c := range cases {
 		got, err := samurai.Split(c.token)
 		if err != nil {
@@ -47,11 +49,11 @@ func createTestGlobalFrequencyTable() *FrequencyTable {
 	return nil
 }
 
-func createTestPrefixes() set {
+func createTestPrefixes() *mapset.Set {
 	return nil
 }
 
-func createTestSuffixes() set {
+func createTestSuffixes() *mapset.Set {
 	return nil
 }
 

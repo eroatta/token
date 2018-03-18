@@ -3,18 +3,14 @@ package splitters
 import (
 	"math"
 	"regexp"
+
+	"github.com/deckarep/golang-set"
 )
-
-type set map[string]bool
-
-func (s set) found(word string) bool {
-	return map[string]bool(s)[word]
-}
 
 var defaultLocalFreqTable FrequencyTable
 var defaultGlobalFreqTable FrequencyTable
-var defaultPrefixes set
-var defaultSuffixes set
+var defaultPrefixes mapset.Set
+var defaultSuffixes mapset.Set
 
 func init() {
 	defaultPrefixes = buildDefaultPrefixes()
@@ -25,13 +21,13 @@ func init() {
 type Samurai struct {
 	localFreqTable  *FrequencyTable
 	globalFreqTable *FrequencyTable
-	prefixes        *set
-	suffixes        *set
+	prefixes        *mapset.Set
+	suffixes        *mapset.Set
 }
 
 // NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
 // tables are provided, the default tables are used.
-func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes *set, suffixes *set) *Samurai {
+func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes *mapset.Set, suffixes *mapset.Set) *Samurai {
 	local := &defaultLocalFreqTable
 	if localFreqTable != nil {
 		local = localFreqTable
@@ -149,15 +145,17 @@ func (s *Samurai) score(word string) float64 {
 
 // isPrefix checks if the current token is found on a list of common prefixes.
 func (s *Samurai) isPrefix(token string) bool {
-	return s.prefixes.found(token)
+	set := *s.prefixes
+	return set.Contains(token)
 }
 
 // isSuffix checks if the current token is found on a list of common suffixes.
 func (s *Samurai) isSuffix(token string) bool {
-	return s.suffixes.found(token)
+	set := *s.suffixes
+	return set.Contains(token)
 }
 
-func buildDefaultPrefixes() set {
+func buildDefaultPrefixes() mapset.Set {
 	commonPrefixes := []string{
 		"afro", "ambi", "amphi", "ana", "anglo", "apo", "astro", "bi", "bio", "circum", "cis", "co", "col",
 		"com", "con", "contra", "cor", "cryo", "crypto", "de", "de", "demi", "di", "dif", "dis", "du", "duo",
@@ -168,15 +166,15 @@ func buildDefaultPrefixes() set {
 		"syl", "sym", "syn", "tele", "trans", "tri", "twi", "ultra", "un", "uni",
 	}
 
-	prefixes := make(map[string]bool)
+	prefixes := mapset.NewSet()
 	for _, prefix := range commonPrefixes {
-		prefixes[prefix] = true
+		prefixes.Add(prefix)
 	}
 
 	return prefixes
 }
 
-func buildDefaultSuffixes() set {
+func buildDefaultSuffixes() mapset.Set {
 	commonSuffixes := []string{
 		"a", "ac", "acea", "aceae", "acean", "aceous", "ade", "aemia", "agogue", "aholic", "al", "ales",
 		"algia", "amine", "ana", "anae", "ance", "ancy", "androus", "andry", "ane", "ar", "archy", "ard",
@@ -210,9 +208,9 @@ func buildDefaultSuffixes() set {
 		"xor", "y", "yl", "yne", "zoic", "zoon", "zygous", "zyme",
 	}
 
-	suffixes := make(map[string]bool)
+	suffixes := mapset.NewSet()
 	for _, suffix := range commonSuffixes {
-		suffixes[suffix] = true
+		suffixes.Add(suffix)
 	}
 
 	return suffixes
