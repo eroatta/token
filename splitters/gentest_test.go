@@ -44,7 +44,7 @@ func BenchmarkGenTestSplitting(b *testing.B) {
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				generate(bm.token)
+				generateSplits(bm.token)
 			}
 		})
 	}
@@ -60,7 +60,7 @@ func TestGenerateSplits(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := generate(c.token)
+		got := generateSplits(c.token)
 
 		assert.ElementsMatch(t, c.expected, got, "elements should match")
 	}
@@ -80,7 +80,7 @@ func BenchmarkGenerate(b *testing.B) {
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				generate(bm.token)
+				generateSplits(bm.token)
 			}
 		})
 	}

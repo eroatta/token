@@ -49,8 +49,8 @@ func (g *GenTest) generate(token string) []string {
 	return selectedSplit
 }
 
-// generate creates every possible splitting for a given token.
-func generate(token string) []string {
+// generateSplits creates every possible splitting for a given token.
+func generateSplits(token string) []string {
 	splits := []string{token}
 	for i := 1; i < len(token); i++ {
 		leading := token[:i]
@@ -66,4 +66,12 @@ func generate(token string) []string {
 	}
 
 	return splits
+}
+
+func testSplit(split string) {
+
+}
+
+func similarity() {
+
 }
