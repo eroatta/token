@@ -17,4 +17,5 @@ Every splitting algorithm implements a `Splitter` interface, which defines the r
 ### Conserv
 
 A new Conserv splitter can be created using: NewConserv().
+
 A token can be splitted calling the splitting function: conserv.Split(token)
