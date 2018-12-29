@@ -6,7 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConservSplitting(t *testing.T) {
+func TestNewConserv_ShouldReturnConservSplitter(t *testing.T) {
+	conserv := NewConserv()
+
+	assert.NotNil(t, conserv)
+	assert.IsType(t, Conserv{}, conserv)
+}
+
+func TestSplit_OnConserv_ShouldReturnValidSplits(t *testing.T) {
 	cases := []struct {
 		token    string
 		expected []string
@@ -25,7 +32,7 @@ func TestConservSplitting(t *testing.T) {
 		{"", []string{""}},
 	}
 
-	conserv := new(Conserv)
+	conserv := NewConserv()
 	for _, c := range cases {
 		got, err := conserv.Split(c.token)
 		if err != nil {
@@ -37,7 +44,7 @@ func TestConservSplitting(t *testing.T) {
 }
 
 func BenchmarkConservSplitting(b *testing.B) {
-	conserv := new(Conserv)
+	conserv := NewConserv()
 	for i := 0; i < b.N; i++ {
 		conserv.Split("spongebob_squarePants")
 	}

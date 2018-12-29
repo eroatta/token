@@ -5,6 +5,11 @@ type Conserv struct {
 	Splitter
 }
 
+// NewConserv creates a new instance of a conservative splitter.
+func NewConserv() Conserv {
+	return Conserv{}
+}
+
 // Split on Conserv receives a token and returns an array of hard/soft words,
 // split by:
 // * Underscores
