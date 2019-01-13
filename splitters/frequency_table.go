@@ -29,15 +29,15 @@ func (f *FrequencyTable) Frequency(token string) float64 {
 	return float64(f.occurrences[strings.ToLower(token)]) / float64(f.totalOccurrences)
 }
 
-// SetCount sets how many times a token occurs in a set of strings.
-func (f *FrequencyTable) SetCount(token string, count int) error {
-	if count < 0 {
-		return errors.New("Count must be greater or equal than 0")
+// SetOccurrences sets how many times a token appeared in a set of strings.
+func (f *FrequencyTable) SetOccurrences(token string, occurrences int) error {
+	if occurrences < 0 {
+		return errors.New("Occurrences must be greater or equal than 0")
 	}
 
 	key := strings.ToLower(token)
-	f.totalOccurrences = f.totalOccurrences + (count - f.occurrences[key])
-	f.occurrences[key] = count
+	f.totalOccurrences = f.totalOccurrences + (occurrences - f.occurrences[key])
+	f.occurrences[key] = occurrences
 
 	return nil
 }

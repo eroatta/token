@@ -48,39 +48,39 @@ func TestSamuraiSplitting(t *testing.T) {
 
 func createTestFrequencyTable() *FrequencyTable {
 	ft := NewFrequencyTable()
-	ft.SetCount("get", 3)
-	ft.SetCount("string", 10)
-	ft.SetCount("gets", 1)
-	ft.SetCount("ring", 3)
+	ft.SetOccurrences("get", 3)
+	ft.SetOccurrences("string", 10)
+	ft.SetOccurrences("gets", 1)
+	ft.SetOccurrences("ring", 3)
 
-	ft.SetCount("gps", 12)
-	ft.SetCount("gp", 1)
-	ft.SetCount("state", 22)
+	ft.SetOccurrences("gps", 12)
+	ft.SetOccurrences("gp", 1)
+	ft.SetOccurrences("state", 22)
 
-	ft.SetCount("ast", 2)
-	ft.SetCount("visitor", 1)
+	ft.SetOccurrences("ast", 2)
+	ft.SetOccurrences("visitor", 1)
 
-	ft.SetCount("no", 5)
-	ft.SetCount("not", 4)
-	ft.SetCount("type", 5)
+	ft.SetOccurrences("no", 5)
+	ft.SetOccurrences("not", 4)
+	ft.SetOccurrences("type", 5)
 
 	return ft
 }
 
 func createTestGlobalFrequencyTable() *FrequencyTable {
 	ft := NewFrequencyTable()
-	ft.SetCount("get", 100)
-	ft.SetCount("string", 200)
-	ft.SetCount("gets", 150)
-	ft.SetCount("ring", 15)
+	ft.SetOccurrences("get", 100)
+	ft.SetOccurrences("string", 200)
+	ft.SetOccurrences("gets", 150)
+	ft.SetOccurrences("ring", 15)
 
-	ft.SetCount("gps", 98)
-	ft.SetCount("gp", 13)
-	ft.SetCount("state", 224)
+	ft.SetOccurrences("gps", 98)
+	ft.SetOccurrences("gp", 13)
+	ft.SetOccurrences("state", 224)
 
-	ft.SetCount("no", 22)
-	ft.SetCount("not", 63)
-	ft.SetCount("type", 112)
+	ft.SetOccurrences("no", 22)
+	ft.SetOccurrences("not", 63)
+	ft.SetOccurrences("type", 112)
 
 	return ft
 }

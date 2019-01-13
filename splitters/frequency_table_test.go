@@ -20,16 +20,16 @@ func TestTotalOccurrencesZeroOnEmptyTable(t *testing.T) {
 	assert.Equal(t, 0, got, "total number of occurrences on an empty table should be 0")
 }
 
-func TestErrorWhenSetCountWithNegativeValue(t *testing.T) {
+func TestErrorWhenSetOccurrencesWithNegativeValue(t *testing.T) {
 	ft := NewFrequencyTable()
-	err := ft.SetCount("token", -1)
+	err := ft.SetOccurrences("token", -1)
 
 	assert.Error(t, err, "an error should occur when trying to set a count with a negative value")
 }
 
-func TestSetCountForNewStringOnEmptyTable(t *testing.T) {
+func TestSetOccurrencesForNewStringOnEmptyTable(t *testing.T) {
 	ft := NewFrequencyTable()
-	ft.SetCount("token", 3)
+	ft.SetOccurrences("token", 3)
 
 	freq := ft.Frequency("token")
 	total := ft.TotalOccurrences()
@@ -38,11 +38,11 @@ func TestSetCountForNewStringOnEmptyTable(t *testing.T) {
 	assert.Equal(t, 3, total, "total number of occurrences should match")
 }
 
-func TestSetCountForNewStringOnTable(t *testing.T) {
+func TestSetOccurrencesForNewStringOnTable(t *testing.T) {
 	ft := NewFrequencyTable()
-	ft.SetCount("token", 3)
+	ft.SetOccurrences("token", 3)
 
-	ft.SetCount("new-token", 2)
+	ft.SetOccurrences("new-token", 2)
 	freq := ft.Frequency("new-token")
 	total := ft.TotalOccurrences()
 
@@ -50,18 +50,18 @@ func TestSetCountForNewStringOnTable(t *testing.T) {
 	assert.Equal(t, 5, total, "total number of occurrences should match")
 }
 
-func TestIncreasingSetCountForExistingStringOnTable(t *testing.T) {
+func TestIncreasingSetOccurrencesForExistingStringOnTable(t *testing.T) {
 	ft := NewFrequencyTable()
-	ft.SetCount("token", 3)
+	ft.SetOccurrences("token", 3)
 
-	ft.SetCount("existing-token", 1)
+	ft.SetOccurrences("existing-token", 1)
 	freq := ft.Frequency("existing-token")
 	total := ft.TotalOccurrences()
 
 	assert.Equal(t, 0.25, freq, "frequency for the given token should match")
 	assert.Equal(t, 4, total, "total number of occurrences should match")
 
-	ft.SetCount("existing-token", 2)
+	ft.SetOccurrences("existing-token", 2)
 	freq = ft.Frequency("existing-token")
 	total = ft.TotalOccurrences()
 
@@ -69,18 +69,18 @@ func TestIncreasingSetCountForExistingStringOnTable(t *testing.T) {
 	assert.Equal(t, 5, total, "total number of occurrences should match")
 }
 
-func TestDecreasingSetCountForExistingStringOnTable(t *testing.T) {
+func TestDecreasingSetOccurrencesForExistingStringOnTable(t *testing.T) {
 	ft := NewFrequencyTable()
-	ft.SetCount("token", 3)
+	ft.SetOccurrences("token", 3)
 
-	ft.SetCount("existing-token", 2)
+	ft.SetOccurrences("existing-token", 2)
 	freq := ft.Frequency("existing-token")
 	total := ft.TotalOccurrences()
 
 	assert.Equal(t, 0.4, freq, "frequency for the given token should match")
 	assert.Equal(t, 5, total, "total number of occurrences should match")
 
-	ft.SetCount("existing-token", 1)
+	ft.SetOccurrences("existing-token", 1)
 	freq = ft.Frequency("existing-token")
 	total = ft.TotalOccurrences()
 
