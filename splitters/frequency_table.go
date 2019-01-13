@@ -42,8 +42,7 @@ func (f *FrequencyTable) SetOccurrences(token string, occurrences int) error {
 	return nil
 }
 
-// TotalOccurrences provides the total number of string occurrences on the
-// frequency table.
+// TotalOccurrences provides the total number of occurrences on the frequency table.
 func (f *FrequencyTable) TotalOccurrences() int {
 	return f.totalOccurrences
 }

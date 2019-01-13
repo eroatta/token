@@ -6,28 +6,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFrequencyZeroForAnyTokenOnEmptyTable(t *testing.T) {
+func TestFrequency_OnEmptyFrequencyTable_ShouldReturnZero(t *testing.T) {
 	ft := NewFrequencyTable()
 	got := ft.Frequency("test")
 
 	assert.Equal(t, 0.0, got, "frequency for any token on an empty table should be 0")
 }
 
-func TestTotalOccurrencesZeroOnEmptyTable(t *testing.T) {
+func TestTotalOccurrences_OnEmptyFrequencyTable_ShouldReturnZero(t *testing.T) {
 	ft := NewFrequencyTable()
 	got := ft.TotalOccurrences()
 
 	assert.Equal(t, 0, got, "total number of occurrences on an empty table should be 0")
 }
 
-func TestErrorWhenSetOccurrencesWithNegativeValue(t *testing.T) {
+func TestSetOccurrences_WithNegativeValue_ShouldReturnError(t *testing.T) {
 	ft := NewFrequencyTable()
 	err := ft.SetOccurrences("token", -1)
 
 	assert.Error(t, err, "an error should occur when trying to set a count with a negative value")
 }
 
-func TestSetOccurrencesForNewStringOnEmptyTable(t *testing.T) {
+func TestSetOccurrences_WithNewAndOnlyToken_ShouldAddTheTokenAndSetTotal(t *testing.T) {
 	ft := NewFrequencyTable()
 	ft.SetOccurrences("token", 3)
 
@@ -38,7 +38,7 @@ func TestSetOccurrencesForNewStringOnEmptyTable(t *testing.T) {
 	assert.Equal(t, 3, total, "total number of occurrences should match")
 }
 
-func TestSetOccurrencesForNewStringOnTable(t *testing.T) {
+func TestSetOccurrences_WithNewTokenOnExistingTable_ShouldAddTheTokenAndUpdateTotal(t *testing.T) {
 	ft := NewFrequencyTable()
 	ft.SetOccurrences("token", 3)
 
@@ -50,7 +50,7 @@ func TestSetOccurrencesForNewStringOnTable(t *testing.T) {
 	assert.Equal(t, 5, total, "total number of occurrences should match")
 }
 
-func TestIncreasingSetOccurrencesForExistingStringOnTable(t *testing.T) {
+func TestSetOccurrences_WithExistingTokenOnTable_ShouldIncreaseTokenAndTotalValues(t *testing.T) {
 	ft := NewFrequencyTable()
 	ft.SetOccurrences("token", 3)
 
@@ -69,7 +69,7 @@ func TestIncreasingSetOccurrencesForExistingStringOnTable(t *testing.T) {
 	assert.Equal(t, 5, total, "total number of occurrences should match")
 }
 
-func TestDecreasingSetOccurrencesForExistingStringOnTable(t *testing.T) {
+func TestSetOccurrences_WithExistingTokenOnTable_ShouldDecreaseTokenAndTotalValues(t *testing.T) {
 	ft := NewFrequencyTable()
 	ft.SetOccurrences("token", 3)
 
