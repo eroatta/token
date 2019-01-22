@@ -17,9 +17,9 @@ var KnownAbbreviations map[string]interface{}
 var StopList map[string]interface{}
 
 func init() {
-	Dicctionary = loadFile("dicctionary.txt")
-	KnownAbbreviations = loadFile("known_abbreviations.txt")
-	StopList = loadFile("stoplist.txt")
+	Dicctionary = loadFile("lists/dicctionary.txt")
+	KnownAbbreviations = loadFile("lists/known_abbreviations.txt")
+	StopList = loadFile("lists/stoplist.txt")
 }
 
 // loadFile reads a file, line by line, and builds a set of strings from it.
