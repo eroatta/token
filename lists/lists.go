@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -17,14 +18,15 @@ var KnownAbbreviations map[string]interface{}
 var StopList map[string]interface{}
 
 func init() {
-	Dicctionary = loadFile("lists/dicctionary.txt")
-	KnownAbbreviations = loadFile("lists/known_abbreviations.txt")
-	StopList = loadFile("lists/stoplist.txt")
+	Dicctionary = loadFile("../token-splitex/lists/dicctionary.txt")
+	KnownAbbreviations = loadFile("../token-splitex/lists/known_abbreviations.txt")
+	StopList = loadFile("../token-splitex/lists/stoplist.txt")
 }
 
 // loadFile reads a file, line by line, and builds a set of strings from it.
 func loadFile(filename string) map[string]interface{} {
-	file, err := os.Open(filename)
+	absPath, _ := filepath.Abs(filename)
+	file, err := os.Open(absPath)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to open file %s: %v", filename, err))
 	}
