@@ -2,6 +2,7 @@ package splitters
 
 import (
 	"sort"
+	"strings"
 )
 
 // potentialSplit represents a GenTest potential split. It holds data related to the split, the softwords
@@ -33,6 +34,17 @@ func (p potentialSplit) highestCohesion() float64 {
 	return cohesion
 }
 
+// bestExpansion on a potential split returns the best expansion for each softword, combined and joined
+// with underscores.
+func (p potentialSplit) bestExpansion() string {
+	expansions := make([]string, len(p.softwords))
+	for i, softword := range p.softwords {
+		expansions[i] = softword.bestExpansion()
+	}
+
+	return strings.Join(expansions, "_")
+}
+
 // highestCohesion on a softword returns the highest cohesion of any of its available translations.
 func (s softword) highestCohesion() float64 {
 	if len(s.expansions) == 0 {
@@ -44,6 +56,19 @@ func (s softword) highestCohesion() float64 {
 	})
 
 	return s.expansions[0].cohesion
+}
+
+// bestExpansion on a softword returns the best expansion based on the cohesion value.
+func (s softword) bestExpansion() string {
+	if len(s.expansions) == 0 {
+		return s.word
+	}
+
+	sort.Slice(s.expansions, func(i, j int) bool {
+		return s.expansions[i].cohesion > s.expansions[j].cohesion
+	})
+
+	return s.expansions[0].translation
 }
 
 // findBestSplit looks for the potential split with the highest cohesion and selects it as the best

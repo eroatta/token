@@ -45,6 +45,45 @@ func TestHighestCohesion_OnSoftword_ShouldReturnTheHighestCohesionOnAnyExpansion
 	assert.Equal(t, 2.1123, got)
 }
 
+func TestBestExpansion_OnSoftwordWithNoExpansions_ShouldReturnTheSoftword(t *testing.T) {
+	softword := softword{
+		word:       "foo",
+		expansions: []expansion{},
+	}
+
+	got := softword.bestExpansion()
+
+	assert.Equal(t, "foo", got)
+}
+
+func TestBestExpansion_OnSoftwordWithOnlyOneExpansion_ShouldReturnTheOnlyExpansion(t *testing.T) {
+	softword := softword{
+		word: "foo",
+		expansions: []expansion{
+			{"floor", 1.2345},
+		},
+	}
+
+	got := softword.bestExpansion()
+
+	assert.Equal(t, "floor", got)
+}
+
+func TestBesExpansion_OnSoftwordWithSeveralExpansions_ShouldReturnTheExpansionWithHighestCohesion(t *testing.T) {
+	softword := softword{
+		word: "foo",
+		expansions: []expansion{
+			{"floor", 1.2345},
+			{"foot", 2.1123},
+			{"football", -0.1123},
+		},
+	}
+
+	got := softword.bestExpansion()
+
+	assert.Equal(t, "foot", got)
+}
+
 func TestHighestCohesion_OnEmptyPotentialSplit_ShouldReturnZero(t *testing.T) {
 	potentialSplit := potentialSplit{}
 
@@ -95,6 +134,58 @@ func TestHighestCohesion_OnPotentialSplitWithSeveralSoftwords_ShouldReturnTheirH
 	got := potentialSplit.highestCohesion()
 
 	assert.Equal(t, 1.7896, got)
+}
+
+func TestBestExpansion_OnEmptyPotentialSplit_ShouldReturnEmptyString(t *testing.T) {
+	potentialSplit := potentialSplit{}
+
+	got := potentialSplit.bestExpansion()
+
+	assert.Equal(t, "", got)
+}
+
+func TestBestExpansion_OnPotentialSplitWithOneSoftword_ShouldReturnTheSoftwordBestExpansion(t *testing.T) {
+	uniqueSoftword := softword{
+		word: "bar",
+		expansions: []expansion{
+			{"bar", 1.2345},
+		},
+	}
+
+	potentialSplit := potentialSplit{
+		split:     "bar",
+		softwords: []softword{uniqueSoftword},
+	}
+
+	got := potentialSplit.bestExpansion()
+
+	assert.Equal(t, "bar", got)
+}
+
+func TestBestExpansion_OnPotentialSplitWithSeveralSoftwords_ShouldReturnTheSplitExpansion(t *testing.T) {
+	firstSoftword := softword{
+		word: "bar",
+		expansions: []expansion{
+			{"bar", 1.2345},
+		},
+	}
+
+	secondSoftword := softword{
+		word: "bum",
+		expansions: []expansion{
+			{"bump", 0.5551},
+			{"bumpy", 0.1999},
+		},
+	}
+
+	potentialSplit := potentialSplit{
+		split:     "bar_bum",
+		softwords: []softword{firstSoftword, secondSoftword},
+	}
+
+	got := potentialSplit.bestExpansion()
+
+	assert.Equal(t, "bar_bump", got)
 }
 
 func TestFindBestSplit_OnEmptyPotentialSplitsList_ShouldReturnEmptySplit(t *testing.T) {
