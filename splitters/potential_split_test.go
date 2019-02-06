@@ -97,6 +97,62 @@ func TestHighestCohesion_OnPotentialSplitWithSeveralSoftwords_ShouldReturnTheirH
 	assert.Equal(t, 1.7896, got)
 }
 
+func TestFindBestSplit_OnEmptyPotentialSplitsList_ShouldReturnEmptySplit(t *testing.T) {
+	var potentialSplits []potentialSplit
+
+	got := findBestSplit(potentialSplits)
+
+	assert.Equal(t, potentialSplit{}, got)
+}
+
+func TestFindBestSplit_OnPotentialSplitsListWithOneItem_ShouldReturnTheOnlySplit(t *testing.T) {
+	uniqueSoftword := softword{
+		word: "bar",
+		expansions: []expansion{
+			{"bar", 1.2345},
+		},
+	}
+
+	pSplit := potentialSplit{
+		split:     "bar",
+		softwords: []softword{uniqueSoftword},
+	}
+
+	got := findBestSplit([]potentialSplit{pSplit})
+
+	assert.Equal(t, pSplit, got)
+}
+
+func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohesion(t *testing.T) {
+	bestSplit := potentialSplit{
+		split: "str_len",
+		softwords: []softword{
+			{"str", []expansion{{"string", 2.3432}}},
+			{"len", []expansion{{"length", 2.0011}}},
+		},
+	}
+
+	notSoBadSplit := potentialSplit{
+		split: "st_rlen",
+		softwords: []softword{
+			{"st", []expansion{{"string", 1.9432}}},
+			{"rlen", []expansion{{"riflemen", 0.9011}}},
+		},
+	}
+
+	badSplit := potentialSplit{
+		split: "s_trlen",
+		softwords: []softword{
+			{"s", []expansion{}},
+			{"trlen", []expansion{}},
+		},
+	}
+
+	got := findBestSplit([]potentialSplit{badSplit, bestSplit, notSoBadSplit})
+
+	assert.Equal(t, bestSplit, got)
+}
+
 /*
 func TestNewPotentialSplit_OnMarkedHardword_ShouldReturnPotentialSplit(t *testing.T) {
 	got := newPotentialSplit("foo_bar")

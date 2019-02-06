@@ -46,6 +46,20 @@ func (s softword) highestCohesion() float64 {
 	return s.expansions[0].cohesion
 }
 
+// findBestSplit looks for the potential split with the highest cohesion and selects it as the best
+// potential split available.
+func findBestSplit(potentialSplits []potentialSplit) potentialSplit {
+	if len(potentialSplits) == 0 {
+		return potentialSplit{}
+	}
+
+	sort.Slice(potentialSplits, func(i, j int) bool {
+		return potentialSplits[i].highestCohesion() > potentialSplits[j].highestCohesion()
+	})
+
+	return potentialSplits[0]
+}
+
 // TODO check if we should have it or not...
 // NewPotentialSplit creates and initializes a new potential split for the given hardword.
 func newPotentialSplit(hardword string) potentialSplit {
