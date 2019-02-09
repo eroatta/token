@@ -6,6 +6,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewPotentialSplit_OnMarkedHardword_ShouldReturnPotentialSplit(t *testing.T) {
+	got := newPotentialSplit("foo_bar")
+
+	assert.Equal(t, "foo_bar", got.split)
+	assert.Equal(t, 2, len(got.softwords))
+
+	expectedSoftwords := []softword{
+		{"foo", make([]expansion, 0)},
+		{"bar", make([]expansion, 0)},
+	}
+	assert.ElementsMatch(t, expectedSoftwords, got.softwords)
+}
+
+func TestNewPotentialSplit_OnEmptyHardword_ShouldReturnEmptyPotentialSplit(t *testing.T) {
+	got := newPotentialSplit("")
+
+	assert.Equal(t, "", got.split)
+	assert.Equal(t, 0, len(got.softwords))
+}
 func TestHighestCohesion_OnSoftwordWithoutExpansions_ShouldReturnZero(t *testing.T) {
 	softword := softword{
 		word:       "foo",
@@ -243,21 +262,3 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 
 	assert.Equal(t, bestSplit, got)
 }
-
-/*
-func TestNewPotentialSplit_OnMarkedHardword_ShouldReturnPotentialSplit(t *testing.T) {
-	got := newPotentialSplit("foo_bar")
-
-	assert.Equal(t, "foo_bar", got.split, "split should match de input")
-	assert.ElementsMatch(t, []string{"foo", "bar"}, got.softwords, "elements should match")
-	//assert.Equal(t, 0, len(got.expansions), "expansions map should be empty")
-}
-
-func TestNewPotentialSplit_OnEmptyHardword_ShouldReturnEmptyPotentialSplit(t *testing.T) {
-	got := newPotentialSplit("")
-
-	assert.Equal(t, "", got.split, "split should be empty")
-	assert.ElementsMatch(t, []string{}, got.softwords, "there should be no softwords")
-	//assert.Equal(t, 0, len(got.expansions), "there should be no elements")
-}
-*/

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	"math"
+
+	"github.com/stretchr/testify/mock"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,6 +25,10 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 	}
 
 	gentest := NewGenTest()
+	// TODO: review gentest creation
+	testDicc := make(map[string]interface{}, 0)
+	gentest.dicctionary = &testDicc
+
 	for _, c := range cases {
 		got, err := gentest.Split(c.token)
 		if err != nil {
@@ -75,20 +83,47 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 	}
 }
 
-func TestNewPotentialSplit_OnMarkedHardword_ShouldReturnPotentialSplit(t *testing.T) {
-	got := NewPotentialSplit("foo_bar")
+func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
+	genTest := NewGenTest()
 
-	assert.Equal(t, "foo_bar", got.split, "split should match de input")
-	assert.ElementsMatch(t, []string{"foo", "bar"}, got.softwords, "elements should match")
-	assert.Equal(t, 0, len(got.expansions), "expansions map should be empty")
+	got := genTest.similarityScore("car", "car")
+
+	assert.Equal(t, float64(0), got)
 }
 
-func TestNewPotentialSplit_OnEmptyHardword_ShouldReturnEmptyPotentialSplit(t *testing.T) {
-	got := NewPotentialSplit("")
+// TODO: change test name
+func TestSimilarityScore_OnDifferentWords_ShouldReturn_TODO(t *testing.T) {
+	simProviderMock := new(simProviderMock)
+	// TODO: review why it's not working
+	simProviderMock.On("Sim", "car", "wheel").Return(1.2345)
 
-	assert.Equal(t, "", got.split, "split should be empty")
-	assert.ElementsMatch(t, []string{}, got.softwords, "there should be no softwords")
-	assert.Equal(t, 0, len(got.expansions), "there should be no elements")
+	genTest := NewGenTest()
+	genTest.simProvider = simProviderMock
+
+	got := genTest.similarityScore("car", "wheel")
+
+	expected := math.Log(1.2345)
+	assert.Equal(t, expected, got)
+}
+
+// mocks
+type simProviderMock struct {
+	mock.Mock
+}
+
+func (s *simProviderMock) Sim(string, string) float64 {
+	return 1.2345
+}
+
+// end of mocks
+
+func TestCohesion_TODO(t *testing.T) {
+	genTest := NewGenTest()
+
+	potentialSplit := potentialSplit{}
+	got := genTest.cohesion(potentialSplit, "string", 1)
+
+	assert.Equal(t, 123.45, got)
 }
 
 func BenchmarkGenerate(b *testing.B) {

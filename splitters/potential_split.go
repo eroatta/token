@@ -24,6 +24,24 @@ type expansion struct {
 	cohesion    float64
 }
 
+// newPotentialSplit creates and initializes a new potential split for the given hardword.
+func newPotentialSplit(hardword string) potentialSplit {
+	var softwords []softword
+	if hardword != "" {
+		for _, word := range splitOnMarkers(hardword) {
+			softwords = append(softwords, softword{
+				word:       word,
+				expansions: make([]expansion, 0),
+			})
+		}
+	}
+
+	return potentialSplit{
+		split:     hardword,
+		softwords: softwords,
+	}
+}
+
 // highestCohesion on a potential split returns the sum of the highest available expansion for each softword.
 func (p potentialSplit) highestCohesion() float64 {
 	var cohesion float64
@@ -83,23 +101,4 @@ func findBestSplit(potentialSplits []potentialSplit) potentialSplit {
 	})
 
 	return potentialSplits[0]
-}
-
-// TODO check if we should have it or not...
-// NewPotentialSplit creates and initializes a new potential split for the given hardword.
-func newPotentialSplit(hardword string) potentialSplit {
-	var softwords []softword
-	if hardword != "" {
-		for _, word := range splitOnMarkers(hardword) {
-			softwords = append(softwords, softword{
-				word:       word,
-				expansions: make([]expansion, 0),
-			})
-		}
-	}
-
-	return potentialSplit{
-		split:     hardword,
-		softwords: softwords,
-	}
 }
