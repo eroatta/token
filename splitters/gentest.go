@@ -1,19 +1,22 @@
 package splitters
 
 import (
-	"fmt"
 	"math"
 	"regexp"
 	"strings"
 )
 
+const (
+	closeToZeroProbability = 0.000000000000001
+)
+
 // GenTest represents a Generation and Tests splitting algorithm, proposed by Lawrie, Binkley and Morrell.
 type GenTest struct {
 	// TODO review
-	list        string
-	simProvider SimilarityProvider
-	context     []string
-	dicctionary *map[string]interface{}
+	list          string
+	simCalculator SimCalculator
+	context       []string
+	dicctionary   map[string]interface{}
 }
 
 // NewGenTest creates a new GenTest splitter.
@@ -21,72 +24,68 @@ func NewGenTest() *GenTest {
 	return &GenTest{}
 }
 
-// SimilarityProvider defines the contract that a provider for calculating similarities should implement.
-type SimilarityProvider interface {
-	Sim(firstWord string, secondWord string) float64
+// SimCalculator is the interface that wraps the basic Sim method.
+//
+// Sim calculates the probability for two words to be co-located on the same sentence.
+type SimCalculator interface {
+	Sim(firstWord string, secondWord string) (prob float64)
 }
 
 // Split on GenTest receives a token and returns an array of hard/soft words,
 // split by the Generation and Test algorithm proposed by Lawrie, Binkley and Morrell.
-// generate potential splitings
-// e.g. splits("strlen") = {st-rlen, str-len}
-// find the list of expansions/translations for each potential splitting
-// e.g. E(st) = {stop, string, set}
-// e.g. E(rlen) = {riflemen}
-// e.g. E(str) = {steer, string}
-// e.g. E(len) = {lender, length}
-// define the similarity score between an expansion and the other soft words on the potential splittings
-// list, but for the same word (k not i)
-// uses the Google Data Set, and sim(Ei,j; Sk) = sum sim(Ei,j, e) <- e = E(Sk)
-// e.g. sim(string, len) = sim(string, lender) + sim(string, length)
 //
-// computation for cohesion sums over all the other soft-words besides the current one
-// e.g. cohesion(string, str-len) = log(sim(string, len))
+// The algorithm splits the token by its markers. Then, for each new token, checks if
+// it is a dicctionary word or not. If it is a dicctionary word, then no more processing is done.
+// But if the token is not a dicctionary word, then the generate and testing algorithm starts.
 //
-// the maximal cohesion is chosen among the possible expansions
-// e.g. cohesion(string, str-len) = -5.9431
-// e.g. cohesion(steer, str-len) = -16.1222
+// The first step is to retrieve the list of potential splits, each potential split composed by a
+// list of softwords.
+// For each softword on the potential split, the algorithm looks for a set of expansions, and then
+// calculates the cohesion.
+// Cohesion is calculated for every expansion on every softword of each potential split, comparing the expansion
+// with the rest of the expansions on every softword belonging to the same potential split.
 //
-// score is the maximal cohesion with the selected translation as default expansion
-// e.g. score(str) = -5.9431 with "string" as expansion
+// The potential split with the highest cohesion is the selected split.
 func (g *GenTest) Split(token string) ([]string, error) {
 	preprocessedToken := addMarkersOnDigits(token)
 	preprocessedToken = addMarkersOnLowerToUpperCase(preprocessedToken)
 
 	splitToken := make([]string, 0, 10)
 	for _, tok := range splitOnMarkers(preprocessedToken) {
-		// discard dictionary words
-		// TODO: review this pointer call
-		if (*g.dicctionary)[tok] != nil {
-			// TODO remove
-			fmt.Sprintln("Discarded diccionary word: " + tok)
+		// discard one letter tokens and dictionary words
+		if len(tok) == 1 || (g.dicctionary)[strings.ToLower(tok)] != nil {
 			splitToken = append(splitToken, tok)
+			continue
 		}
 
-		potentialSplits := generatePotentialSplits(tok)
-		for _, pSplit := range potentialSplits {
-			fmt.Sprintln(pSplit.split)
+		potentialSplits := make([]potentialSplit, 0)
+		for _, pSplit := range generatePotentialSplits(tok) {
+			// for each potential split softword find the list of expansions
+			for i := 0; i < len(pSplit.softwords); i++ {
+				// if no expansion is found, the input itself must be considered an expansion
+				expansions := g.findExpansions(pSplit.softwords[i].word)
+				if len(expansions) == 0 {
+					expansions = append(expansions, pSplit.softwords[i].word)
+				}
 
-			// for each potential split find the list of expansions
-			for _, softword := range pSplit.softwords {
-				for _, translation := range g.findExpansions(softword.word) {
-					softword.expansions = append(softword.expansions, expansion{translation, 0})
+				for _, translation := range expansions {
+					pSplit.softwords[i].expansions = append(pSplit.softwords[i].expansions, expansion{translation, 0})
 				}
 			}
 
 			// for each expansion of every softword of the potential split, calculate the cohesion with the rest
 			// of the softwords on the potential split
-			for index, softword := range pSplit.softwords {
-				for _, expansion := range softword.expansions {
-					cohesion := g.cohesion(pSplit, expansion.translation, index)
-					expansion.cohesion = cohesion
+			for i := 0; i < len(pSplit.softwords); i++ {
+				for j := 0; j < len(pSplit.softwords[i].expansions); j++ {
+					cohesion := g.cohesion(pSplit, pSplit.softwords[i].expansions[j].translation, i)
+					pSplit.softwords[i].expansions[j].cohesion = cohesion
 				}
 			}
+
+			potentialSplits = append(potentialSplits, pSplit)
 		}
 
 		tokenBestSplit := findBestSplit(potentialSplits)
-		// TODO: remove
-		fmt.Sprintln("Best Split: " + tokenBestSplit.split)
 		splitToken = append(splitToken, splitOnMarkers(tokenBestSplit.split)...)
 	}
 
@@ -95,7 +94,8 @@ func (g *GenTest) Split(token string) ([]string, error) {
 
 // generatePotentialSplits generates every possible splitting for a given token.
 func generatePotentialSplits(token string) []potentialSplit {
-	potentialSplits := []potentialSplit{newPotentialSplit(token)}
+	potentialSplits := make([]potentialSplit, 0)
+
 	for i := 1; i < len(token); i++ {
 		leading := token[:i]
 		trailing := token[i:]
@@ -128,30 +128,32 @@ func (g *GenTest) findExpansions(input string) []string {
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// find on a list (what should this list include?)
 	// TODO add rules!
 	return exp.FindAllString(g.list, -1)
 }
 
-// similarityScore returns the Log of the similarity computed by the SimilarityProvider.
-// For two equal words, the similarity score is zero.
+// similarityScore returns the Log of the similarity computed by the SimCalculator.
+//
+// For two equal words, the similarity score is zero. If the probability is zero, we use
+// a close-to-zero value to avoid issues with -Inf.
 func (g *GenTest) similarityScore(word string, anotherWord string) float64 {
-	if word == anotherWord {
+	w1 := strings.ToLower(word)
+	w2 := strings.ToLower(anotherWord)
+	if w1 == w2 {
 		return 0
 	}
 
-	logSim := math.Log(g.simProvider.Sim(word, anotherWord))
-	if math.IsNaN(logSim) || math.IsInf(logSim, 0) {
-		return 0
+	prob := g.simCalculator.Sim(w1, w2)
+	if prob == 0 {
+		prob = closeToZeroProbability
 	}
 
-	return logSim
+	return math.Log(prob)
 }
 
 // cohesion computes the similarity score between an expansion and the other soft words on the potential splittings
 // list, but for the same word (k not i).
-func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, index int) float64 {
-	var cohesion float64
+func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, index int) (cohesion float64) {
 	for i, softword := range potentialSplit.softwords {
 		if index == i {
 			continue

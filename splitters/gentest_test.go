@@ -22,12 +22,22 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		{2, "GPSstate", []string{"GPS", "state"}},
 		{3, "ASTVisitor", []string{"AST", "Visitor"}},
 		{4, "notype", []string{"no", "type"}},
+		{5, "type_notype", []string{"type", "no", "type"}},
 	}
 
 	gentest := NewGenTest()
 	// TODO: review gentest creation
-	testDicc := make(map[string]interface{}, 0)
-	gentest.dicctionary = &testDicc
+	testDicc := map[string]interface{}{
+		"car":    true,
+		"get":    true,
+		"string": true,
+		"no":     true,
+		"type":   true,
+	}
+	gentest.dicctionary = testDicc
+	gentest.simCalculator = &simCalculatorMock{}
+	gentest.list = "no not notary type typo"
+	gentest.context = []string{"none", "no", "never", "nine", "type", "typeset", "typhoon", "tire", "car", "boo", "foo"}
 
 	for _, c := range cases {
 		got, err := gentest.Split(c.token)
@@ -92,13 +102,13 @@ func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
 }
 
 // TODO: change test name
-func TestSimilarityScore_OnDifferentWords_ShouldReturn_TODO(t *testing.T) {
-	simProviderMock := new(simProviderMock)
+func TestSimilarityScore_OnDifferentWordsWithSomeProb_ShouldReturnValue(t *testing.T) {
+	simCalculatorMock := new(simCalculatorMock)
 	// TODO: review why it's not working
-	simProviderMock.On("Sim", "car", "wheel").Return(1.2345)
+	simCalculatorMock.On("Sim", "car", "wheel").Return(1.2345)
 
 	genTest := NewGenTest()
-	genTest.simProvider = simProviderMock
+	genTest.simCalculator = simCalculatorMock
 
 	got := genTest.similarityScore("car", "wheel")
 
@@ -106,25 +116,70 @@ func TestSimilarityScore_OnDifferentWords_ShouldReturn_TODO(t *testing.T) {
 	assert.Equal(t, expected, got)
 }
 
+func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
+	genTest := NewGenTest()
+	genTest.simCalculator = &simCalculatorMock{}
+
+	got := genTest.similarityScore("disco", "egypt")
+
+	expected := math.Log(0.000000000998587)
+	assert.Equal(t, expected, got)
+}
+
 // mocks
-type simProviderMock struct {
+type simCalculatorMock struct {
 	mock.Mock
 }
 
-func (s *simProviderMock) Sim(string, string) float64 {
-	return 1.2345
+func (s *simCalculatorMock) Sim(word string, another string) float64 {
+	if word == "gps" {
+		if another == "status" || another == "car" {
+			return 0.9999
+		}
+	}
+
+	if word == "state" {
+		if another == "tire" {
+			return 0.9001
+		}
+	}
+
+	if word == "ast" && another == "visitor" {
+		return 1
+	}
+
+	if word == "no" && another == "type" {
+		return 0.8564
+	}
+
+	if word == "no" && another == "typo" {
+		return 0.0001
+	}
+
+	if word == "not" {
+		return 0.0021
+	}
+
+	if word == "notary" && another == "p" {
+		return 0
+	}
+
+	if word == "notary" && another == "pe" {
+		return 0
+	}
+
+	if word == "pe" && another == "notary" {
+		return 0
+	}
+
+	if word == "notary" || another == "notary" {
+		return 0.0023
+	}
+
+	return 0
 }
 
 // end of mocks
-
-func TestCohesion_TODO(t *testing.T) {
-	genTest := NewGenTest()
-
-	potentialSplit := potentialSplit{}
-	got := genTest.cohesion(potentialSplit, "string", 1)
-
-	assert.Equal(t, 123.45, got)
-}
 
 func BenchmarkGenerate(b *testing.B) {
 	benchmarks := []struct {
