@@ -36,8 +36,53 @@ func TestIsTruncation_OnAbbrOfWord_ShouldReturnTrue(t *testing.T) {
 	assert.True(t, got)
 }
 
-func TestIsTruncation_OnAbbrEqualThanWord_ShouldReturnTrue(t *testing.T) {
+func TestIsTruncation_OnAbbrEqualsThanWord_ShouldReturnTrue(t *testing.T) {
 	got := isTruncation("car", "car")
+
+	assert.True(t, got)
+}
+
+func TestHasRemovedChar_OnEmptyAbbr_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedChar("", "car")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedChar_OnEmptyWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedChar("cr", "")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedChar_OnAbbrWithSameSizeThanWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedChar("sts", "set")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedChar_OnAbbrThanHasDifferentStartCharThanWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedChar("st", "ast")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedChar_OnNonAbbrOfWord_ShouldReturnFalse(t *testing.T) {
+	cases := []struct {
+		abbr string
+		word string
+	}{
+		{"st", "sub"},
+		{"snit", "saint"},
+	}
+	for _, c := range cases {
+		got := hasRemovedChar(c.abbr, c.word)
+
+		assert.False(t, got)
+	}
+}
+
+func TestHasRemovedChar_OnAbbrOfWord_ShouldReturnTrue(t *testing.T) {
+	got := hasRemovedChar("st", "set")
 
 	assert.True(t, got)
 }

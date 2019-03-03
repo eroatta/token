@@ -15,11 +15,31 @@ func isTruncation(abbr string, word string) bool {
 
 // hasRemovedChar checks if the abbreviation matches the word when one of its characters are removed.
 func hasRemovedChar(abbr string, word string) bool {
+	if abbr == "" {
+		return false
+	}
+
 	if len(word)-len(abbr) != 1 {
 		return false
 	}
 
-	return true
+	if abbr[0] != word[0] {
+		return false
+	}
+
+	removedChars := 0
+	var i, j int
+	for i < len(abbr) && j < len(word) {
+		if abbr[i] == word[j] {
+			i++
+			j++
+		} else {
+			removedChars++
+			j++
+		}
+	}
+
+	return removedChars == 1
 }
 
 // hasRemovedVowels checks if the abbreviation matches the word when all of its vowels are removed.
