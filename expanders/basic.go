@@ -29,25 +29,25 @@ func (b *Basic) Expand(token string) ([]string, error) {
 
 	stoplist := *b.stopList
 	if stoplist.Contains(token) {
-		return token, nil
+		return []string{token}, nil
 	}
 
 	if srcPhrases[token] != "" {
-		return srcPhrases[token], nil
+		return []string{srcPhrases[token]}, nil
 	}
 
 	if srcWords.Contains(token) {
-		return token, nil
+		return []string{token}, nil
 	}
 
 	var expansions []string
 
 	// build the search regex
 
-	it := b.dicc.Iterator()
-	for elem := range it.C {
+	//it := b.dicc.Iterator()
+	/*for elem := range it.C {
 
-	}
+	}*/
 
 	return expansions, nil
 }
