@@ -41,3 +41,33 @@ func TestIsTruncation_OnAbbrEqualThanWord_ShouldReturnTrue(t *testing.T) {
 
 	assert.True(t, got)
 }
+
+func TestHasRemovedVowels_OnEmptyAbbr_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedVowels("", "o")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedVowels_OnEmptyWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedVowels("cr", "")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedVowels_OnAbbrWithVowels_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedVowels("car", "car")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedVowels_OnNonAbbrOfWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedVowels("st", "street")
+
+	assert.False(t, got)
+}
+
+func TestHasRemovedVowels_OnAbbrOfWord_ShouldReturnTrue(t *testing.T) {
+	got := hasRemovedVowels("st", "set")
+
+	assert.True(t, got)
+}

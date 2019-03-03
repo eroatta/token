@@ -24,6 +24,10 @@ func hasRemovedChar(abbr string, word string) bool {
 
 // hasRemovedVowels checks if the abbreviation matches the word when all of its vowels are removed.
 func hasRemovedVowels(abrr string, word string) bool {
+	if abrr == "" {
+		return false
+	}
+
 	r := strings.NewReplacer("a", "", "e", "", "i", "", "o", "", "u", "")
 	removedVowels := r.Replace(strings.ToLower(word))
 
