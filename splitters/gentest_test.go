@@ -6,8 +6,6 @@ import (
 
 	"math"
 
-	"github.com/stretchr/testify/mock"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +33,16 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		"type":   true,
 	}
 	gentest.dicctionary = testDicc
-	gentest.simCalculator = &simCalculatorMock{}
+
+	simCalculatorMock := simCalculatorMock{
+		"car-gps":     0.9999,
+		"gps-status":  0.9999,
+		"state-tire":  0.9001,
+		"ast-visitor": 1.0,
+		"no-type":     0.8564,
+		"no-typo":     0.0001,
+	}
+	gentest.simCalculator = simCalculatorMock
 	gentest.list = "no not notary type typo"
 	gentest.context = []string{"none", "no", "never", "nine", "type", "typeset", "typhoon", "tire", "car", "boo", "foo"}
 
@@ -103,11 +110,11 @@ func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
 
 // TODO: change test name
 func TestSimilarityScore_OnDifferentWordsWithSomeProb_ShouldReturnValue(t *testing.T) {
-	simCalculatorMock := new(simCalculatorMock)
-	// TODO: review why it's not working
-	simCalculatorMock.On("Sim", "car", "wheel").Return(1.2345)
-
 	genTest := NewGenTest()
+
+	simCalculatorMock := simCalculatorMock{
+		"car-wheel": 1.2345,
+	}
 	genTest.simCalculator = simCalculatorMock
 
 	got := genTest.similarityScore("car", "wheel")
@@ -118,65 +125,87 @@ func TestSimilarityScore_OnDifferentWordsWithSomeProb_ShouldReturnValue(t *testi
 
 func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
 	genTest := NewGenTest()
-	genTest.simCalculator = &simCalculatorMock{}
+	genTest.simCalculator = simCalculatorMock{}
 
 	got := genTest.similarityScore("disco", "egypt")
 
-	expected := math.Log(0.000000000998587)
+	expected := math.Log(closeToZeroProbability)
+	assert.Equal(t, expected, got)
+}
+
+func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
+	split := potentialSplit{
+		split: "bar",
+		softwords: []softword{
+			{"bar", []expansion{{"bar", 1.2345}}},
+		},
+	}
+
+	genTest := NewGenTest()
+	got := genTest.score(split)
+
+	// TODO: review
+	assert.Equal(t, 0.0, got)
+}
+
+func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
+	split := potentialSplit{
+		split: "str_len",
+		softwords: []softword{
+			{"str", []expansion{{"string", 2.3432}}},
+			{"len", []expansion{{"length", 2.0011}}},
+		},
+	}
+
+	genTest := NewGenTest()
+
+	simCalculatorMock := simCalculatorMock{
+		"length-string": 0.9123,
+	}
+	genTest.simCalculator = simCalculatorMock
+
+	got := genTest.score(split)
+
+	expected := (math.Log(0.9123) + math.Log(0.9123)) / (2.0 * (2.0 + 0.0))
+	assert.Equal(t, expected, got)
+}
+
+func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
+	split := potentialSplit{
+		split: "str_len",
+		softwords: []softword{
+			{"str", []expansion{{"string", 2.3432}}},
+			{"len", []expansion{{"length", 2.0011}}},
+		},
+	}
+
+	genTest := NewGenTest()
+	genTest.context = []string{"concatenation"}
+
+	simCalculatorMock := simCalculatorMock{
+		"length-string":        0.9123,
+		"concatenation-string": 0.8912,
+	}
+	genTest.simCalculator = simCalculatorMock
+
+	got := genTest.score(split)
+
+	expected := (math.Log(0.9123) + math.Log(0.8912) + math.Log(0.9123) + math.Log(closeToZeroProbability)) / (2.0 * (2.0 + 1.0))
 	assert.Equal(t, expected, got)
 }
 
 // mocks
-type simCalculatorMock struct {
-	mock.Mock
-}
+type simCalculatorMock map[string]float64
 
-func (s *simCalculatorMock) Sim(word string, another string) float64 {
-	if word == "gps" {
-		if another == "status" || another == "car" {
-			return 0.9999
-		}
+func (s simCalculatorMock) Sim(word string, another string) float64 {
+	var key string
+	if word < another {
+		key = word + "-" + another
+	} else {
+		key = another + "-" + word
 	}
 
-	if word == "state" {
-		if another == "tire" {
-			return 0.9001
-		}
-	}
-
-	if word == "ast" && another == "visitor" {
-		return 1
-	}
-
-	if word == "no" && another == "type" {
-		return 0.8564
-	}
-
-	if word == "no" && another == "typo" {
-		return 0.0001
-	}
-
-	if word == "not" {
-		return 0.0021
-	}
-
-	if word == "notary" && another == "p" {
-		return 0
-	}
-
-	if word == "notary" && another == "pe" {
-		return 0
-	}
-
-	if word == "pe" && another == "notary" {
-		return 0
-	}
-
-	if word == "notary" || another == "notary" {
-		return 0.0023
-	}
-
-	return 0
+	return s[key]
 }
 
 // end of mocks

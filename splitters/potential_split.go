@@ -6,10 +6,11 @@ import (
 )
 
 // potentialSplit represents a GenTest potential split. It holds data related to the split, the softwords
-// and their expansions.
+// and their expansions, and also the score.
 type potentialSplit struct {
 	split     string
 	softwords []softword
+	score     float64
 }
 
 // softword represents a potential word and holds a set of related expansions.
@@ -89,15 +90,15 @@ func (s softword) bestExpansion() string {
 	return s.expansions[0].translation
 }
 
-// findBestSplit looks for the potential split with the highest cohesion and selects it as the best
-// potential split available.
+// findBestSplit looks for the potential split with the highest score and selects it as the best
+// potential split/expansion available.
 func findBestSplit(potentialSplits []potentialSplit) potentialSplit {
 	if len(potentialSplits) == 0 {
 		return potentialSplit{}
 	}
 
 	sort.Slice(potentialSplits, func(i, j int) bool {
-		return potentialSplits[i].highestCohesion() > potentialSplits[j].highestCohesion()
+		return potentialSplits[i].score > potentialSplits[j].score
 	})
 
 	return potentialSplits[0]

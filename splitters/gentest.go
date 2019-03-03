@@ -45,7 +45,7 @@ type SimCalculator interface {
 // Cohesion is calculated for every expansion on every softword of each potential split, comparing the expansion
 // with the rest of the expansions on every softword belonging to the same potential split.
 //
-// The potential split with the highest cohesion is the selected split.
+// The potential split with the highest score is the selected split.
 func (g *GenTest) Split(token string) ([]string, error) {
 	preprocessedToken := addMarkersOnDigits(token)
 	preprocessedToken = addMarkersOnLowerToUpperCase(preprocessedToken)
@@ -82,6 +82,9 @@ func (g *GenTest) Split(token string) ([]string, error) {
 				}
 			}
 
+			// calculate the score
+			pSplit.score = g.score(pSplit)
+
 			potentialSplits = append(potentialSplits, pSplit)
 		}
 
@@ -94,7 +97,7 @@ func (g *GenTest) Split(token string) ([]string, error) {
 
 // generatePotentialSplits generates every possible splitting for a given token.
 func generatePotentialSplits(token string) []potentialSplit {
-	potentialSplits := make([]potentialSplit, 0)
+	potentialSplits := []potentialSplit{newPotentialSplit(token)}
 
 	for i := 1; i < len(token); i++ {
 		leading := token[:i]
@@ -171,4 +174,35 @@ func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, inde
 	}
 
 	return cohesion
+}
+
+// score calculates the score for a split. The score is the average similarities computed over all
+// of pairs of expanded words and each expanded word paired with each context word.
+// An average is used to avoid biasing the results toward excesive splitting.
+func (g *GenTest) score(split potentialSplit) float64 {
+	var expansionsScore float64
+	expandedWords := splitOnMarkers(split.bestExpansion())
+	for i, w1 := range expandedWords {
+		var wordScore float64
+		// add expansions similarities
+		for j, w2 := range expandedWords {
+			if i == j {
+				continue
+			}
+
+			wordScore += g.similarityScore(w1, w2)
+		}
+
+		// add context similarities
+		for _, contextWord := range g.context {
+			wordScore += g.similarityScore(w1, contextWord)
+		}
+
+		expansionsScore += wordScore
+	}
+
+	n := float64(len(split.softwords))
+	c := float64(len(g.context))
+
+	return expansionsScore / (n * (n + c))
 }

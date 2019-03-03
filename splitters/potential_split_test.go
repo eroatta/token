@@ -216,16 +216,12 @@ func TestFindBestSplit_OnEmptyPotentialSplitsList_ShouldReturnEmptySplit(t *test
 }
 
 func TestFindBestSplit_OnPotentialSplitsListWithOneItem_ShouldReturnTheOnlySplit(t *testing.T) {
-	uniqueSoftword := softword{
-		word: "bar",
-		expansions: []expansion{
-			{"bar", 1.2345},
-		},
-	}
-
 	pSplit := potentialSplit{
-		split:     "bar",
-		softwords: []softword{uniqueSoftword},
+		split: "bar",
+		softwords: []softword{
+			{"bar", []expansion{{"bar", 1.2345}}},
+		},
+		score: 1.0012,
 	}
 
 	got := findBestSplit([]potentialSplit{pSplit})
@@ -240,6 +236,7 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 			{"str", []expansion{{"string", 2.3432}}},
 			{"len", []expansion{{"length", 2.0011}}},
 		},
+		score: 1.2131,
 	}
 
 	notSoBadSplit := potentialSplit{
@@ -248,6 +245,7 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 			{"st", []expansion{{"string", 1.9432}}},
 			{"rlen", []expansion{{"riflemen", 0.9011}}},
 		},
+		score: 1.0013,
 	}
 
 	badSplit := potentialSplit{
@@ -256,6 +254,7 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 			{"s", []expansion{}},
 			{"trlen", []expansion{}},
 		},
+		score: 0.5541,
 	}
 
 	got := findBestSplit([]potentialSplit{badSplit, bestSplit, notSoBadSplit})
