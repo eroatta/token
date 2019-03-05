@@ -24,7 +24,6 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 	}
 
 	gentest := NewGenTest()
-	// TODO: review gentest creation
 	testDicc := map[string]interface{}{
 		"car":    true,
 		"get":    true,
@@ -108,18 +107,17 @@ func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
 	assert.Equal(t, float64(0), got)
 }
 
-// TODO: change test name
-func TestSimilarityScore_OnDifferentWordsWithSomeProb_ShouldReturnValue(t *testing.T) {
+func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 	genTest := NewGenTest()
 
 	simCalculatorMock := simCalculatorMock{
-		"car-wheel": 1.2345,
+		"car-wheel": 0.8211,
 	}
 	genTest.simCalculator = simCalculatorMock
 
 	got := genTest.similarityScore("car", "wheel")
 
-	expected := math.Log(1.2345)
+	expected := math.Log(0.8211)
 	assert.Equal(t, expected, got)
 }
 
@@ -144,7 +142,6 @@ func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
 	genTest := NewGenTest()
 	got := genTest.score(split)
 
-	// TODO: review
 	assert.Equal(t, 0.0, got)
 }
 
