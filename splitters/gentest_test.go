@@ -82,7 +82,7 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 		expansions []string
 	}{
 		{"input_st", "st", []string{"string", "steer", "set"}},
-		{"input_rlen", "rlen", []string{"riflemen"}},
+		{"input_rlen", "rlen", []string{}},
 		{"input_str", "str", []string{"steer", "string"}},
 		{"input_len", "len", []string{"lender", "length"}},
 		{"empty_input", "", []string{}},

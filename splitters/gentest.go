@@ -131,8 +131,24 @@ func (g *GenTest) findExpansions(input string) []string {
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// TODO add rules!
-	return exp.FindAllString(g.list, -1)
+	expansions := make([]string, 0)
+	for _, candidate := range exp.FindAllString(g.list, -1) {
+		if any(input, candidate, isTruncation, hasRemovedChar, hasRemovedVowels, hasRemovedCharAfterRemovedVowels) {
+			expansions = append(expansions, candidate)
+		}
+	}
+
+	return expansions
+}
+
+func any(abbr string, word string, filters ...filterFunc) bool {
+	for _, filter := range filters {
+		if filter(abbr, word) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // similarityScore returns the Log of the similarity computed by the SimCalculator.
