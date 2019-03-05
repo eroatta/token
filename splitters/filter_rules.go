@@ -15,15 +15,7 @@ func isTruncation(abbr string, word string) bool {
 
 // hasRemovedChar checks if the abbreviation matches the word when one of its characters are removed.
 func hasRemovedChar(abbr string, word string) bool {
-	if abbr == "" {
-		return false
-	}
-
-	if len(word)-len(abbr) != 1 {
-		return false
-	}
-
-	if abbr[0] != word[0] {
+	if abbr == "" || len(word)-len(abbr) != 1 || abbr[0] != word[0] {
 		return false
 	}
 
@@ -48,8 +40,20 @@ func hasRemovedVowels(abrr string, word string) bool {
 		return false
 	}
 
-	r := strings.NewReplacer("a", "", "e", "", "i", "", "o", "", "u", "")
-	removedVowels := r.Replace(strings.ToLower(word))
+	return abrr == removeVowels(strings.ToLower(word))
+}
 
-	return abrr == removedVowels
+func removeVowels(word string) string {
+	r := strings.NewReplacer("a", "", "e", "", "i", "", "o", "", "u", "")
+	return r.Replace(strings.ToLower(word))
+}
+
+// hasRemovedCharAfterRemovedVowels checks if an abbreviation matches a word with previously removed
+// vowels and a char.
+func hasRemovedCharAfterRemovedVowels(abbr string, word string) bool {
+	if abbr == "" {
+		return false
+	}
+
+	return hasRemovedChar(abbr, removeVowels(strings.ToLower(word)))
 }

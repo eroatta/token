@@ -116,3 +116,33 @@ func TestHasRemovedVowels_OnAbbrOfWord_ShouldReturnTrue(t *testing.T) {
 
 	assert.True(t, got)
 }
+
+func TestHasRemoverCharAfterRemovedVowels_OnEmptyAbbr_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedCharAfterRemovedVowels("", "car")
+
+	assert.False(t, got)
+}
+
+func TestHasRemoverCharAfterRemovedVowels_OnEmptyWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedCharAfterRemovedVowels("cr", "")
+
+	assert.False(t, got)
+}
+
+func TestHasRemoverCharAfterRemovedVowels_OnNonAbbrOfWord_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedCharAfterRemovedVowels("str", "stood")
+
+	assert.False(t, got)
+}
+
+func TestHasRemoverCharAfterRemovedVowels_OnAbbrOfWordButMoreCharsRemoved_ShouldReturnFalse(t *testing.T) {
+	got := hasRemovedCharAfterRemovedVowels("str", "string")
+
+	assert.False(t, got)
+}
+
+func TestHasRemoverCharAfterRemovedVowels_OnAbbrOfWord_ShouldReturnTrue(t *testing.T) {
+	got := hasRemovedCharAfterRemovedVowels("strg", "string")
+
+	assert.True(t, got)
+}
