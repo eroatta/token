@@ -42,6 +42,18 @@ func TestIsTruncation_OnAbbrEqualsThanWord_ShouldReturnTrue(t *testing.T) {
 	assert.True(t, got)
 }
 
+func TestIsTruncation_OnSinlgeLetterAbbrAndPluralWord_ShouldReturnFalse(t *testing.T) {
+	got := isTruncation("s", "arguments")
+
+	assert.False(t, got)
+}
+
+func TestIsTruncation_OnPluralAbbr_ShouldReturnTrue(t *testing.T) {
+	got := isTruncation("args", "arguments")
+
+	assert.True(t, got)
+}
+
 func TestHasRemovedChar_OnEmptyAbbr_ShouldReturnFalse(t *testing.T) {
 	got := hasRemovedChar("", "car")
 

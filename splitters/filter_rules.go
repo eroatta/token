@@ -6,8 +6,13 @@ type filterFunc func(abbr string, word string) bool
 
 // isTruncation checks if the abbreviation is a truncation of the word.
 func isTruncation(abbr string, word string) bool {
-	if abbr == "" {
+	if abbr == "" || word == "" {
 		return false
+	}
+
+	if len(abbr) > 1 && len(word) > 1 && abbr[len(abbr)-1:] == word[len(word)-1:] && abbr[len(abbr)-1:] == "s" {
+		abbr = abbr[0 : len(abbr)-2]
+		word = word[0 : len(word)-2]
 	}
 
 	return strings.HasPrefix(word, abbr)
