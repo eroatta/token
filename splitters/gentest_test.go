@@ -23,16 +23,11 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		{5, "type_notype", []string{"type", "no", "type"}},
 	}
 
-	gentest := NewGenTest()
-	testDicc := map[string]interface{}{
-		"car":    true,
-		"get":    true,
-		"string": true,
-		"no":     true,
-		"type":   true,
+	dicc := map[string]interface{}{
+		"car": true, "get": true, "string": true,
+		"no": true, "not": true, "notary": true,
+		"type": true, "typo": true,
 	}
-	gentest.dicctionary = testDicc
-
 	simCalculatorMock := simCalculatorMock{
 		"car-gps":     0.9999,
 		"gps-status":  0.9999,
@@ -41,12 +36,11 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		"no-type":     0.8564,
 		"no-typo":     0.0001,
 	}
-	gentest.simCalculator = simCalculatorMock
-	gentest.list = "no not notary type typo"
-	gentest.context = []string{"none", "no", "never", "nine", "type", "typeset", "typhoon", "tire", "car", "boo", "foo"}
+	context := []string{"none", "no", "never", "nine", "type", "typeset", "typhoon", "tire", "car", "boo", "foo"}
+	genTest := NewGenTest(simCalculatorMock, context, dicc)
 
 	for _, c := range cases {
-		got, err := gentest.Split(c.token)
+		got, err := genTest.Split(c.token)
 		if err != nil {
 			assert.Fail(t, "we shouldn't get any errors at this point", err)
 		}
@@ -88,8 +82,12 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 		{"blankspace_input", " ", []string{}},
 	}
 
-	gentest := NewGenTest()
-	gentest.list = "car string steer set riflemen lender bar length kamikaze"
+	dicc := map[string]interface{}{
+		"car": true, "string": true, "steer": true,
+		"set": true, "riflemen": true, "lender": true,
+		"bar": true, "length": true, "kamikaze": true,
+	}
+	gentest := NewGenTest(nil, []string{}, dicc)
 	for _, fixture := range tests {
 		t.Run(fixture.name, func(t *testing.T) {
 			got := gentest.findExpansions(fixture.input)
@@ -100,7 +98,7 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 }
 
 func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
-	genTest := NewGenTest()
+	genTest := NewGenTest(nil, []string{}, make(map[string]interface{}))
 
 	got := genTest.similarityScore("car", "car")
 
@@ -108,12 +106,10 @@ func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
 }
 
 func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
-	genTest := NewGenTest()
-
 	simCalculatorMock := simCalculatorMock{
 		"car-wheel": 0.8211,
 	}
-	genTest.simCalculator = simCalculatorMock
+	genTest := NewGenTest(simCalculatorMock, []string{}, make(map[string]interface{}))
 
 	got := genTest.similarityScore("car", "wheel")
 
@@ -122,8 +118,7 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 }
 
 func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
-	genTest := NewGenTest()
-	genTest.simCalculator = simCalculatorMock{}
+	genTest := NewGenTest(simCalculatorMock{}, []string{}, make(map[string]interface{}))
 
 	got := genTest.similarityScore("disco", "egypt")
 
@@ -139,7 +134,7 @@ func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
 		},
 	}
 
-	genTest := NewGenTest()
+	genTest := NewGenTest(nil, []string{}, make(map[string]interface{}))
 	got := genTest.score(split)
 
 	assert.Equal(t, 0.0, got)
@@ -154,12 +149,10 @@ func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
 		},
 	}
 
-	genTest := NewGenTest()
-
 	simCalculatorMock := simCalculatorMock{
 		"length-string": 0.9123,
 	}
-	genTest.simCalculator = simCalculatorMock
+	genTest := NewGenTest(simCalculatorMock, []string{}, make(map[string]interface{}))
 
 	got := genTest.score(split)
 
@@ -176,14 +169,11 @@ func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
 		},
 	}
 
-	genTest := NewGenTest()
-	genTest.context = []string{"concatenation"}
-
 	simCalculatorMock := simCalculatorMock{
 		"length-string":        0.9123,
 		"concatenation-string": 0.8912,
 	}
-	genTest.simCalculator = simCalculatorMock
+	genTest := NewGenTest(simCalculatorMock, []string{"concatenation"}, make(map[string]interface{}))
 
 	got := genTest.score(split)
 

@@ -12,16 +12,28 @@ const (
 
 // GenTest represents a Generation and Tests splitting algorithm, proposed by Lawrie, Binkley and Morrell.
 type GenTest struct {
-	// TODO review
-	list          string
-	simCalculator SimCalculator
-	context       []string
-	dicctionary   map[string]interface{}
+	simCalculator      SimCalculator
+	context            []string
+	dicctionary        map[string]interface{}
+	possibleExpansions string
 }
 
-// NewGenTest creates a new GenTest splitter.
-func NewGenTest() *GenTest {
-	return &GenTest{}
+// NewGenTest creates a new GenTest splitter/expander.
+//
+// GenTest requires a similarity calculator, a set of words known as context informartion
+// and a dicctionary
+func NewGenTest(sc SimCalculator, ctx []string, dicc map[string]interface{}) *GenTest {
+	words := make([]string, len(dicc))
+	for k := range dicc {
+		words = append(words, k)
+	}
+
+	return &GenTest{
+		simCalculator:      sc,
+		context:            ctx,
+		dicctionary:        dicc,
+		possibleExpansions: strings.Join(words, " "),
+	}
 }
 
 // SimCalculator is the interface that wraps the basic Sim method.
@@ -132,7 +144,7 @@ func (g *GenTest) findExpansions(input string) []string {
 	exp := regexp.MustCompile(pattern.String())
 
 	expansions := make([]string, 0)
-	for _, candidate := range exp.FindAllString(g.list, -1) {
+	for _, candidate := range exp.FindAllString(g.possibleExpansions, -1) {
 		if any(input, candidate, isTruncation, hasRemovedChar, hasRemovedVowels, hasRemovedCharAfterRemovedVowels) {
 			expansions = append(expansions, candidate)
 		}
