@@ -10,7 +10,7 @@ const (
 	closeToZeroProbability = 0.000000000000001
 )
 
-// GenTest represents a Generation and Tests splitting algorithm, proposed by Lawrie, Binkley and Morrell.
+// GenTest represents a Generation and Test splitting algorithm, proposed by Lawrie, Binkley and Morrell.
 type GenTest struct {
 	simCalculator      SimCalculator
 	context            []string
