@@ -20,8 +20,8 @@ type GenTest struct {
 
 // NewGenTest creates a new GenTest splitter/expander.
 //
-// GenTest requires a similarity calculator, a set of words known as context informartion
-// and a dicctionary
+// GenTest requires a similarity calculator, a set of words known as "context information"
+// and a dicctionary.
 func NewGenTest(sc SimCalculator, ctx []string, dicc map[string]interface{}) *GenTest {
 	words := make([]string, len(dicc))
 	for k := range dicc {
