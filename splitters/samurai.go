@@ -21,13 +21,13 @@ func init() {
 type Samurai struct {
 	localFreqTable  *FrequencyTable
 	globalFreqTable *FrequencyTable
-	prefixes        *mapset.Set
-	suffixes        *mapset.Set
+	prefixes        mapset.Set
+	suffixes        mapset.Set
 }
 
 // NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
 // tables are provided, the default tables are used.
-func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes *mapset.Set, suffixes *mapset.Set) *Samurai {
+func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes mapset.Set, suffixes mapset.Set) *Samurai {
 	local := &defaultLocalFreqTable
 	if localFreqTable != nil {
 		local = localFreqTable
@@ -38,12 +38,12 @@ func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable,
 		global = globalFreqTable
 	}
 
-	commonPrefixes := &defaultPrefixes
+	commonPrefixes := defaultPrefixes
 	if prefixes != nil {
 		commonPrefixes = prefixes
 	}
 
-	commonSuffixes := &defaultSuffixes
+	commonSuffixes := defaultSuffixes
 	if suffixes != nil {
 		commonSuffixes = suffixes
 	}
@@ -147,14 +147,12 @@ func (s *Samurai) score(word string) float64 {
 
 // isPrefix checks if the current token is found on a list of common prefixes.
 func (s *Samurai) isPrefix(token string) bool {
-	set := *s.prefixes
-	return set.Contains(token)
+	return s.prefixes.Contains(token)
 }
 
 // isSuffix checks if the current token is found on a list of common suffixes.
 func (s *Samurai) isSuffix(token string) bool {
-	set := *s.suffixes
-	return set.Contains(token)
+	return s.suffixes.Contains(token)
 }
 
 func buildDefaultPrefixes() mapset.Set {
