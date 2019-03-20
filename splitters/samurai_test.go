@@ -85,12 +85,12 @@ func createTestGlobalFrequencyTable() *FrequencyTable {
 	return ft
 }
 
-func createTestPrefixes() *mapset.Set {
-	return &defaultPrefixes
+func createTestPrefixes() mapset.Set {
+	return defaultPrefixes
 }
 
-func createTestSuffixes() *mapset.Set {
-	return &defaultSuffixes
+func createTestSuffixes() mapset.Set {
+	return defaultSuffixes
 }
 
 func BenchmarkSamuraiSplitting(b *testing.B) {
