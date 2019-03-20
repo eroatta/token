@@ -133,9 +133,8 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 	return splitToken
 }
 
-// score calculates the a score for a string based on how frequently a word
-// appears in the program under analysis and in a more global scope of a large
-// set of programs.
+// score calculates the score for a string based on how frequently a word
+// appears in the program under analysis and in a more global scope of a large set of programs.
 func (s *Samurai) score(word string) float64 {
 	freqS := s.localFreqTable.Frequency(word)
 	globalFreqS := s.globalFreqTable.Frequency(word)
