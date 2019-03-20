@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSamuraiWithNilTablesReturnNewSamuraiWithDefaultTables(t *testing.T) {
+func TestNewSamurai_WithNilTables_ShouldReturnDefaultTables(t *testing.T) {
 	samurai := NewSamurai(nil, nil, nil, nil)
 
 	assert.NotNil(t, samurai.localFreqTable, "the local frequency table should be using a default table")
@@ -17,7 +17,7 @@ func TestNewSamuraiWithNilTablesReturnNewSamuraiWithDefaultTables(t *testing.T) 
 	assert.NotNil(t, samurai.suffixes, "the common suffixes set should be using a default set")
 }
 
-func TestSamuraiSplitting(t *testing.T) {
+func TestSplit_OnSamurai_ShouldReturnValidSplits(t *testing.T) {
 	cases := []struct {
 		ID       int
 		token    string
