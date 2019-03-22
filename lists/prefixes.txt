@@ -37,7 +37,7 @@ geo
 hemi
 hetero
 homo
-hydro,
+hydro
 hypo
 ideo
 idio
@@ -63,7 +63,7 @@ neo
 omni
 paleo
 para
-ped,
+ped
 peri
 poly
 pre
