@@ -26,6 +26,7 @@ func TestExpand_OnBasic_ShouldReturnExpansion(t *testing.T) {
 		token    string
 		expected []string
 	}{
+		{"noExpansion", []string{}},
 		{"case", []string{"case"}},
 		{"Case", []string{"case"}},
 		{"JSON", []string{"java", "script", "object", "notation"}},
