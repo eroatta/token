@@ -1,5 +1,7 @@
 package expanders
 
+import "strings"
+
 // Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
 type Basic struct {
 	srcWords    map[string]interface{}
@@ -19,28 +21,21 @@ func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, sto
 }
 
 // Expand on Basic receives a token and returns an array of possible expansions.
-func (b *Basic) Expand(token string) ([]string, error) {
-	// the first list includes words contained in the comments that appear before and within the function
-	// the first list also includes dictionary hard words found in the identifiers of the function
-	/*srcWords := mapset.NewSet()
-
-	// the phrase list is obtained by running the comments and multiword-identifiers through a phrase finder
-	srcPhrases := make(map[string]string)
-
-	stoplist := *b.stopList
-	if stoplist.Contains(token) {
+func (b Basic) Expand(token string) ([]string, error) {
+	token = strings.ToLower(token)
+	if ok := b.stopList[token]; ok != nil {
 		return []string{token}, nil
 	}
 
-	if srcPhrases[token] != "" {
-		return []string{srcPhrases[token]}, nil
+	if phrase := b.srcPhrases[token]; phrase != "" {
+		return strings.Split(phrase, "-"), nil
 	}
 
-	if srcWords.Contains(token) {
+	if ok := b.srcWords[token]; ok != nil {
 		return []string{token}, nil
 	}
 
-	var expansions []string
+	//var expansions []string
 
 	// build the search regex
 
