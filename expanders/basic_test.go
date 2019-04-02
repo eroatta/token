@@ -6,11 +6,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBasicWithNilListsReturnsNewBasicWithDefaultLists(t *testing.T) {
+func TestNewBasic_WithLists_ShouldReturnBasicWithGivenLists(t *testing.T) {
+	srcWords := make(map[string]interface{}, 0)
+	srcPhrases := make(map[string]string, 0)
+	stopList := make(map[string]interface{}, 0)
+	dicc := make(map[string]interface{}, 0)
 
+	got := NewBasic(srcWords, srcPhrases, stopList, dicc)
+
+	assert.Equal(t, srcWords, got.srcWords)
+	assert.Equal(t, srcPhrases, got.srcPhrases)
+	assert.Equal(t, stopList, got.stopList)
+	assert.Equal(t, dicc, got.dicctionary)
 }
 
-func TestBasicExpansion(t *testing.T) {
+/*func TestBasicExpansion(t *testing.T) {
 	cases := []struct {
 		token    string
 		expected []string
@@ -25,7 +35,7 @@ func TestBasicExpansion(t *testing.T) {
 
 		assert.ElementsMatch(t, c.expected, got, "elements should match")
 	}
-}
+}*/
 
 func BenchmarkBasicExpansion(b *testing.B) {
 

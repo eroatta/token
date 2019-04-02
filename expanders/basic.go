@@ -1,20 +1,20 @@
 package expanders
 
-import (
-	"github.com/deckarep/golang-set"
-)
-
-// Basic represents a Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
+// Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
 type Basic struct {
-	stopList *mapset.Set
-	dicc     *mapset.Set
+	srcWords    map[string]interface{}
+	srcPhrases  map[string]string
+	stopList    map[string]interface{}
+	dicctionary map[string]interface{}
 }
 
-// NewBasic creates a new Basic expander with the given stop lists.
-func NewBasic(stopList *mapset.Set, dicc *mapset.Set) *Basic {
+// NewBasic creates a new Basic expander with the given lists.
+func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, stopList map[string]interface{}, dicc map[string]interface{}) *Basic {
 	return &Basic{
-		stopList: stopList,
-		dicc:     dicc,
+		srcWords:    srcWords,
+		srcPhrases:  srcPhrases,
+		stopList:    stopList,
+		dicctionary: dicc,
 	}
 }
 
@@ -22,7 +22,7 @@ func NewBasic(stopList *mapset.Set, dicc *mapset.Set) *Basic {
 func (b *Basic) Expand(token string) ([]string, error) {
 	// the first list includes words contained in the comments that appear before and within the function
 	// the first list also includes dictionary hard words found in the identifiers of the function
-	srcWords := mapset.NewSet()
+	/*srcWords := mapset.NewSet()
 
 	// the phrase list is obtained by running the comments and multiword-identifiers through a phrase finder
 	srcPhrases := make(map[string]string)
@@ -49,5 +49,5 @@ func (b *Basic) Expand(token string) ([]string, error) {
 
 	}*/
 
-	return expansions, nil
+	return nil, nil
 }
