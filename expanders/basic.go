@@ -1,6 +1,9 @@
 package expanders
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 // Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
 type Basic struct {
@@ -35,40 +38,18 @@ func (b Basic) Expand(token string) ([]string, error) {
 		return []string{token}, nil
 	}
 
-	//var expansions []string
-
 	// build the search regex
-
-	//it := b.dicc.Iterator()
-	/*for elem := range it.C {
-
-	}*/
-
-	return []string{}, nil
-}
-
-/*
-func (g *GenTest) findExpansions(input string) []string {
-	if input == "" || strings.TrimSpace(input) == "" {
-		return []string{}
-	}
-
-	// build the regexp
 	var pattern strings.Builder
 	pattern.WriteString("\\b")
-	for _, char := range input {
+	for _, char := range token {
 		pattern.WriteString("[")
 		pattern.WriteRune(char)
-		pattern.WriteString("]\\w*")
+		pattern.WriteString("]\\w")
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	expansions := make([]string, 0)
-	for _, candidate := range exp.FindAllString(g.possibleExpansions, -1) {
-		if any(input, candidate, isTruncation, hasRemovedChar, hasRemovedVowels, hasRemovedCharAfterRemovedVowels) {
-			expansions = append(expansions, candidate)
-		}
-	}
+	// TODO complete
+	expansions := exp.FindAllString("", -1)
 
-	return expansions
-}*/
+	return expansions, nil
+}
