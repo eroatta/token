@@ -1,6 +1,7 @@
 package expanders
 
 import (
+	"errors"
 	"regexp"
 	"strings"
 )
@@ -48,8 +49,15 @@ func (b Basic) Expand(token string) ([]string, error) {
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// TODO complete
+	// TODO complete, use defined errors
 	expansions := exp.FindAllString("", -1)
+	if len(expansions) > 1 {
+		return nil, errors.New("Multiple matches")
+	}
+
+	if len(expansions) == 0 {
+		return nil, errors.New("No match")
+	}
 
 	return expansions, nil
 }
