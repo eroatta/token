@@ -21,6 +21,24 @@ func TestNewBasic_WithLists_ShouldReturnBasicWithGivenLists(t *testing.T) {
 	assert.Equal(t, dicc, got.dicctionary)
 }
 
+func TestExpand_OnBasic_ShouldReturnNoMatchError(t *testing.T) {
+	basic := NewBasic(nil, nil, nil, nil)
+	expansions, err := basic.Expand("none")
+
+	assert.Empty(t, expansions)
+	assert.Error(t, err)
+	assert.EqualError(t, err, ErrNoMatch.Error())
+}
+
+func TestExpand_OnBasic_ShouldReturnMultipleMatchesError(t *testing.T) {
+	basic := NewBasic(nil, nil, nil, nil)
+	expansions, err := basic.Expand("none")
+
+	assert.Empty(t, expansions)
+	assert.Error(t, err)
+	assert.EqualError(t, err, ErrMultipleMatches.Error())
+}
+
 func TestExpand_OnBasic_ShouldReturnExpansion(t *testing.T) {
 	tests := []struct {
 		token    string
@@ -57,5 +75,5 @@ func TestExpand_OnBasic_ShouldReturnExpansion(t *testing.T) {
 }
 
 func BenchmarkBasicExpansion(b *testing.B) {
-
+	// TODO: add expansion tests...
 }

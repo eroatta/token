@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+var (
+	// ErrMultipleMatches indicates that two or more matches were found for a given abbreviation.
+	ErrMultipleMatches = errors.New("Multiple matches")
+
+	// ErrNoMatch indicates that no single match was found for a given abbreviation.
+	ErrNoMatch = errors.New("No match")
+)
+
 // Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
 type Basic struct {
 	srcWords    map[string]interface{}
@@ -49,14 +57,14 @@ func (b Basic) Expand(token string) ([]string, error) {
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// TODO complete, use defined errors
+	// TODO complete
 	expansions := exp.FindAllString("", -1)
 	if len(expansions) > 1 {
-		return nil, errors.New("Multiple matches")
+		return nil, ErrMultipleMatches
 	}
 
 	if len(expansions) == 0 {
-		return nil, errors.New("No match")
+		return nil, ErrNoMatch
 	}
 
 	return expansions, nil
