@@ -1,17 +1,8 @@
 package expanders
 
 import (
-	"errors"
 	"regexp"
 	"strings"
-)
-
-var (
-	// ErrMultipleMatches indicates that two or more matches were found for a given abbreviation.
-	ErrMultipleMatches = errors.New("Multiple matches")
-
-	// ErrNoMatch indicates that no single match was found for a given abbreviation.
-	ErrNoMatch = errors.New("No match")
 )
 
 // Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
@@ -33,18 +24,18 @@ func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, sto
 }
 
 // Expand on Basic receives a token and returns an array of possible expansions.
-func (b Basic) Expand(token string) ([]string, error) {
+func (b Basic) Expand(token string) []string {
 	token = strings.ToLower(token)
 	if ok := b.stopList[token]; ok != nil {
-		return []string{token}, nil
+		return []string{token}
 	}
 
 	if phrase := b.srcPhrases[token]; phrase != "" {
-		return strings.Split(phrase, "-"), nil
+		return strings.Split(phrase, "-")
 	}
 
 	if ok := b.srcWords[token]; ok != nil {
-		return []string{token}, nil
+		return []string{token}
 	}
 
 	// build the search regex
@@ -57,15 +48,7 @@ func (b Basic) Expand(token string) ([]string, error) {
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// TODO complete
+	// TODO: complete
 	expansions := exp.FindAllString("", -1)
-	if len(expansions) > 1 {
-		return nil, ErrMultipleMatches
-	}
-
-	if len(expansions) == 0 {
-		return nil, ErrNoMatch
-	}
-
-	return expansions, nil
+	return expansions
 }
