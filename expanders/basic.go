@@ -26,17 +26,6 @@ func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, sto
 // Expand on Basic receives a token and returns an array of possible expansions.
 func (b Basic) Expand(token string) []string {
 	token = strings.ToLower(token)
-	if ok := b.stopList[token]; ok != nil {
-		return []string{token}
-	}
-
-	if phrase := b.srcPhrases[token]; phrase != "" {
-		return strings.Split(phrase, "-")
-	}
-
-	if ok := b.srcWords[token]; ok != nil {
-		return []string{token}
-	}
 
 	// build the search regex
 	var pattern strings.Builder
@@ -48,7 +37,23 @@ func (b Basic) Expand(token string) []string {
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// TODO: complete
-	expansions := exp.FindAllString("", -1)
+	// stage 1: should look on the words and phrases lists
+	arrWords := make([]string, len(b.srcWords))
+	for k := range b.srcWords {
+		arrWords = append(arrWords, k)
+	}
+	words := strings.Join(arrWords, " ")
+
+	expansions := exp.FindAllString(words, -1)
+	if len(expansions) > 0 {
+		return expansions
+	}
+
+	if phrase := b.srcPhrases[token]; phrase != "" {
+		return strings.Split(phrase, "-")
+	}
+
+	// stage 2: should look on the dicctionary and stop lists
+
 	return expansions
 }

@@ -23,14 +23,15 @@ func TestNewBasic_WithLists_ShouldReturnBasicWithGivenLists(t *testing.T) {
 
 func TestExpand_OnBasic_ShouldReturnExpansion(t *testing.T) {
 	tests := []struct {
+		name     string
 		token    string
 		expected []string
 	}{
-		{"noExpansion", []string{}},
-		{"case", []string{"case"}},
-		{"Case", []string{"case"}},
-		{"JSON", []string{"java", "script", "object", "notation"}},
-		{"parser", []string{"parser"}},
+		{"no_expansion", "noExpansion", []string{}},
+		{"in_lower_case", "case", []string{"case"}},
+		{"case_unsensitive", "Case", []string{"case"}},
+		{"phrase", "JSON", []string{"java", "script", "object", "notation"}},
+		{"in_words", "parser", []string{"parser"}},
 	}
 
 	words := map[string]interface{}{
@@ -47,9 +48,11 @@ func TestExpand_OnBasic_ShouldReturnExpansion(t *testing.T) {
 
 	basic := NewBasic(words, phraseList, stopList, nil)
 	for _, fixture := range tests {
-		got := basic.Expand(fixture.token)
+		t.Run(fixture.name, func(t *testing.T) {
+			got := basic.Expand(fixture.token)
 
-		assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
+			assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
+		})
 	}
 }
 
