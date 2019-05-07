@@ -7,19 +7,36 @@ import (
 
 // Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
 type Basic struct {
-	srcWords    map[string]interface{}
+	words       *string
+	stopAndDicc *string
 	srcPhrases  map[string]string
-	stopList    map[string]interface{}
-	dicctionary map[string]interface{}
 }
 
 // NewBasic creates a new Basic expander with the given lists.
 func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, stopList map[string]interface{}, dicc map[string]interface{}) *Basic {
+	arrWords := make([]string, len(srcWords))
+	for k := range srcWords {
+		arrWords = append(arrWords, k)
+	}
+	words := strings.Join(arrWords, " ")
+
+	arrStopAndDicc := make([]string, len(dicc)+len(stopList))
+	for k := range dicc {
+		arrStopAndDicc = append(arrStopAndDicc, k)
+	}
+
+	// merge lists to avoid duplication
+	for k := range stopList {
+		if _, found := dicc[k]; !found {
+			arrStopAndDicc = append(arrStopAndDicc, k)
+		}
+	}
+	stopAndDicc := strings.Join(arrStopAndDicc, " ")
+
 	return &Basic{
-		srcWords:    srcWords,
+		words:       &words,
 		srcPhrases:  srcPhrases,
-		stopList:    stopList,
-		dicctionary: dicc,
+		stopAndDicc: &stopAndDicc,
 	}
 }
 
@@ -33,18 +50,12 @@ func (b Basic) Expand(token string) []string {
 	for _, char := range token {
 		pattern.WriteString("[")
 		pattern.WriteRune(char)
-		pattern.WriteString("]\\w")
+		pattern.WriteString("]\\w*")
 	}
 	exp := regexp.MustCompile(pattern.String())
 
-	// stage 1: should look on the words and phrases lists
-	arrWords := make([]string, len(b.srcWords))
-	for k := range b.srcWords {
-		arrWords = append(arrWords, k)
-	}
-	words := strings.Join(arrWords, " ")
-
-	expansions := exp.FindAllString(words, -1)
+	// stage 1: should look on the words from the source code and then phrases lists
+	expansions := exp.FindAllString(*b.words, -1)
 	if len(expansions) > 0 {
 		return expansions
 	}
@@ -54,6 +65,7 @@ func (b Basic) Expand(token string) []string {
 	}
 
 	// stage 2: should look on the dicctionary and stop lists
+	expansions = exp.FindAllString(*b.stopAndDicc, -1)
 
 	return expansions
 }

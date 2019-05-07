@@ -15,10 +15,9 @@ func TestNewBasic_WithLists_ShouldReturnBasicWithGivenLists(t *testing.T) {
 
 	got := NewBasic(srcWords, srcPhrases, stopList, dicc)
 
-	assert.Equal(t, srcWords, got.srcWords)
+	assert.Equal(t, "", *got.words)
+	assert.Equal(t, "", *got.stopAndDicc)
 	assert.Equal(t, srcPhrases, got.srcPhrases)
-	assert.Equal(t, stopList, got.stopList)
-	assert.Equal(t, dicc, got.dicctionary)
 }
 
 func TestExpand_OnBasic_ShouldReturnExpansion(t *testing.T) {
