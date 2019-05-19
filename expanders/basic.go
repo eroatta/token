@@ -41,6 +41,10 @@ func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, sto
 }
 
 // Expand on Basic receives a token and returns an array of possible expansions.
+//
+// The Basic expansion algortihm builds a regular expression for the given token and
+// runs it against several lists built from the source code and natural words from
+// stop lists and dicctionaries.
 func (b Basic) Expand(token string) []string {
 	token = strings.ToLower(token)
 
