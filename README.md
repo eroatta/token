@@ -1,14 +1,20 @@
-# token-splitex
+# token-splitex [WIP]
 
 Collection of token splitting and expanding algorithms.
 The following lists show the supported algorithms.
 
-### Splitting algorithms:
+## Splitting algorithms
 
 * **Conserv**: This is the reference algorithm. Each token is split using separation markers as underscores, numbers and regular camel case.
 * **Greedy**: This algorithm is based on a greedy approach and uses several lists to find the best split, analyzing the token looking for preffixes and suffixes. **[WIP]**
-* **Samurai**: This algorithm splits identifiers into sequences of words by mining word frequencies in source code. **[WIP]**
+* **Samurai**: This algorithm splits identifiers into sequences of words by mining word frequencies in source code.
 * **GenTest**: **[WIP]**
+
+## Expansion algorithms
+
+* **Basic**: *TODO*
+* **AMAP**: *TODO*
+* **Normalize**: *TODO*
 
 ## Usage
 
