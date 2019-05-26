@@ -79,5 +79,25 @@ func TestBuild_OnPatternBuilderForAcronym_ShouldReturnPatternWithRegex(t *testin
 }
 
 func TestBuild_OnPatternBuilderForWordCombination_ShouldReturnPatternWithRegex(t *testing.T) {
-	assert.FailNow(t, "not yet implemented or properly tested")
+	cases := []struct {
+		name          string
+		shortForm     string
+		expectedRegex string
+	}{
+		{"regular_short_form", "pdef", "^p[a-z]*?[ ]*?d[a-z]*?[ ]*?e[a-z]*?[ ]*?f[a-z]*?[ ]*?$"},
+		{"starting_with_x_short_form", "xp", "^e?x[a-z]*?[ ]*?p[a-z]*?[ ]*?$"},
+		{"empty_short_form", "", ""},
+	}
+
+	for _, fixture := range cases {
+		t.Run(fixture.name, func(t *testing.T) {
+			builder := &patternBuilder{}
+			pattern := builder.kind("word-combination").shortForm(fixture.shortForm).build()
+
+			assert.Equal(t, pattern.group, multiWordGroup)
+			assert.Equal(t, pattern.kind, wordCombinationType)
+			assert.Equal(t, pattern.shortForm, fixture.shortForm)
+			assert.Equal(t, pattern.regex, fixture.expectedRegex)
+		})
+	}
 }

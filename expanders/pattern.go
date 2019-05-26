@@ -122,5 +122,22 @@ func buildAcronymRegex(input string) string {
 }
 
 func buildWordCombinationRegex(input string) string {
-	return ""
+	if len(input) == 0 {
+		return ""
+	}
+
+	var builder strings.Builder
+	// TODO: review regexp starting char
+	builder.WriteRune('^')
+	if input[0] == 'x' {
+		builder.WriteString("e?")
+	}
+
+	for _, letter := range input {
+		builder.WriteRune(letter)
+		builder.WriteString("[a-z]*?[ ]*?")
+	}
+	builder.WriteRune('$')
+
+	return builder.String()
 }
