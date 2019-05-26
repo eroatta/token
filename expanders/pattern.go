@@ -1,5 +1,7 @@
 package expanders
 
+import "strings"
+
 const (
 	singleWordGroup = "single-word"
 	multiWordGroup  = "multi-word"
@@ -46,6 +48,12 @@ func (pb *patternBuilder) build() pattern {
 	switch pb.pattern.kind {
 	case prefixType:
 		regex = buildPrefixRegex(pb.pattern.shortForm)
+	case droppedLettersType:
+		regex = buildDroppedLettersRegex(pb.pattern.shortForm)
+	case acronymType:
+		regex = buildAcronymRegex(pb.pattern.shortForm)
+	case wordCombinationType:
+		regex = buildWordCombinationRegex(pb.pattern.shortForm)
 	}
 	pb.pattern.regex = regex
 
@@ -53,23 +61,25 @@ func (pb *patternBuilder) build() pattern {
 }
 
 func buildPrefixRegex(input string) string {
+	var builder strings.Builder
+	builder.WriteString("^")
+	if input[0] == 'x' {
+		builder.WriteString("e?")
+	}
+	builder.WriteString(input)
+	builder.WriteString("[a-z]+")
+
+	return builder.String()
+}
+
+func buildDroppedLettersRegex(shortForm string) string {
 	return ""
 }
 
-func buildDroppedLettersPattern(shortForm string) pattern {
-	return pattern{
-		kind: droppedLettersType,
-	}
+func buildAcronymRegex(shortForm string) string {
+	return ""
 }
 
-func buildAcronymPattern(shortForm string) pattern {
-	return pattern{
-		kind: acronymType,
-	}
-}
-
-func buildWordCombinationPattern(shortForm string) pattern {
-	return pattern{
-		kind: wordCombinationType,
-	}
+func buildWordCombinationRegex(shortForm string) string {
+	return ""
 }
