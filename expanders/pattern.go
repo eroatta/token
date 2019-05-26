@@ -66,7 +66,8 @@ func buildPrefixRegex(input string) string {
 	}
 
 	var builder strings.Builder
-	builder.WriteString("^")
+	// TODO: review regexp starting char
+	builder.WriteRune('^')
 	if input[0] == 'x' {
 		builder.WriteString("e?")
 	}
@@ -82,7 +83,8 @@ func buildDroppedLettersRegex(input string) string {
 	}
 
 	var builder strings.Builder
-	builder.WriteString("^")
+	// TODO: review regexp starting char
+	builder.WriteRune('^')
 	if input[0] == 'x' {
 		builder.WriteString("e?")
 	}
@@ -96,7 +98,27 @@ func buildDroppedLettersRegex(input string) string {
 }
 
 func buildAcronymRegex(input string) string {
-	return ""
+	if len(input) == 0 {
+		return ""
+	}
+
+	var builder strings.Builder
+	// TODO: review regexp starting char
+	builder.WriteRune('(')
+	if input[0] == 'x' {
+		builder.WriteString("e?")
+	}
+
+	for i := 0; i < len(input); i++ {
+		builder.WriteByte(input[i])
+		builder.WriteString("[a-z]+")
+		if i < len(input)-1 {
+			builder.WriteString("[ ]")
+		}
+	}
+	builder.WriteRune(')')
+
+	return builder.String()
 }
 
 func buildWordCombinationRegex(input string) string {
