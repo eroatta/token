@@ -14,6 +14,17 @@ const (
 	wordCombinationType = "word-combination"
 )
 
+var regexBuilders map[string]func(string) string
+
+func init() {
+	regexBuilders = map[string]func(string) string{
+		prefixType:          buildPrefixRegex,
+		droppedLettersType:  buildDroppedLettersRegex,
+		acronymType:         buildAcronymRegex,
+		wordCombinationType: buildWordCombinationRegex,
+	}
+}
+
 type pattern struct {
 	group     string
 	kind      string
@@ -44,19 +55,7 @@ func (pb *patternBuilder) shortForm(sf string) *patternBuilder {
 }
 
 func (pb *patternBuilder) build() pattern {
-	var regex string
-	switch pb.pattern.kind {
-	case prefixType:
-		regex = buildPrefixRegex(pb.pattern.shortForm)
-	case droppedLettersType:
-		regex = buildDroppedLettersRegex(pb.pattern.shortForm)
-	case acronymType:
-		regex = buildAcronymRegex(pb.pattern.shortForm)
-	case wordCombinationType:
-		regex = buildWordCombinationRegex(pb.pattern.shortForm)
-	}
-	pb.pattern.regex = regex
-
+	pb.pattern.regex = regexBuilders[pb.pattern.kind](pb.pattern.shortForm)
 	return pb.pattern
 }
 
