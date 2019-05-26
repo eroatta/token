@@ -61,6 +61,10 @@ func (pb *patternBuilder) build() pattern {
 }
 
 func buildPrefixRegex(input string) string {
+	if len(input) == 0 {
+		return ""
+	}
+
 	var builder strings.Builder
 	builder.WriteString("^")
 	if input[0] == 'x' {
@@ -72,14 +76,29 @@ func buildPrefixRegex(input string) string {
 	return builder.String()
 }
 
-func buildDroppedLettersRegex(shortForm string) string {
+func buildDroppedLettersRegex(input string) string {
+	if len(input) == 0 {
+		return ""
+	}
+
+	var builder strings.Builder
+	builder.WriteString("^")
+	if input[0] == 'x' {
+		builder.WriteString("e?")
+	}
+
+	for _, letter := range input {
+		builder.WriteRune(letter)
+		builder.WriteString("[a-z]*")
+	}
+
+	return builder.String()
+}
+
+func buildAcronymRegex(input string) string {
 	return ""
 }
 
-func buildAcronymRegex(shortForm string) string {
-	return ""
-}
-
-func buildWordCombinationRegex(shortForm string) string {
+func buildWordCombinationRegex(input string) string {
 	return ""
 }
