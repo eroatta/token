@@ -29,3 +29,17 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 		})
 	}
 }
+
+func TestSingleWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongFormCandidates(t *testing.T) {
+	variableDeclarations := []string{"cpol Carpool"}
+	methodName := "buildCarpool"
+	methodBodyText := ""
+	methodComments := ""
+	packageComments := ""
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("prefix").shortForm("cp").build()
+	longForms := amap.singleWordExpansion(pattern, variableDeclarations, methodName, methodBodyText, methodComments, packageComments)
+
+	assert.Empty(t, longForms)
+}

@@ -32,17 +32,8 @@ func (a Amap) Expand(token string) []string {
 }
 
 // singleWordExpansion looks for candidate long forms for a given pattern
-func (a Amap) singleWordExpansion(pttrn pattern) []string {
-	// input: short form
-	// input: regular expression, pattern
-
-	var methodName string
-	// input: method body text
-	var methodBodyText string
-	// input: method comments
-	var methodComments string
-	// input: class comments (prefix only)
-	var packageComments string
+func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
+	methodBodyText string, methodComments string, packageComments string) []string {
 
 	var longForms []string
 
@@ -52,18 +43,26 @@ func (a Amap) singleWordExpansion(pttrn pattern) []string {
 		!manyVowels.MatchString(pttrn.shortForm) {
 
 		// 9: Search TypeNames and corresponding declared variable names for “pattern sf”
-		// TODO: complete with variable declarations
+		matcher, _ := regexp.Compile(pttrn.regex + "[ ]" + pttrn.shortForm)
+		for _, v := range variableDeclarations {
+			if matcher.MatchString(v) {
+				longForms = append(longForms, v)
+			}
+		}
+		if len(longForms) == 1 {
+			return longForms
+		}
 
 		// 10: Search MethodName for “pattern”
-		matcher, _ := regexp.Compile(pttrn.regex)
+		matcher, _ = regexp.Compile(pttrn.regex)
 		if matcher.MatchString(methodName) {
 			longForms = append(longForms, methodName)
 			if len(longForms) == 1 {
 				return longForms
 			}
 		}
-		// 11: Search Statements for “pattern sf” and “sf pattern”
-		// TODO: complete with other statements
+
+		// 11: Search Statements for “pattern sf” and “sf pattern” (ignored)
 
 		if len(pttrn.shortForm) != 2 {
 			// 13: Search method words for “pattern”
