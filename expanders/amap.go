@@ -52,7 +52,7 @@ func (a Amap) singleWordExpansion(pttrn pattern) []string {
 		!manyVowels.MatchString(pttrn.shortForm) {
 
 		// 9: Search TypeNames and corresponding declared variable names for “pattern sf”
-		// TODO: complete
+		// TODO: complete with variable declarations
 
 		// 10: Search MethodName for “pattern”
 		matcher, _ := regexp.Compile(pttrn.regex)
@@ -63,7 +63,7 @@ func (a Amap) singleWordExpansion(pttrn pattern) []string {
 			}
 		}
 		// 11: Search Statements for “pattern sf” and “sf pattern”
-		// TODO: complete
+		// TODO: complete with other statements
 
 		if len(pttrn.shortForm) != 2 {
 			// 13: Search method words for “pattern”
