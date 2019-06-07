@@ -2,6 +2,7 @@ package expanders
 
 import (
 	"regexp"
+	"strings"
 )
 
 var consonants *regexp.Regexp
@@ -46,7 +47,8 @@ func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, 
 		matcher, _ := regexp.Compile(pttrn.regex + "[ ]" + pttrn.shortForm)
 		for _, v := range variableDeclarations {
 			if matcher.MatchString(v) {
-				longForms = append(longForms, v)
+				// append only the matching name to the candidate expansions
+				longForms = append(longForms, strings.Split(v, " ")[0])
 			}
 		}
 		if len(longForms) == 1 {
