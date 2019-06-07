@@ -53,14 +53,19 @@ func TestSingleWordExpansion_OnAmapWithPrefixPattern_ShouldReturnMatchingLongFor
 		{"many_vowels", "cp", []string{}},
 		{"not_many_vowels_and_only_match_on_variable_declarations", "carp", []string{"carpool"}},
 		{"not_many_vowels_and_only_match_on_method_name", "bu", []string{"buildCarpool"}},
+		{"not_many_vowels_and_short_form_size_not_two_one_match_method_body", "syn", []string{"syntax"}},
+		{"not_many_vowels_and_short_form_size_not_two_one_match_method_comments", "abs", []string{"abstract"}},
+		{"not_many_vowels_and_short_form_size_two_no_match_method_body", "sy", []string{}},
+		{"not_many_vowels_and_short_form_size_two_no_match_method_comments", "ab", []string{}},
+		{"not_many_vowels_and_short_form_size_higher_than_one_one_match_method_comments", "wal", []string{"walker"}},
 	}
 
 	amap := NewAmap()
 	variableDeclarations := []string{"carpool carp"}
 	methodName := "buildCarpool"
-	methodBodyText := ""
-	methodComments := ""
-	packageComments := ""
+	methodBodyText := "syntax analizer"
+	methodComments := "abstract watcher"
+	packageComments := "walker"
 
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
