@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewAmap_ShouldReturnNewAmapInstance(t *testing.T) {
-	// TODO: complete
+	assert.Fail(t, "not yet implemented")
 }
 
 func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
@@ -33,15 +33,26 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 func TestSingleWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongFormCandidates(t *testing.T) {
 	variableDeclarations := []string{"cpol Carpool"}
 	methodName := "buildCarpool"
-	methodBodyText := ""
-	methodComments := ""
-	packageComments := ""
+	var emptyMethodBody, emptyMethodComments, emptyPackageComments string
 
 	amap := NewAmap()
 	pattern := (&patternBuilder{}).kind("prefix").shortForm("cp").build()
-	longForms := amap.singleWordExpansion(pattern, variableDeclarations, methodName, methodBodyText, methodComments, packageComments)
+	got := amap.singleWordExpansion(pattern, variableDeclarations, methodName, emptyMethodBody,
+		emptyMethodComments, emptyPackageComments)
 
-	assert.Empty(t, longForms)
+	assert.Empty(t, got)
+}
+
+func TestSingleWordExpansion_OnAmapWithPrefixPatternButManyWovels_ShouldReturnEmptyLongForms(t *testing.T) {
+	possibleButSkippedMatch := []string{"iooboooo ioob"}
+	var emptyMethodName, emptyMethodBody, emptyMethodComments, emptyPackageComments string
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("prefix").shortForm("ioob").build()
+	got := amap.singleWordExpansion(pattern, possibleButSkippedMatch, emptyMethodName, emptyMethodBody,
+		emptyMethodComments, emptyPackageComments)
+
+	assert.Empty(t, got)
 }
 
 func TestSingleWordExpansion_OnAmapWithPrefixPattern_ShouldReturnMatchingLongFormCandidates(t *testing.T) {
@@ -57,7 +68,7 @@ func TestSingleWordExpansion_OnAmapWithPrefixPattern_ShouldReturnMatchingLongFor
 		{"not_many_vowels_and_short_form_size_not_two_one_match_method_comments", "abs", []string{"abstract"}},
 		{"not_many_vowels_and_short_form_size_two_no_match_method_body", "sy", []string{}},
 		{"not_many_vowels_and_short_form_size_two_no_match_method_comments", "ab", []string{}},
-		{"not_many_vowels_and_short_form_size_higher_than_one_one_match_method_comments", "wal", []string{"walker"}},
+		{"not_many_vowels_and_short_form_size_higher_than_one_one_match_package_comments", "wal", []string{"walker"}},
 	}
 
 	amap := NewAmap()
