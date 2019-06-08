@@ -17,6 +17,7 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 		token    string
 		expected []string
 	}{
+		// TODO: review
 		{"no_expansion", "noExpansion", []string{}},
 	}
 
@@ -43,7 +44,7 @@ func TestSingleWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongFormCandid
 	assert.Empty(t, got)
 }
 
-func TestSingleWordExpansion_OnAmapWithPrefixPatternButManyWovels_ShouldReturnEmptyLongForms(t *testing.T) {
+func TestSingleWordExpansion_OnAmapWithPrefixPatternButTooManyWovels_ShouldReturnEmptyLongForms(t *testing.T) {
 	possibleButSkippedMatch := []string{"iooboooo ioob"}
 	var emptyMethodName, emptyMethodBody, emptyMethodComments, emptyPackageComments string
 
@@ -55,20 +56,19 @@ func TestSingleWordExpansion_OnAmapWithPrefixPatternButManyWovels_ShouldReturnEm
 	assert.Empty(t, got)
 }
 
-func TestSingleWordExpansion_OnAmapWithPrefixPattern_ShouldReturnMatchingLongFormCandidates(t *testing.T) {
+func TestSingleWordExpansion_OnAmapWithPrefixPatternAndNotManyVowels_ShouldReturnMatchingLongFormCandidates(t *testing.T) {
 	cases := []struct {
 		name       string
 		shortForm  string
 		candidates []string
 	}{
-		{"many_vowels", "cp", []string{}},
-		{"not_many_vowels_and_only_match_on_variable_declarations", "carp", []string{"carpool"}},
-		{"not_many_vowels_and_only_match_on_method_name", "bu", []string{"buildCarpool"}},
-		{"not_many_vowels_and_short_form_size_not_two_one_match_method_body", "syn", []string{"syntax"}},
-		{"not_many_vowels_and_short_form_size_not_two_one_match_method_comments", "abs", []string{"abstract"}},
-		{"not_many_vowels_and_short_form_size_two_no_match_method_body", "sy", []string{}},
-		{"not_many_vowels_and_short_form_size_two_no_match_method_comments", "ab", []string{}},
-		{"not_many_vowels_and_short_form_size_higher_than_one_one_match_package_comments", "wal", []string{"walker"}},
+		{"only_match_on_variable_declarations", "carp", []string{"carpool"}},
+		{"only_match_on_method_name", "bu", []string{"buildCarpool"}},
+		{"short_form_size_not_two_one_match_method_body", "syn", []string{"syntax"}},
+		{"short_form_size_not_two_one_match_method_comments", "abs", []string{"abstract"}},
+		{"short_form_size_two_no_match_method_body", "sy", []string{}},
+		{"short_form_size_two_no_match_method_comments", "ab", []string{}},
+		{"short_form_size_higher_than_one_one_match_package_comments", "wal", []string{"walker"}},
 	}
 
 	amap := NewAmap()
@@ -81,6 +81,52 @@ func TestSingleWordExpansion_OnAmapWithPrefixPattern_ShouldReturnMatchingLongFor
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
 			pattern := (&patternBuilder{}).kind("prefix").shortForm(fixture.shortForm).build()
+
+			got := amap.singleWordExpansion(pattern, variableDeclarations, methodName, methodBodyText,
+				methodComments, packageComments)
+
+			assert.ElementsMatch(t, fixture.candidates, got, fmt.Sprintf("found elements: %v", got))
+		})
+	}
+}
+
+func TestSingleWordExpansion_OnAmapWithNoPrefixPatternButTooManyVowels_ShouldReturnEmptyLongForms(t *testing.T) {
+	possibleButSkippedMatch := []string{"contextpool coo"}
+	var emptyMethodName, emptyMethodBody, emptyMethodComments, emptyPackageComments string
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("dropped-letters").shortForm("cool").build()
+	got := amap.singleWordExpansion(pattern, possibleButSkippedMatch, emptyMethodName, emptyMethodBody,
+		emptyMethodComments, emptyPackageComments)
+
+	assert.Empty(t, got)
+}
+
+func TestSingleWordExpansion_OnAmapWithNotPrefixPatternAndNotManyVowels_ShouldReturnMatchingLongFormCandidates(t *testing.T) {
+	cases := []struct {
+		name       string
+		shortForm  string
+		candidates []string
+	}{
+		{"only_match_on_variable_declarations", "cpl", []string{"carpool"}},
+		{"only_match_on_method_name", "bcpl", []string{"buildcarpool"}},
+		{"short_form_size_not_two_one_match_method_body", "syn", []string{"syntax"}},
+		{"short_form_size_not_two_one_match_method_comments", "absat", []string{"abstract"}},
+		{"short_form_size_two_no_match_method_body", "sy", []string{}},
+		{"short_form_size_two_no_match_method_comments", "ab", []string{}},
+		{"short_form_size_higher_than_one_but_skipped_package_comments", "wlkr", []string{}},
+	}
+
+	amap := NewAmap()
+	variableDeclarations := []string{"carpool cpl"}
+	methodName := "buildcarpool"
+	methodBodyText := "syntax analizer"
+	methodComments := "abstract watcher"
+	packageComments := "walker"
+
+	for _, fixture := range cases {
+		t.Run(fixture.name, func(t *testing.T) {
+			pattern := (&patternBuilder{}).kind("dropped-letters").shortForm(fixture.shortForm).build()
 
 			got := amap.singleWordExpansion(pattern, variableDeclarations, methodName, methodBodyText,
 				methodComments, packageComments)
