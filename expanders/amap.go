@@ -69,13 +69,13 @@ func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, 
 		if len(pttrn.shortForm) != 2 {
 			// 13: Search method words for “pattern”
 			matcher, _ := regexp.Compile(pttrn.regex)
-			longForms = matcher.FindAllString(methodBodyText, -1)
+			longForms = append(longForms, matcher.FindAllString(methodBodyText, -1)...)
 			if len(longForms) == 1 {
 				return longForms
 			}
 
 			// 14: Search method comment words for “pattern”
-			longForms = matcher.FindAllString(methodComments, -1)
+			longForms = append(longForms, matcher.FindAllString(methodComments, -1)...)
 			if len(longForms) == 1 {
 				return longForms
 			}
@@ -83,7 +83,7 @@ func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, 
 		if pttrn.kind == prefixType && len(pttrn.shortForm) > 1 {
 			// 17: Search class comment words for “pattern”
 			matcher, _ := regexp.Compile(pttrn.regex)
-			longForms = matcher.FindAllString(packageComments, -1)
+			longForms = append(longForms, matcher.FindAllString(packageComments, -1)...)
 			if len(longForms) == 1 {
 				return longForms
 			}

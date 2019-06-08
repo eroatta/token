@@ -12,8 +12,8 @@ func TestBuild_OnPatternBuilderForPrefix_ShouldReturnPatternWithRegex(t *testing
 		shortForm     string
 		expectedRegex string
 	}{
-		{"regular_short_form", "arg", "^arg[a-z]+"},
-		{"starting_with_x_short_form", "xt", "^e?xt[a-z]+"},
+		{"regular_short_form", "arg", "\\barg[a-z]+"},
+		{"starting_with_x_short_form", "xt", "\\be?xt[a-z]+"},
 		{"empty_short_form", "", ""},
 	}
 

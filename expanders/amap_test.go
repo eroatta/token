@@ -27,11 +27,12 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 			got := amap.Expand(fixture.token)
 
 			assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
+			assert.Fail(t, "not yet implemented")
 		})
 	}
 }
 
-func TestSingleWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongFormCandidates(t *testing.T) {
+func TestSingleWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongForms(t *testing.T) {
 	variableDeclarations := []string{"cpol Carpool"}
 	methodName := "buildCarpool"
 	var emptyMethodBody, emptyMethodComments, emptyPackageComments string
@@ -56,7 +57,7 @@ func TestSingleWordExpansion_OnAmapWithPrefixPatternButTooManyWovels_ShouldRetur
 	assert.Empty(t, got)
 }
 
-func TestSingleWordExpansion_OnAmapWithPrefixPatternAndNotManyVowels_ShouldReturnMatchingLongFormCandidates(t *testing.T) {
+func TestSingleWordExpansion_OnAmapWithPrefixPatternAndNotManyVowels_ShouldReturnMatchingLongForms(t *testing.T) {
 	cases := []struct {
 		name       string
 		shortForm  string
@@ -102,7 +103,7 @@ func TestSingleWordExpansion_OnAmapWithNoPrefixPatternButTooManyVowels_ShouldRet
 	assert.Empty(t, got)
 }
 
-func TestSingleWordExpansion_OnAmapWithNotPrefixPatternAndNotManyVowels_ShouldReturnMatchingLongFormCandidates(t *testing.T) {
+func TestSingleWordExpansion_OnAmapWithNotPrefixPatternAndNotManyVowels_ShouldReturnMatchingLongForms(t *testing.T) {
 	cases := []struct {
 		name       string
 		shortForm  string
@@ -134,4 +135,18 @@ func TestSingleWordExpansion_OnAmapWithNotPrefixPatternAndNotManyVowels_ShouldRe
 			assert.ElementsMatch(t, fixture.candidates, got, fmt.Sprintf("found elements: %v", got))
 		})
 	}
+}
+
+func TestSingleWordExpansion_OnAmapWithPrefixPatternButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
+	var emptyVariableDecls []string
+	var emptyMethodName, emptyMethodBody string
+	methodComments := "abstraction for abstract syntax tree"
+	packageComments := "absolute"
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("prefix").shortForm("abs").build()
+	got := amap.singleWordExpansion(pattern, emptyVariableDecls, emptyMethodName, emptyMethodBody,
+		methodComments, packageComments)
+
+	assert.ElementsMatch(t, []string{"abstraction", "abstract", "absolute"}, got, fmt.Sprintf("found elements: %v", got))
 }

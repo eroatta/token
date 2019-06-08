@@ -65,8 +65,7 @@ func buildPrefixRegex(input string) string {
 	}
 
 	var builder strings.Builder
-	// TODO: review regexp starting char
-	builder.WriteRune('^')
+	builder.WriteString("\\b")
 	if input[0] == 'x' {
 		builder.WriteString("e?")
 	}
