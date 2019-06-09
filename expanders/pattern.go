@@ -137,7 +137,7 @@ func buildWordCombinationRegex(input string) string {
 		builder.WriteRune(letter)
 		builder.WriteString("[a-z]*?[ ]*?")
 	}
-	builder.WriteRune('$')
+	builder.WriteString("\\b")
 
 	return builder.String()
 }

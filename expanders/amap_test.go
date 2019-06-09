@@ -185,15 +185,19 @@ func TestMultiWordExpansion_OnAmap_ShouldReturnMatchingLongForms(t *testing.T) {
 		expected    []string
 	}{
 		{"match_acronym_on_variable_decl", "acronym", "jpf", []string{"json parser factory"}},
-		// {"match_acronym_on_method_name", "acronym", "jpb", []string{"jsonParserBuilder"}}, this will never match with the pattern
+		{"match_acronym_on_method_name", "acronym", "jpb", []string{"json parser builder"}},
 		{"match_acronym_on_method_body_text", "acronym", "ff", []string{"factory function"}},
 		{"match_acronym_on_method_comments", "acronym", "xml", []string{"extensible markup language"}},
 		{"match_acronym_on_package_comments", "acronym", "ftp", []string{"file transfer protocol"}},
-		//{"match_word-combination_on_variable_decl", "word-combination", "jsonpf", []string{"json parser factory"}},
+		{"match_word-combination_on_variable_decl", "word-combination", "jsonpf", []string{"json parser factory"}},
+		{"match_word-combination_on_method_name", "word-combination", "jpbder", []string{"json parser builder"}},
+		{"match_word-combination_on_method_body_text", "word-combination", "facfunc", []string{"factory function"}},
+		{"match_word-combination_on_method_comments", "word-combination", "xmlang", []string{"extensible markup language"}},
+		{"no_match_word-combination_skipped_package_comments", "word-combination", "filetp", []string{}},
 	}
 
-	variableDeclarations := []string{"json parser factory jpf"}
-	methodName := "jsonParserBuilder"
+	variableDeclarations := []string{"json parser factory jpf", "json parser factory jsonpf"}
+	methodName := "json parser builder"
 	methodBodyText := "factory function"
 	methodComments := "extensible markup language"
 	packageComments := "file transfer protocol enables file transfering between"
