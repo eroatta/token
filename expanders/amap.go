@@ -32,10 +32,9 @@ func (a Amap) Expand(token string) []string {
 	return []string{}
 }
 
-// singleWordExpansion looks for candidate long forms for a given pattern
+// singleWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
 func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
 	methodBodyText string, methodComments string, packageComments string) []string {
-
 	var longForms []string
 
 	// restricts the search to prefix or dropped letters to those short forms longer than 3 letters or
@@ -91,5 +90,55 @@ func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, 
 	}
 
 	// output: long form candidates
+	return longForms
+}
+
+// multiWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
+func (a Amap) multiWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
+	methodBodyText string, methodComments string, packageComments string) []string {
+	var longForms []string
+
+	if pttrn.kind == acronymType || len(pttrn.shortForm) > 3 {
+		// 9: Search TypeNames and corresponding declared variable names for “pattern sf”
+		matcher, _ := regexp.Compile(pttrn.regex + "[ ]" + pttrn.shortForm)
+		for _, v := range variableDeclarations {
+			if matcher.MatchString(v) {
+				// append only the matching name to the candidate expansions
+				longForms = append(longForms, strings.Split(v, " ")[0])
+			}
+		}
+		if len(longForms) == 1 {
+			return longForms
+		}
+
+		// 10: Search MethodName for “pattern”
+		matcher, _ = regexp.Compile(pttrn.regex)
+		if matcher.MatchString(methodName) {
+			longForms = append(longForms, methodName)
+			if len(longForms) == 1 {
+				return longForms
+			}
+		}
+
+		// 11: Search all identifiers in the method for “pattern” (ignored)
+
+		// 12: Search string literals for “pattern”
+		longForms = append(longForms, matcher.FindAllString(methodBodyText, -1)...)
+		if len(longForms) == 1 {
+			return longForms
+		}
+
+		// 13: Search method comment words for “pattern”
+		longForms = append(longForms, matcher.FindAllString(methodComments, -1)...)
+		if len(longForms) == 1 {
+			return longForms
+		}
+
+		// 15: If acronym, search class comment words for “pattern”
+		if pttrn.kind == acronymType {
+			longForms = append(longForms, matcher.FindAllString(packageComments, -1)...)
+		}
+	}
+
 	return longForms
 }

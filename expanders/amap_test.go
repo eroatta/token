@@ -150,3 +150,43 @@ func TestSingleWordExpansion_OnAmapWithPrefixPatternButNoSingleMatch_ShouldRetur
 
 	assert.ElementsMatch(t, []string{"abstraction", "abstract", "absolute"}, got, fmt.Sprintf("found elements: %v", got))
 }
+
+func TestMultiWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongForms(t *testing.T) {
+	variableDeclarations := []string{"cpol Carpool"}
+	methodName := "buildCarpool"
+	var emptyMethodBody, emptyMethodComments, emptyPackageComments string
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("acronym").shortForm("json").build()
+	got := amap.multiWordExpansion(pattern, variableDeclarations, methodName, emptyMethodBody,
+		emptyMethodComments, emptyPackageComments)
+
+	assert.Empty(t, got)
+}
+
+func TestSingleWordExpansion_OnAmapWithNotAcronymPatternButTooShortShortForm_ShouldReturnEmptyLongForms(t *testing.T) {
+	var emptyVariableDecls []string
+	var emptyMethodName, emptyMethodBody, emptyPackageComments string
+	possibleButSkippedMethodComments := "javascript notation"
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("word-combination").shortForm("jsn").build()
+	got := amap.multiWordExpansion(pattern, emptyVariableDecls, emptyMethodName, emptyMethodBody,
+		possibleButSkippedMethodComments, emptyPackageComments)
+
+	assert.Empty(t, got)
+}
+
+func TestMultiWordExpansion_OnAmapWithPrefixAcronymButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
+	var emptyVariableDecls []string
+	var emptyMethodName, emptyMethodBody string
+	methodComments := "abstraction for abstract syntax tree"
+	packageComments := "absolute"
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("acronym").shortForm("js").build()
+	got := amap.multiWordExpansion(pattern, emptyVariableDecls, emptyMethodName, emptyMethodBody,
+		methodComments, packageComments)
+
+	assert.ElementsMatch(t, []string{"abstraction", "abstract", "absolute"}, got, fmt.Sprintf("found elements: %v", got))
+}
