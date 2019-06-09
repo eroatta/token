@@ -104,7 +104,7 @@ func (a Amap) multiWordExpansion(pttrn pattern, variableDeclarations []string, m
 		for _, v := range variableDeclarations {
 			if matcher.MatchString(v) {
 				// append only the matching name to the candidate expansions
-				longForms = append(longForms, strings.Split(v, " ")[0])
+				longForms = append(longForms, strings.TrimSpace(strings.TrimSuffix(v, pttrn.shortForm)))
 			}
 		}
 		if len(longForms) == 1 {
