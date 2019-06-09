@@ -84,8 +84,8 @@ func TestBuild_OnPatternBuilderForWordCombination_ShouldReturnPatternWithRegex(t
 		shortForm     string
 		expectedRegex string
 	}{
-		{"regular_short_form", "pdef", "^p[a-z]*?[ ]*?d[a-z]*?[ ]*?e[a-z]*?[ ]*?f[a-z]*?[ ]*?\\b"},
-		{"starting_with_x_short_form", "xp", "^e?x[a-z]*?[ ]*?p[a-z]*?[ ]*?\\b"},
+		{"regular_short_form", "pdef", "\\bp[a-z]*?[ ]*?d[a-z]*?[ ]*?e[a-z]*?[ ]*?f[a-z]*?[ ]*?\\b"},
+		{"starting_with_x_short_form", "xp", "\\be?x[a-z]*?[ ]*?p[a-z]*?[ ]*?\\b"},
 		{"empty_short_form", "", ""},
 	}
 

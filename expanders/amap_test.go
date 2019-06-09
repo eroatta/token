@@ -215,7 +215,7 @@ func TestMultiWordExpansion_OnAmap_ShouldReturnMatchingLongForms(t *testing.T) {
 	}
 }
 
-func TestMultiWordExpansion_OnAmapWithPrefixAcronymButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
+func TestMultiWordExpansion_OnAmapWithAcronymPatternButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
 	var emptyVariableDecls []string
 	var emptyMethodName, emptyMethodBody string
 	methodComments := "java script define json source"
@@ -227,4 +227,18 @@ func TestMultiWordExpansion_OnAmapWithPrefixAcronymButNoSingleMatch_ShouldReturn
 		methodComments, packageComments)
 
 	assert.ElementsMatch(t, []string{"java script", "json source", "java script"}, got, fmt.Sprintf("found elements: %v", got))
+}
+
+func TestMultiWordExpansion_OnAmapWithWordCombinationPatternButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
+	var emptyVariableDecls []string
+	var emptyMethodName, emptyPackageComments string
+	methodBodyText := "java script is not a java scripting language"
+	methodComments := "java script define json source"
+
+	amap := NewAmap()
+	pattern := (&patternBuilder{}).kind("word-combination").shortForm("jspt").build()
+	got := amap.multiWordExpansion(pattern, emptyVariableDecls, emptyMethodName, methodBodyText,
+		methodComments, emptyPackageComments)
+
+	assert.ElementsMatch(t, []string{"java script", "java scripting", "java script"}, got, fmt.Sprintf("found elements: %v", got))
 }
