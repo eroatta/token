@@ -242,3 +242,43 @@ func TestMultiWordExpansion_OnAmapWithWordCombinationPatternButNoSingleMatch_Sho
 
 	assert.ElementsMatch(t, []string{"java script", "java scripting", "java script"}, got, fmt.Sprintf("found elements: %v", got))
 }
+
+func TestMostFrequentWord_WhenNoWords_ShouldReturnEmptyWord(t *testing.T) {
+	words := []string{}
+
+	mfw := mostFrequentWord(words)
+
+	assert.Equal(t, "", mfw)
+}
+
+func TestMostFrequentWord_WhenTwoRepeatedWords_ShouldReturnWord(t *testing.T) {
+	words := []string{"valid", "valid"}
+
+	mfw := mostFrequentWord(words)
+
+	assert.Equal(t, "valid", mfw)
+}
+
+func TestMostFrequentWord_WhenTwoRepeatedWordsAndAnotherWord_ShouldReturnRepeatedWord(t *testing.T) {
+	words := []string{"valid", "validate", "valid"}
+
+	mfw := mostFrequentWord(words)
+
+	assert.Equal(t, "valid", mfw)
+}
+
+func TestMostFrequentWord_WhenSeveralRepeatedWords_ShouldReturnMostFrequentWord(t *testing.T) {
+	words := []string{"valid", "validate", "valid", "valid", "validation", "validation"}
+
+	mfw := mostFrequentWord(words)
+
+	assert.Equal(t, "valid", mfw)
+}
+
+func TestMostFrequentWord_WhenSeveralRepeatedWordsWithNoWinningWord_ShouldReturnEmptyWord(t *testing.T) {
+	words := []string{"valid", "validate", "validation", "valid", "valid", "validation", "validation"}
+
+	mfw := mostFrequentWord(words)
+
+	assert.Equal(t, "", mfw)
+}
