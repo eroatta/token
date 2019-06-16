@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	porterstemmer "github.com/reiver/go-porterstemmer"
 )
 
 var consonants *regexp.Regexp
@@ -167,10 +169,20 @@ func (a Amap) multiWordExpansion(pttrn pattern, variableDeclarations []string, m
 // example, if a prefix pattern has already found long form
 // candidates, we avoid finding dropped letter long form candidates by halting the search for a given short form within
 // a method.
-func (a Amap) filterMultipleLongForms(longForms []string) []string {
+func (a Amap) filterMultipleLongForms(longForms []string) string {
 	// step 1: use the long form that most frequently matches the short form's pattern in this scope
+	mfw := mostFrequentWord(longForms)
+	if mfw != "" {
+		return mfw
+	}
 
-	return []string{}
+	// step 2: group words with the same stem
+	mfw = mostFrequentWord(stemmedWords(longForms))
+	if mfw != "" {
+		return mfw
+	}
+
+	return ""
 }
 
 func mostFrequentWord(words []string) string {
@@ -207,6 +219,15 @@ func mostFrequentWord(words []string) string {
 type wordCount struct {
 	key   string
 	value int
+}
+
+func stemmedWords(words []string) []string {
+	stemmedWords := make([]string, len(words))
+	for i, w := range words {
+		stemmedWords[i] = porterstemmer.StemString(w)
+	}
+
+	return stemmedWords
 }
 
 // most frequent expansion: match short form (using the same pattern) to the whole

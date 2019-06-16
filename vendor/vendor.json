@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "3WcaGOhrhzaql8dsRxKPosdwyJo=",
+			"path": "github.com/reiver/go-porterstemmer",
+			"revision": "ab0f922907ea0321367a5776bd7a6c35d505d53b",
+			"revisionTime": "2016-04-12T06:14:28Z"
+		}
+	],
+	"rootPath": "github.com/eroatta/token-splitex"
+}

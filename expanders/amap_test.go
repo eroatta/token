@@ -282,3 +282,20 @@ func TestMostFrequentWord_WhenSeveralRepeatedWordsWithNoWinningWord_ShouldReturn
 
 	assert.Equal(t, "", mfw)
 }
+
+func TestStemmedWords_WhenEmptyArray_ShouldReturnEmptyArray(t *testing.T) {
+	words := []string{}
+
+	stemmedWords := stemmedWords(words)
+
+	assert.Empty(t, stemmedWords)
+}
+
+func TestStemmedWords_WhenThreeWords_ShouldReturnThreeStemmedWords(t *testing.T) {
+	words := []string{"default", "defaults", "running"}
+
+	stemmedWords := stemmedWords(words)
+
+	assert.Equal(t, 3, len(stemmedWords))
+	assert.ElementsMatch(t, []string{"default", "default", "run"}, stemmedWords)
+}
