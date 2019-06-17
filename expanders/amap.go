@@ -182,6 +182,10 @@ func (a Amap) filterMultipleLongForms(longForms []string) string {
 		return mfw
 	}
 
+	// step 3: skipped, because we continue searching at broader levels if multiple matches are found
+
+	// step 4: use MFE
+
 	return ""
 }
 
@@ -232,3 +236,41 @@ func stemmedWords(words []string) []string {
 
 // most frequent expansion: match short form (using the same pattern) to the whole
 // program/packages
+func mostFrequentExpansion(pttrn pattern, text []string) string {
+	var totalMatches int
+	results := make(map[string]int, 0)
+
+	matcher, _ := regexp.Compile(pttrn.regex)
+	for _, t := range text {
+		matches := matcher.FindAllString(t, -1)
+		totalMatches += len(matches)
+
+		for _, match := range matches {
+			results[porterstemmer.StemString(match)]++
+		}
+	}
+
+	type relativeFreq struct {
+		word  string
+		value float64
+	}
+
+	relativeFrequencies := make([]relativeFreq, len(results))
+	for word, count := range results {
+		rf := float64(count) / float64(totalMatches)
+		if count >= 3 && rf > 0.5 {
+			relativeFrequencies = append(relativeFrequencies, relativeFreq{word: word, value: rf})
+		}
+	}
+
+	sort.Slice(relativeFrequencies, func(i, j int) bool {
+		return relativeFrequencies[i].value > relativeFrequencies[j].value
+	})
+
+	var mostFrequentExpansion string
+	if len(relativeFrequencies) > 0 {
+		mostFrequentExpansion = relativeFrequencies[0].word
+	}
+
+	return mostFrequentExpansion
+}

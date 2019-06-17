@@ -299,3 +299,24 @@ func TestStemmedWords_WhenThreeWords_ShouldReturnThreeStemmedWords(t *testing.T)
 	assert.Equal(t, 3, len(stemmedWords))
 	assert.ElementsMatch(t, []string{"default", "default", "run"}, stemmedWords)
 }
+
+func TestMostFrequentExpansion_WhenNoMatches_ShouldReturnEmptyWord(t *testing.T) {
+	pttrn := (&patternBuilder{}).kind("prefix").shortForm("val").build()
+	text := []string{"no matching expansion"}
+
+	mfe := mostFrequentExpansion(pttrn, text)
+
+	assert.Equal(t, "", mfe)
+}
+
+func TestMostFrequentExpansion_WhenRelativeFrequencyLessThanZeroFive_ShouldReturnEmptyWord(t *testing.T) {
+	assert.Fail(t, "not yet implemented")
+}
+
+func TestMostFrequentExpansion_WhenLessThanThreeMatches_ShouldReturnEmptyWord(t *testing.T) {
+	assert.Fail(t, "not yet implementd")
+}
+
+func TestMostFrequentExpansion_WhenExpansionFound_ShouldReturnExpansion(t *testing.T) {
+	assert.Fail(t, "not yet implemented")
+}
