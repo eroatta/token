@@ -310,13 +310,49 @@ func TestMostFrequentExpansion_WhenNoMatches_ShouldReturnEmptyWord(t *testing.T)
 }
 
 func TestMostFrequentExpansion_WhenRelativeFrequencyLessThanZeroFive_ShouldReturnEmptyWord(t *testing.T) {
-	assert.Fail(t, "not yet implemented")
+	pttrn := (&patternBuilder{}).kind("prefix").shortForm("val").build()
+	text := []string{
+		"big value",
+		"medium value",
+		"small value",
+		"very small value",
+		"check validation",
+		"review validation",
+		"check validity",
+		"review validity",
+	}
+
+	mfe := mostFrequentExpansion(pttrn, text)
+
+	assert.Equal(t, "", mfe)
 }
 
 func TestMostFrequentExpansion_WhenLessThanThreeMatches_ShouldReturnEmptyWord(t *testing.T) {
-	assert.Fail(t, "not yet implementd")
+	pttrn := (&patternBuilder{}).kind("prefix").shortForm("val").build()
+	text := []string{
+		"big value",
+		"another value",
+	}
+
+	mfe := mostFrequentExpansion(pttrn, text)
+
+	assert.Equal(t, "", mfe)
 }
 
 func TestMostFrequentExpansion_WhenExpansionFound_ShouldReturnExpansion(t *testing.T) {
-	assert.Fail(t, "not yet implemented")
+	pttrn := (&patternBuilder{}).kind("prefix").shortForm("val").build()
+	text := []string{
+		"big value",
+		"medium value",
+		"small value",
+		"very small value",
+		"tiny value",
+		"check validation",
+		"review validation",
+		"check validity",
+	}
+
+	mfe := mostFrequentExpansion(pttrn, text)
+
+	assert.Equal(t, "value", mfe)
 }

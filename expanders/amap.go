@@ -246,7 +246,7 @@ func mostFrequentExpansion(pttrn pattern, text []string) string {
 		totalMatches += len(matches)
 
 		for _, match := range matches {
-			results[porterstemmer.StemString(match)]++
+			results[match]++
 		}
 	}
 
