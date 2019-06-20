@@ -24,17 +24,16 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 		token    string
 		expected []string
 	}{
-		// TODO: review
-		{"no_expansion", "noExpansion", []string{}},
+		{"skipped", "ex", []string{}},
 	}
 
 	amap := NewAmap()
+	amap.methodBodyText = "expansion"
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
 			got := amap.Expand(fixture.token)
 
 			assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
-			assert.Fail(t, "not yet implemented")
 		})
 	}
 }

@@ -55,29 +55,33 @@ func (a Amap) Expand(token string) []string {
 	var expansion string
 	for _, pttrn := range patterns {
 		var longForms []string
-		longForms = a.singleWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
-			methodComments, packageComments)
-		if len(longForms) == 1 {
-			expansion = longForms[0]
-			break
-		}
+		if pttrn.group == singleWordGroup {
+			longForms = a.singleWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
+				methodComments, packageComments)
+			if len(longForms) == 1 {
+				expansion = longForms[0]
+				break
+			}
 
-		if len(longForms) > 1 {
-			expansion = a.filterMultipleLongForms(pttrn, longForms)
-			break
+			if len(longForms) > 1 {
+				expansion = a.filterMultipleLongForms(pttrn, longForms)
+				break
+			}
 		}
 
 		// TODO: change how to apply a pattern
-		longForms = a.multiWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
-			methodComments, packageComments)
-		if len(longForms) == 1 {
-			expansion = longForms[0]
-			break
-		}
+		if pttrn.group == multiWordGroup {
+			longForms = a.multiWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
+				methodComments, packageComments)
+			if len(longForms) == 1 {
+				expansion = longForms[0]
+				break
+			}
 
-		if len(longForms) > 1 {
-			expansion = a.filterMultipleLongForms(pttrn, longForms)
-			break
+			if len(longForms) > 1 {
+				expansion = a.filterMultipleLongForms(pttrn, longForms)
+				break
+			}
 		}
 	}
 
