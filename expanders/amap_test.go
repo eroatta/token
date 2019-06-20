@@ -7,8 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewAmap_ShouldReturnNewAmapInstance(t *testing.T) {
-	assert.Fail(t, "not yet implemented")
+func TestNewAmap_ShouldReturnNewAmapInstanceWithEmptyProperties(t *testing.T) {
+	amap := NewAmap()
+
+	assert.Empty(t, amap.variableDeclarations)
+	assert.Equal(t, "", amap.methodName)
+	assert.Equal(t, "", amap.methodBodyText)
+	assert.Equal(t, "", amap.methodComments)
+	assert.Equal(t, "", amap.packageComments)
+	assert.Empty(t, amap.text)
 }
 
 func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {

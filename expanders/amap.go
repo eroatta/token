@@ -18,6 +18,12 @@ func init() {
 
 // Amap represents an Automatically Mining Abbreviations in Programs expander.
 type Amap struct {
+	variableDeclarations []string
+	methodName           string
+	methodBodyText       string
+	methodComments       string
+	packageComments      string
+	text                 []string
 }
 
 // NewAmap creates an AMAP expander.
@@ -32,7 +38,55 @@ func NewAmap() *Amap {
 // expansions. AMAP is capable of select the more appropiate expansions based on available
 // information on the given context.
 func (a Amap) Expand(token string) []string {
-	return []string{}
+	patterns := []pattern{
+		(&patternBuilder{}).kind(acronymType).shortForm(token).build(),
+		(&patternBuilder{}).kind(prefixType).shortForm(token).build(),
+		(&patternBuilder{}).kind(droppedLettersType).shortForm(token).build(),
+		(&patternBuilder{}).kind(wordCombinationType).shortForm(token).build(),
+	}
+
+	// TODO: refactor
+	varDeclarations := a.variableDeclarations
+	methodName := a.methodName
+	methodBodyText := a.methodBodyText
+	methodComments := a.methodComments
+	packageComments := a.packageComments
+
+	var expansion string
+	for _, pttrn := range patterns {
+		var longForms []string
+		longForms = a.singleWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
+			methodComments, packageComments)
+		if len(longForms) == 1 {
+			expansion = longForms[0]
+			break
+		}
+
+		if len(longForms) > 1 {
+			expansion = a.filterMultipleLongForms(pttrn, longForms)
+			break
+		}
+
+		// TODO: change how to apply a pattern
+		longForms = a.multiWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
+			methodComments, packageComments)
+		if len(longForms) == 1 {
+			expansion = longForms[0]
+			break
+		}
+
+		if len(longForms) > 1 {
+			expansion = a.filterMultipleLongForms(pttrn, longForms)
+			break
+		}
+	}
+
+	var expansions []string
+	if expansion != "" {
+		expansions = append(expansions, expansion)
+	}
+
+	return expansions
 }
 
 // singleWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
@@ -169,7 +223,7 @@ func (a Amap) multiWordExpansion(pttrn pattern, variableDeclarations []string, m
 // example, if a prefix pattern has already found long form
 // candidates, we avoid finding dropped letter long form candidates by halting the search for a given short form within
 // a method.
-func (a Amap) filterMultipleLongForms(longForms []string) string {
+func (a Amap) filterMultipleLongForms(pttrn pattern, longForms []string) string {
 	// step 1: use the long form that most frequently matches the short form's pattern in this scope
 	mfw := mostFrequentWord(longForms)
 	if mfw != "" {
@@ -185,8 +239,9 @@ func (a Amap) filterMultipleLongForms(longForms []string) string {
 	// step 3: skipped, because we continue searching at broader levels if multiple matches are found
 
 	// step 4: use MFE
+	mfw = mostFrequentExpansion(pttrn, a.text)
 
-	return ""
+	return mfw
 }
 
 func mostFrequentWord(words []string) string {
@@ -234,8 +289,8 @@ func stemmedWords(words []string) []string {
 	return stemmedWords
 }
 
-// most frequent expansion: match short form (using the same pattern) to the whole
-// program/packages
+// mostFrequentExpansion calculates the most frequent expansion based on the number of matches
+// between the short form and the given text.
 func mostFrequentExpansion(pttrn pattern, text []string) string {
 	var totalMatches int
 	results := make(map[string]int, 0)
