@@ -313,6 +313,15 @@ func TestStemmedWords_WhenThreeWords_ShouldReturnThreeStemmedWords(t *testing.T)
 	assert.ElementsMatch(t, []string{"default", "default", "run"}, stemmedWords)
 }
 
+func TestStemmedWord_WhenCombinedWords_ShouldReturnEachWordStemmed(t *testing.T) {
+	words := []string{"graphical user interface"}
+
+	stemmedWords := stemmedWords(words)
+
+	assert.Equal(t, 1, len(stemmedWords))
+	assert.ElementsMatch(t, []string{"graphic user interfac"}, stemmedWords)
+}
+
 func TestMostFrequentExpansion_WhenNoMatches_ShouldReturnEmptyWord(t *testing.T) {
 	pttrn := (&patternBuilder{}).kind("prefix").shortForm("val").build()
 	text := []string{"no matching expansion"}

@@ -269,7 +269,11 @@ type wordCount struct {
 func stemmedWords(words []string) []string {
 	stemmedWords := make([]string, len(words))
 	for i, w := range words {
-		stemmedWords[i] = porterstemmer.StemString(w)
+		var sw string
+		for _, c := range strings.Split(w, " ") {
+			sw += " " + porterstemmer.StemString(c)
+		}
+		stemmedWords[i] = strings.TrimSpace(sw)
 	}
 
 	return stemmedWords
