@@ -64,7 +64,7 @@ func (a Amap) Expand(token string) []string {
 			}
 
 			if len(longForms) > 1 {
-				expansion = a.filterMultipleLongForms(pttrn, longForms)
+				expansion = a.findMostFrequentLongForm(pttrn, longForms)
 				break
 			}
 		}
@@ -79,7 +79,7 @@ func (a Amap) Expand(token string) []string {
 			}
 
 			if len(longForms) > 1 {
-				expansion = a.filterMultipleLongForms(pttrn, longForms)
+				expansion = a.findMostFrequentLongForm(pttrn, longForms)
 				break
 			}
 		}
@@ -204,30 +204,12 @@ func (a Amap) multiWordExpansion(pttrn pattern, variableDeclarations []string, m
 	return longForms
 }
 
-// filterMultipleLongForms handles the TODO
-// Step 1. Use the long form that most frequently matches the
-// short form’s pattern in this scope. For example, if ‘value’
-// matched the prefix pattern for ‘val’ three times and ‘valid’
-// only once, return ‘value’.
-// Step 2. Group words with the same stem [15] and update
-// the frequencies accordingly. For example, if the words ‘default’ (2 matches), ‘defaults’ (2 matches), and ‘define’ (2
-// matches) all match the prefix pattern for ‘def’, group ‘default’ and ‘defaults’ to be the shortest long form, ‘default’
-// (4 matches), and return the long form with the highest frequency.
-// Step 3. If there is still no clear winner, continue searching
-// for the pattern at broader scope levels. For example, if both
-// ‘string buffer’ and ‘sound byte’ match the acronym pattern
-// for ‘sb’ at the method identifier level, continue to search for
-// the acronym pattern in string literals and comments. We
-// store the frequencies of the tied long forms so that the most
-// frequently occurring long form candidates are favored when
-// searching the broader scope.
-// Step 4. If all else fails, abandon the search and let MFE
-// select the long form. At this point we stop searching for
-// long form candidates of different abbreviation types. For
-// example, if a prefix pattern has already found long form
-// candidates, we avoid finding dropped letter long form candidates by halting the search for a given short form within
-// a method.
-func (a Amap) filterMultipleLongForms(pttrn pattern, longForms []string) string {
+// findMostFrequentLongForm selects a long form between the available long forms.
+// The process follows several steps. On the first step, it uses the long form that most frequently matches the
+// short form’s pattern in this scope.
+// On the second step, words with the same stem are grouped and the frequencies updated accordingly.
+// Finally, if the previous steps fail, the MFE process is used.
+func (a Amap) findMostFrequentLongForm(pttrn pattern, longForms []string) string {
 	// step 1: use the long form that most frequently matches the short form's pattern in this scope
 	mfw := mostFrequentWord(longForms)
 	if mfw != "" {
