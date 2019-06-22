@@ -24,11 +24,18 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 		token    string
 		expected []string
 	}{
-		{"skipped", "ex", []string{}},
+		{"long_form_found_using_prefix_pattern", "exp", []string{"expansion"}},
+		{"long_form_found_using_dropped_letter_pattern", "expnsn", []string{"expansion"}},
+		{"long_form_found_using_acronym_pattern", "gui", []string{"graphical user interface"}},
+		{"long_form_found_using_word_combination_pattern", "cdrdr", []string{"card reader"}},
+		{"long_form_found_handling_multiple_matches", "int", []string{"interface"}},
+		{"short_from_skipped_during_validation", "ex", []string{}},
 	}
 
 	amap := NewAmap()
-	amap.methodBodyText = "expansion"
+	amap.methodBodyText = "expansion interface interfacing interface interfaces"
+	amap.methodComments = "providing graphical user interface for Linux, setting a card reader implementation"
+	amap.packageComments = "provides a card reader implementation"
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
 			got := amap.Expand(fixture.token)
