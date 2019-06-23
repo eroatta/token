@@ -102,7 +102,6 @@ func buildAcronymRegex(input string) string {
 	}
 
 	var builder strings.Builder
-	// TODO: review regexp starting char
 	builder.WriteRune('(')
 	if input[0] == 'x' {
 		builder.WriteString("e?")
