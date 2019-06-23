@@ -36,8 +36,8 @@ func TestBuild_OnPatternBuilderForDroppedLetters_ShouldReturnPatternWithRegex(t 
 		shortForm     string
 		expectedRegex string
 	}{
-		{"regular_short_form", "arg", "^a[a-z]*r[a-z]*g[a-z]*"},
-		{"starting_with_x_short_form", "xt", "^e?x[a-z]*t[a-z]*"},
+		{"regular_short_form", "arg", "\\ba[a-z]*r[a-z]*g[a-z]*"},
+		{"starting_with_x_short_form", "xt", "\\be?x[a-z]*t[a-z]*"},
 		{"empty_short_form", "", ""},
 	}
 
