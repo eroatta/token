@@ -8,12 +8,19 @@ import (
 	porterstemmer "github.com/reiver/go-porterstemmer"
 )
 
+type searchExpansion func(pattern, []string, string, string, string, string) []string
+
 var consonants *regexp.Regexp
 var manyVowels *regexp.Regexp
+var searchers map[string]searchExpansion
 
 func init() {
 	consonants, _ = regexp.Compile("[a-z][^aeiou]+")
 	manyVowels, _ = regexp.Compile("[a-z][aeiou][aeiou]+")
+	searchers = map[string]searchExpansion{
+		singleWordGroup: searchSingleWordExpansion,
+		multiWordGroup:  searchMultiWordExpansion,
+	}
 }
 
 // Amap represents an Automatically Mining Abbreviations in Programs expander.
@@ -54,34 +61,17 @@ func (a Amap) Expand(token string) []string {
 
 	var expansion string
 	for _, pttrn := range patterns {
-		var longForms []string
-		if pttrn.group == singleWordGroup {
-			longForms = a.singleWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
-				methodComments, packageComments)
-			if len(longForms) == 1 {
-				expansion = longForms[0]
-				break
-			}
-
-			if len(longForms) > 1 {
-				expansion = a.findMostFrequentLongForm(pttrn, longForms)
-				break
-			}
+		search := searchers[pttrn.group]
+		longForms := search(pttrn, varDeclarations, methodName, methodBodyText,
+			methodComments, packageComments)
+		if len(longForms) == 1 {
+			expansion = longForms[0]
+			break
 		}
 
-		// TODO: change how to apply a pattern
-		if pttrn.group == multiWordGroup {
-			longForms = a.multiWordExpansion(pttrn, varDeclarations, methodName, methodBodyText,
-				methodComments, packageComments)
-			if len(longForms) == 1 {
-				expansion = longForms[0]
-				break
-			}
-
-			if len(longForms) > 1 {
-				expansion = a.findMostFrequentLongForm(pttrn, longForms)
-				break
-			}
+		if len(longForms) > 1 {
+			expansion = a.findMostFrequentLongForm(pttrn, longForms)
+			break
 		}
 	}
 
@@ -93,8 +83,8 @@ func (a Amap) Expand(token string) []string {
 	return expansions
 }
 
-// singleWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
-func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
+// searchSingleWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
+func searchSingleWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
 	methodBodyText string, methodComments string, packageComments string) []string {
 	var longForms []string
 
@@ -154,8 +144,8 @@ func (a Amap) singleWordExpansion(pttrn pattern, variableDeclarations []string, 
 	return longForms
 }
 
-// multiWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
-func (a Amap) multiWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
+// searchMultiWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
+func searchMultiWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
 	methodBodyText string, methodComments string, packageComments string) []string {
 	var longForms []string
 
