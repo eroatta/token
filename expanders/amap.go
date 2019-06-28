@@ -58,6 +58,7 @@ func (a Amap) Expand(token string) []string {
 	methodBodyText := a.methodBodyText
 	methodComments := a.methodComments
 	packageComments := a.packageComments
+	referenceText := a.text
 
 	var expansion string
 	for _, pttrn := range patterns {
@@ -70,7 +71,7 @@ func (a Amap) Expand(token string) []string {
 		}
 
 		if len(longForms) > 1 {
-			expansion = a.findMostFrequentLongForm(pttrn, longForms)
+			expansion = findMostFrequentLongForm(pttrn, longForms, referenceText)
 			break
 		}
 	}
@@ -199,7 +200,7 @@ func searchMultiWordExpansion(pttrn pattern, variableDeclarations []string, meth
 // short form’s pattern in this scope.
 // On the second step, words with the same stem are grouped and the frequencies updated accordingly.
 // Finally, if the previous steps fail, the MFE process is used.
-func (a Amap) findMostFrequentLongForm(pttrn pattern, longForms []string) string {
+func findMostFrequentLongForm(pttrn pattern, longForms []string, referenceText []string) string {
 	// step 1: use the long form that most frequently matches the short form's pattern in this scope
 	mfw := mostFrequentWord(longForms)
 	if mfw != "" {
@@ -215,7 +216,7 @@ func (a Amap) findMostFrequentLongForm(pttrn pattern, longForms []string) string
 	// step 3: skipped, because we continue searching at broader levels if multiple matches are found
 
 	// step 4: use MFE
-	mfw = mostFrequentExpansion(pttrn, a.text)
+	mfw = mostFrequentExpansion(pttrn, referenceText)
 
 	return mfw
 }
