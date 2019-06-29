@@ -26,10 +26,7 @@ func TestSplit_OnConserv_ShouldReturnValidSplits(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got, err := Split(c.token)
-		if err != nil {
-			assert.Fail(t, "we shouldn't get any errors at this point", err)
-		}
+		got := Split(c.token)
 
 		assert.Equal(t, c.expected, got, "elements should match in number and order")
 	}
