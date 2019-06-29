@@ -22,7 +22,7 @@ The following lists show the supported algorithms.
 
 A token can be splitted calling the splitting function: conserv.Split(token)
 
-```golang
+```go
 package main
 
 import (
@@ -34,6 +34,6 @@ import (
 func main() {
     splitted := conserv.Split("httpResponse")
 
-    fmt.Println(splitted) //[http response]
+    fmt.Println(splitted) // [http response]
 }
 ```
