@@ -18,10 +18,22 @@ The following lists show the supported algorithms.
 
 ## Usage
 
-Every splitting algorithm implements a `Splitter` interface, which defines the required contract for an algorithm.
-
 ### Conserv
 
-A new Conserv splitter can be created using: NewConserv().
-
 A token can be splitted calling the splitting function: conserv.Split(token)
+
+```golang
+package main
+
+import (
+    "fmt"
+
+    "github.com/eroatta/token-splitex/conserv
+)
+
+func main() {
+    splitted := conserv.Split("httpResponse")
+
+    fmt.Println(splitted) //[http response]
+}
+```
