@@ -6,6 +6,51 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewListBuilder_ShouldReturnListBuilder(t *testing.T) {
+	got := NewListBuilder()
+
+	assert.NotNil(t, got, "ListBuilder shouldn't be nil")
+}
+
+func TestBuild_OnListBuilder_ShouldIncludeProvidedWords(t *testing.T) {
+	type args struct {
+		dicc       []string
+		knownAbbrs []string
+		stopList   []string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		token string
+		want  bool
+	}{
+		{"empty_list", args{}, "any", false},
+		// TODO: add more test cases
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			builder := NewListBuilder()
+			if tt.args.dicc != nil && len(tt.args.dicc) > 0 {
+				builder.Dicctionary(tt.args.dicc)
+			}
+
+			if tt.args.knownAbbrs != nil && len(tt.args.knownAbbrs) > 0 {
+				builder.Dicctionary(tt.args.knownAbbrs)
+			}
+
+			if tt.args.stopList != nil && len(tt.args.stopList) > 0 {
+				builder.Dicctionary(tt.args.stopList)
+			}
+
+			list := builder.Build()
+			got := list.Contains(tt.token)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 	tests := []struct {
 		name  string
