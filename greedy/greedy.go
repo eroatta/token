@@ -1,10 +1,5 @@
-// Package greedy. Esta técnica utiliza un diccionario, una lista de abreviaturas conocidas
-// y una lista de corte, la cual incluye identificadores predefinidos, librerías, funciones,
-// nombres de variables comunes y letras individuales.
-// Después de retornar cada hard word encontrada en alguna de las tres listas,
-// como una soft word simple, el resto de las hard words se consideran para división.
-// A partir de ahí, recursivamente, se analizan los sufijos y prefijos de las palabras
-// hasta que se encuentren en alguna de las listas, prefiriendo siempre las palabras de mayor longitud.
+// Package greedy declares the functions and list builders for splitting a token using the
+// Greedy algorithm.
 package greedy
 
 import (
@@ -30,8 +25,9 @@ func init() {
 		Build()
 }
 
-// List TODO
+// List declares the contract for a list.
 type List interface {
+	// Contains checks if a word is contained on the list.
 	Contains(string) bool
 }
 
@@ -43,11 +39,15 @@ func (l list) Contains(element string) bool {
 	return l.elements[strings.ToLower(element)]
 }
 
-// ListBuilder TODO
+// ListBuilder is used to identify and set the lists that are used while processing a token with the Greedy algorithm.
 type ListBuilder interface {
+	// Dicctionary sets the dicctionary words.
 	Dicctionary([]string) ListBuilder
+	// KnownAbbreviations sets the list of common and known abbreviations.
 	KnownAbbreviations([]string) ListBuilder
+	// StopList sets the stop list words and expressions.
 	StopList([]string) ListBuilder
+	// Build creates a list with all the given lists.
 	Build() List
 }
 
@@ -95,8 +95,12 @@ func (lb *listBuilder) Build() List {
 	}
 }
 
-// Split on Greedy receives a token and returns an array of hard/soft words,
-// split by the Greedy algorithm proposed by TODO.
+// Split on Greedy receives a token and returns an array of hard and soft words,
+// split by the Greedy algorithm proposed by Field, Binkley and Lawrie.
+// This technique splits a token into hard words and checks for a greedy splitting those hard words
+// that cannot be matched to any word on the list.
+// The process evaluates prefixes and suffixes recursively until any of them are found on the list,
+// prefering longer words.
 func Split(token string, list List) []string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
@@ -106,9 +110,9 @@ func Split(token string, list List) []string {
 		if list.Contains(s) {
 			splitToken = append(splitToken, s)
 		} else {
-			preffixSplittings := marker.SplitBy(findPreffix(s, "", list))
+			preffixSplittings := marker.SplitBy(findPrefix(s, "", list))
 			suffixSplittings := marker.SplitBy(findSuffix(s, "", list))
-			chosenSplittings := compare(preffixSplittings, suffixSplittings, list)
+			chosenSplittings := chooseSplittings(preffixSplittings, suffixSplittings, list)
 
 			splitToken = append(splitToken, chosenSplittings...)
 		}
@@ -117,27 +121,27 @@ func Split(token string, list List) []string {
 	return splitToken
 }
 
-// findPreffix looks for the longest preffix that exists on any list.
-// If the token exists on any list, the process continues to look for the longest
-// preffix within the remaining token. If not, then the process continues the search
+// findPrefix looks for the longest prefix exinsting on the list.
+// If the token exists on the list, the process continues to look for the longest
+// prefix within the remaining token. If not, then the process continues the search
 // with a smaller token.
-func findPreffix(token string, splitToken string, list List) string {
+func findPrefix(token string, splitToken string, list List) string {
 	if len(token) == 0 {
 		return splitToken
 	}
 
 	if list.Contains(token) {
-		return token + "_" + findPreffix(splitToken, "", list)
+		return token + "_" + findPrefix(splitToken, "", list)
 	}
 
 	sToken := string(token[len(token)-1]) + splitToken
 	s := token[:len(token)-1]
 
-	return findPreffix(s, sToken, list)
+	return findPrefix(s, sToken, list)
 }
 
-// findSuffix looks for the longest suffix that exists on any list.
-// If the token exists on any list, the process continues to look for the longest
+// findSuffix looks for the longest suffix existing on the list.
+// If the token exists on the list, the process continues to look for the longest
 // suffix within the remaining token. If not, the the process continues the search
 // with a smaller token.
 func findSuffix(token string, splitToken string, list List) string {
@@ -155,10 +159,9 @@ func findSuffix(token string, splitToken string, list List) string {
 	return findSuffix(s, sToken, list)
 }
 
-// Compare calculates the ratio between found words on any list and
-// the total number of splittings. The string with the highest ratio
-// is chosen as the proper splitting.
-func compare(preffixSplittings []string, suffixSplittings []string, list List) []string {
+// chooseSplittings calculates the ratio between found words on the list and
+// the total number of splittings and chooses the proper splitting.
+func chooseSplittings(preffixSplittings []string, suffixSplittings []string, list List) []string {
 	if inListRatio(preffixSplittings, list) > inListRatio(suffixSplittings, list) {
 		return preffixSplittings
 	}
@@ -167,7 +170,7 @@ func compare(preffixSplittings []string, suffixSplittings []string, list List) [
 }
 
 // inListRatio calculates the ratio between the total words
-// passed as parameter vs. the total of those words found on any list.
+// passed as parameter vs. the total of those words found the list.
 func inListRatio(words []string, list List) float64 {
 	found := 0
 	for _, word := range words {
