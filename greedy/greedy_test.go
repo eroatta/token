@@ -25,7 +25,10 @@ func TestBuild_OnListBuilder_ShouldIncludeProvidedWords(t *testing.T) {
 		want  bool
 	}{
 		{"empty_list", args{}, "any", false},
-		// TODO: add more test cases
+		{"with_dicctionary", args{dicc: []string{"dicc"}}, "dicc", true},
+		{"with_known_abbrvs", args{knownAbbrs: []string{"known"}}, "known", true},
+		{"with_stoplist", args{stopList: []string{"case"}}, "case", true},
+		{"merged_list", args{dicc: []string{"merged"}, knownAbbrs: []string{"merged"}, stopList: []string{"merged"}}, "merged", true},
 	}
 
 	for _, tt := range tests {
@@ -77,9 +80,9 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 }
 
 func BenchmarkGreedySplitting(b *testing.B) {
-	/*emtpyList := make(map[string]interface{})
-	greedy := NewGreedy(&emtpyList, &emtpyList, &emtpyList)
+	dicc := []string{"get", "string", "gps", "state", "ast", "visitor", "no", "type"}
+	list := NewListBuilder().Dicctionary(dicc).Build()
 	for i := 0; i < b.N; i++ {
-		Split("spongebob_squarePants", *greedy)
-	}*/
+		Split("GPSstate", list)
+	}
 }
