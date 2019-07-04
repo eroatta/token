@@ -5,6 +5,7 @@ package greedy
 import (
 	"strings"
 
+	"github.com/eroatta/token-splitex/lists"
 	"github.com/eroatta/token-splitex/marker"
 )
 
@@ -17,11 +18,10 @@ var defaultStopList map[string]interface{}
 var DefaultList List
 
 func init() {
-	var empty []string
 	DefaultList = NewListBuilder().
-		Dicctionary(empty).
-		KnownAbbreviations(empty).
-		StopList(empty).
+		Dicctionary(lists.Dicctionary).
+		KnownAbbreviations(lists.KnownAbbreviations).
+		StopList(lists.Stop).
 		Build()
 }
 
