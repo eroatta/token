@@ -39,11 +39,11 @@ func TestBuild_OnListBuilder_ShouldIncludeProvidedWords(t *testing.T) {
 			}
 
 			if tt.args.knownAbbrs != nil && len(tt.args.knownAbbrs) > 0 {
-				builder.Dicctionary(tt.args.knownAbbrs)
+				builder.KnownAbbreviations(tt.args.knownAbbrs)
 			}
 
 			if tt.args.stopList != nil && len(tt.args.stopList) > 0 {
-				builder.Dicctionary(tt.args.stopList)
+				builder.StopList(tt.args.stopList)
 			}
 
 			list := builder.Build()
