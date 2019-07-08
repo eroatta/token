@@ -50,6 +50,7 @@ import (
     "fmt"
 
     "github.com/eroatta/token-splitex/greedy"
+    "github.com/eroatta/token-splitex/lists"
 )
 
 func main() {
