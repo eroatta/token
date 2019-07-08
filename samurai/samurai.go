@@ -9,61 +9,28 @@ import (
 	"github.com/eroatta/token-splitex/lists"
 )
 
-// TODO: remove
-var defaultLocalFreqTable FrequencyTable
-var defaultGlobalFreqTable FrequencyTable
 var cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
 
-// Samurai represents the Samurai splitting algorithm, proposed by Hill et all.
-type Samurai struct {
-	localFreqTable  *FrequencyTable
-	globalFreqTable *FrequencyTable
-	prefixes        lists.List
-	suffixes        lists.List
+// TokenContext holds the local and global frequency tables in the context of a given token.
+type TokenContext struct {
+	localFT  *FrequencyTable
+	globalFT *FrequencyTable
 }
 
-// NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
-// tables are provided, the default tables are used.
-func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes lists.List, suffixes lists.List) *Samurai {
-	local := &defaultLocalFreqTable
-	if localFreqTable != nil {
-		local = localFreqTable
-	}
+// Score calculates the score for a string based on how frequently a word
+// appears in the program under analysis and in a more global scope of a large set of programs.
+func (ctx TokenContext) Score(word string) float64 {
+	freqS := ctx.localFT.Frequency(word)
+	globalFreqS := ctx.globalFT.Frequency(word)
+	allStrsFreqP := float64(ctx.localFT.TotalOccurrences())
 
-	global := &defaultGlobalFreqTable
-	if globalFreqTable != nil {
-		global = globalFreqTable
-	}
-
-	var commonPrefixes lists.List
-	commonPrefixes = emptyList{}
-	if prefixes != nil {
-		commonPrefixes = prefixes
-	}
-
-	var commonSuffixes lists.List
-	commonSuffixes = emptyList{}
-	if suffixes != nil {
-		commonSuffixes = suffixes
-	}
-
-	return &Samurai{
-		localFreqTable:  local,
-		globalFreqTable: global,
-		prefixes:        commonPrefixes,
-		suffixes:        commonSuffixes,
-	}
-}
-
-type emptyList struct{}
-
-func (e emptyList) Contains(token string) bool {
-	return false
+	// Freq(s,p) + (globalFreq(s) / log_10 (AllStrsFreq(p))
+	return freqS + globalFreqS/math.Log10(allStrsFreqP)
 }
 
 // Split on Samurai receives a token and returns an array of hard/soft words,
 // split by the Samurai algorithm proposed by Hill et all.
-func (s *Samurai) Split(token string) ([]string, error) {
+func Split(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.List) []string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(token)
 
@@ -76,12 +43,12 @@ func (s *Samurai) Split(token string) ([]string, error) {
 
 			var camelScore float64
 			if i > 0 {
-				camelScore = s.score(word[i:n])
+				camelScore = tCtx.Score(word[i:n])
 			} else {
-				camelScore = s.score(word[0:n])
+				camelScore = tCtx.Score(word[0:n])
 			}
 
-			altCamelScore := s.score(word[i+1 : n])
+			altCamelScore := tCtx.Score(word[i+1 : n])
 			if camelScore > math.Sqrt(altCamelScore) {
 				if i > 0 {
 					word = word[0:i-1] + "_" + word[i:n]
@@ -96,14 +63,14 @@ func (s *Samurai) Split(token string) ([]string, error) {
 
 	splitToken := make([]string, 0, 10)
 	for _, word := range marker.SplitBy(preprocessedToken) {
-		sameCaseSplitting := s.sameCaseSplit(word, s.score(word))
+		sameCaseSplitting := sameCaseSplit(word, tCtx, prefixes, suffixes, tCtx.Score(word))
 		splitToken = append(splitToken, sameCaseSplitting...)
 	}
 
-	return splitToken, nil
+	return splitToken
 }
 
-func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
+func sameCaseSplit(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.List, baseScore float64) []string {
 	maxScore := -1.0
 
 	splitToken := []string{token}
@@ -111,21 +78,21 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 
 	for i := 0; i < n; i++ {
 		left := token[0:i]
-		scoreLeft := s.score(left)
-		shouldSplitLeft := math.Sqrt(scoreLeft) > math.Max(s.score(token), baseScore)
+		scoreLeft := tCtx.Score(left)
+		shouldSplitLeft := math.Sqrt(scoreLeft) > math.Max(tCtx.Score(token), baseScore)
 
 		right := token[i:n]
-		scoreRight := s.score(right)
-		shouldSplitRight := math.Sqrt(scoreRight) > math.Max(s.score(token), baseScore)
+		scoreRight := tCtx.Score(right)
+		shouldSplitRight := math.Sqrt(scoreRight) > math.Max(tCtx.Score(token), baseScore)
 
-		isPreffixOrSuffix := s.isPrefix(left) || s.isSuffix(right)
+		isPreffixOrSuffix := prefixes.Contains(left) || suffixes.Contains(right)
 		if !isPreffixOrSuffix && shouldSplitLeft && shouldSplitRight {
 			if (scoreLeft + scoreRight) > maxScore {
 				maxScore = scoreLeft + scoreRight
 				splitToken = []string{left, right}
 			}
 		} else if !isPreffixOrSuffix && shouldSplitLeft {
-			temp := s.sameCaseSplit(right, baseScore)
+			temp := sameCaseSplit(right, tCtx, prefixes, suffixes, baseScore)
 			if len(temp) > 1 {
 				splitToken = []string{left}
 				splitToken = append(splitToken, temp...)
@@ -134,25 +101,4 @@ func (s *Samurai) sameCaseSplit(token string, baseScore float64) []string {
 	}
 
 	return splitToken
-}
-
-// score calculates the score for a string based on how frequently a word
-// appears in the program under analysis and in a more global scope of a large set of programs.
-func (s *Samurai) score(word string) float64 {
-	freqS := s.localFreqTable.Frequency(word)
-	globalFreqS := s.globalFreqTable.Frequency(word)
-	allStrsFreqP := float64(s.localFreqTable.TotalOccurrences())
-
-	// Freq(s,p) + (globalFreq(s) / log_10 (AllStrsFreq(p))
-	return freqS + globalFreqS/math.Log10(allStrsFreqP)
-}
-
-// isPrefix checks if the current token is found on a list of common prefixes.
-func (s *Samurai) isPrefix(token string) bool {
-	return s.prefixes.Contains(token)
-}
-
-// isSuffix checks if the current token is found on a list of common suffixes.
-func (s *Samurai) isSuffix(token string) bool {
-	return s.suffixes.Contains(token)
 }
