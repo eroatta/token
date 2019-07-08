@@ -3,43 +3,38 @@ package samurai
 import (
 	"testing"
 
+	"github.com/eroatta/token-splitex/lists"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSamurai_WithNilTables_ShouldReturnDefaultTables(t *testing.T) {
-	samurai := NewSamurai(nil, nil, nil, nil)
-
-	assert.NotNil(t, samurai.localFreqTable, "the local frequency table should be using a default table")
-	assert.NotNil(t, samurai.globalFreqTable, "the global frequency table should be using a default table")
-	assert.NotNil(t, samurai.prefixes, "the common prefixes set should be using a default set")
-	assert.NotNil(t, samurai.suffixes, "the common suffixes set should be using a default set")
-}
-
-func TestSplit_OnSamurai_ShouldReturnValidSplits(t *testing.T) {
-	cases := []struct {
-		ID       int
-		token    string
-		expected []string
+func TestSplit_ShouldReturnValidSplits(t *testing.T) {
+	tests := []struct {
+		name  string
+		token string
+		want  []string
 	}{
-		{0, "car", []string{"car"}},
-		{1, "getString", []string{"get", "String"}},
-		{2, "GPSstate", []string{"GPS", "state"}},
-		{3, "ASTVisitor", []string{"AST", "Visitor"}},
-		{4, "notype", []string{"no", "type"}},
-		{5, "astnotype", []string{"ast", "no", "type"}},
+		{"no_split", "car", []string{"car"}},
+		{"by_lower_to_upper_case", "getString", []string{"get", "String"}},
+		{"by_upper_to_lower_case", "GPSstate", []string{"GPS", "state"}},
+		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", []string{"AST", "Visitor"}},
+		{"lowercase_softword", "notype", []string{"no", "type"}},
+		{"multiple_lowercase_softword", "astnotype", []string{"ast", "no", "type"}},
 	}
 
-	freqTable := createTestFrequencyTable()
-	globalFreqTable := createTestGlobalFrequencyTable()
-	// TODO: use prefixes and suffixes
-	samurai := NewSamurai(freqTable, globalFreqTable, nil, nil)
-	for _, c := range cases {
-		got, err := samurai.Split(c.token)
-		if err != nil {
-			assert.Fail(t, "we shouldn't get any errors at this point", err)
-		}
+	tCtx := TokenContext{
+		localFT:  createTestFrequencyTable(),
+		globalFT: createTestGlobalFrequencyTable(),
+	}
 
-		assert.Equal(t, c.expected, got, "elements should match in number and order for identifier number")
+	var prefixes lists.List
+	var suffixes lists.List
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Split(tt.token, tCtx, prefixes, suffixes)
+
+			assert.Equal(t, tt.want, got, "elements should match in number and order")
+		})
 	}
 }
 
@@ -83,12 +78,16 @@ func createTestGlobalFrequencyTable() *FrequencyTable {
 }
 
 func BenchmarkSamuraiSplitting(b *testing.B) {
-	freqTable := createTestFrequencyTable()
-	globalFreqTable := createTestGlobalFrequencyTable()
+	tCtx := TokenContext{
+		localFT:  createTestFrequencyTable(),
+		globalFT: createTestGlobalFrequencyTable(),
+	}
 
-	// TODO: use prefixes and suffixes
-	samurai := NewSamurai(freqTable, globalFreqTable, nil, nil)
+	var prefixes lists.List
+	var suffixes lists.List
+
+	// TODO: complete
 	for i := 0; i < b.N; i++ {
-		samurai.Split("notype")
+		Split("notype", tCtx, prefixes, suffixes)
 	}
 }
