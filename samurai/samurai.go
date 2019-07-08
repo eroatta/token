@@ -1,28 +1,33 @@
-package splitters
+package samurai
 
 import (
 	"math"
 	"regexp"
 
-	"github.com/eroatta/token-splitex/lists"
+	"github.com/eroatta/token-splitex/marker"
 
-	"github.com/deckarep/golang-set"
+	"github.com/eroatta/token-splitex/lists"
 )
 
 var defaultLocalFreqTable FrequencyTable
 var defaultGlobalFreqTable FrequencyTable
+var cutLocationRegex *regexp.Regexp
+
+func init() {
+	cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
+}
 
 // Samurai represents the Samurai splitting algorithm, proposed by Hill et all.
 type Samurai struct {
 	localFreqTable  *FrequencyTable
 	globalFreqTable *FrequencyTable
-	prefixes        mapset.Set
-	suffixes        mapset.Set
+	prefixes        lists.List
+	suffixes        lists.List
 }
 
 // NewSamurai creates a new Samurai splitter with the provided frequency tables. If no frequency
 // tables are provided, the default tables are used.
-func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes mapset.Set, suffixes mapset.Set) *Samurai {
+func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable, prefixes lists.List, suffixes lists.List) *Samurai {
 	local := &defaultLocalFreqTable
 	if localFreqTable != nil {
 		local = localFreqTable
@@ -33,12 +38,14 @@ func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable,
 		global = globalFreqTable
 	}
 
-	commonPrefixes := lists.Prefixes
+	var commonPrefixes lists.List
+	commonPrefixes = emptyList{}
 	if prefixes != nil {
 		commonPrefixes = prefixes
 	}
 
-	commonSuffixes := lists.Suffixes
+	var commonSuffixes lists.List
+	commonSuffixes = emptyList{}
 	if suffixes != nil {
 		commonSuffixes = suffixes
 	}
@@ -51,16 +58,20 @@ func NewSamurai(localFreqTable *FrequencyTable, globalFreqTable *FrequencyTable,
 	}
 }
 
+type emptyList struct{}
+
+func (e emptyList) Contains(token string) bool {
+	return false
+}
+
 // Split on Samurai receives a token and returns an array of hard/soft words,
 // split by the Samurai algorithm proposed by Hill et all.
 func (s *Samurai) Split(token string) ([]string, error) {
-	preprocessedToken := addMarkersOnDigits(token)
-	preprocessedToken = addMarkersOnLowerToUpperCase(preprocessedToken)
-
-	cutLocationRegex := regexp.MustCompile("[A-Z][a-z]")
+	preprocessedToken := marker.OnDigits(token)
+	preprocessedToken = marker.OnLowerToUpperCase(token)
 
 	var processedToken string
-	for _, word := range splitOnMarkers(preprocessedToken) {
+	for _, word := range marker.SplitBy(preprocessedToken) {
 		cutLocation := cutLocationRegex.FindStringIndex(word)
 		if len(word) > 1 && cutLocation != nil {
 			n := len(word) - 1
@@ -87,7 +98,7 @@ func (s *Samurai) Split(token string) ([]string, error) {
 	}
 
 	splitToken := make([]string, 0, 10)
-	for _, word := range splitOnMarkers(preprocessedToken) {
+	for _, word := range marker.SplitBy(preprocessedToken) {
 		sameCaseSplitting := s.sameCaseSplit(word, s.score(word))
 		splitToken = append(splitToken, sameCaseSplitting...)
 	}

@@ -1,4 +1,4 @@
-package splitters
+package samurai
 
 import (
 	"errors"

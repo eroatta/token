@@ -1,9 +1,8 @@
-package splitters
+package samurai
 
 import (
 	"testing"
 
-	"github.com/eroatta/token-splitex/lists"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,7 +31,8 @@ func TestSplit_OnSamurai_ShouldReturnValidSplits(t *testing.T) {
 
 	freqTable := createTestFrequencyTable()
 	globalFreqTable := createTestGlobalFrequencyTable()
-	samurai := NewSamurai(freqTable, globalFreqTable, lists.Prefixes, lists.Suffixes)
+	// TODO: use prefixes and suffixes
+	samurai := NewSamurai(freqTable, globalFreqTable, nil, nil)
 	for _, c := range cases {
 		got, err := samurai.Split(c.token)
 		if err != nil {
@@ -86,7 +86,8 @@ func BenchmarkSamuraiSplitting(b *testing.B) {
 	freqTable := createTestFrequencyTable()
 	globalFreqTable := createTestGlobalFrequencyTable()
 
-	samurai := NewSamurai(freqTable, globalFreqTable, lists.Prefixes, lists.Suffixes)
+	// TODO: use prefixes and suffixes
+	samurai := NewSamurai(freqTable, globalFreqTable, nil, nil)
 	for i := 0; i < b.N; i++ {
 		samurai.Split("notype")
 	}
