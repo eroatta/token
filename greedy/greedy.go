@@ -9,21 +9,12 @@ import (
 	"github.com/eroatta/token-splitex/marker"
 )
 
-var defaultDictionary map[string]interface{}
-var defaultKnownAbbreviations map[string]interface{}
-var defaultStopList map[string]interface{}
-
 // DefaultList contains the words included on the default configuration for Greedy,
 // defined on Field, Binkley and Lawrie's paper.
-var DefaultList List
-
-func init() {
-	DefaultList = NewListBuilder().
-		Dicctionary(lists.Dicctionary).
-		KnownAbbreviations(lists.KnownAbbreviations).
-		StopList(lists.Stop).
-		Build()
-}
+var DefaultList = NewListBuilder().Dicctionary(lists.Dicctionary).
+	KnownAbbreviations(lists.KnownAbbreviations).
+	StopList(lists.Stop).
+	Build()
 
 // List declares the contract for a list.
 type List interface {

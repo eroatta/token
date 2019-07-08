@@ -9,13 +9,10 @@ import (
 	"github.com/eroatta/token-splitex/lists"
 )
 
+// TODO: remove
 var defaultLocalFreqTable FrequencyTable
 var defaultGlobalFreqTable FrequencyTable
-var cutLocationRegex *regexp.Regexp
-
-func init() {
-	cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
-}
+var cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
 
 // Samurai represents the Samurai splitting algorithm, proposed by Hill et all.
 type Samurai struct {

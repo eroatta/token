@@ -5,17 +5,12 @@ import (
 	"strings"
 )
 
-var leadingNumRegex *regexp.Regexp
-var trailingNumRegex *regexp.Regexp
-var lowerToUpperRegex *regexp.Regexp
-var upperToLowerRegex *regexp.Regexp
-
-func init() {
-	leadingNumRegex = regexp.MustCompile("([a-zA-Z])([0-9])")
-	trailingNumRegex = regexp.MustCompile("([0-9])([a-zA-Z])")
+var (
+	leadingNumRegex   = regexp.MustCompile("([a-zA-Z])([0-9])")
+	trailingNumRegex  = regexp.MustCompile("([0-9])([a-zA-Z])")
 	lowerToUpperRegex = regexp.MustCompile("([a-z])([A-Z])")
 	upperToLowerRegex = regexp.MustCompile("([A-Z]+)([A-Z])([a-z])")
-}
+)
 
 // OnDigits applies markers between letters and numbers, and also between numbers
 // and letters. The default marker is the underscore character.
