@@ -40,5 +40,5 @@ func OnUpperToLowerCase(token string) string {
 
 // SplitBy splits the given token by its markers.
 func SplitBy(token string) []string {
-	return strings.Split(token, "_")
+	return strings.Split(strings.Trim(token, "_"), "_")
 }
