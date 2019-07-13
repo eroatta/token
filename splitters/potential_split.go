@@ -3,6 +3,8 @@ package splitters
 import (
 	"sort"
 	"strings"
+
+	"github.com/eroatta/token-splitex/marker"
 )
 
 // potentialSplit represents a GenTest potential split. It holds data related to the split, the softwords
@@ -29,7 +31,7 @@ type expansion struct {
 func newPotentialSplit(hardword string) potentialSplit {
 	var softwords []softword
 	if hardword != "" {
-		for _, word := range splitOnMarkers(hardword) {
+		for _, word := range marker.SplitBy(hardword) {
 			softwords = append(softwords, softword{
 				word:       word,
 				expansions: make([]expansion, 0),

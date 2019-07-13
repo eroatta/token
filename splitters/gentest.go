@@ -4,6 +4,8 @@ import (
 	"math"
 	"regexp"
 	"strings"
+
+	"github.com/eroatta/token-splitex/marker"
 )
 
 const (
@@ -59,11 +61,11 @@ type SimCalculator interface {
 //
 // The potential split with the highest score is the selected split.
 func (g *GenTest) Split(token string) ([]string, error) {
-	preprocessedToken := addMarkersOnDigits(token)
-	preprocessedToken = addMarkersOnLowerToUpperCase(preprocessedToken)
+	preprocessedToken := marker.OnDigits(token)
+	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
 
 	splitToken := make([]string, 0, 10)
-	for _, tok := range splitOnMarkers(preprocessedToken) {
+	for _, tok := range marker.SplitBy(preprocessedToken) {
 		// discard one letter tokens and dictionary words
 		if len(tok) == 1 || (g.dicctionary)[strings.ToLower(tok)] != nil {
 			splitToken = append(splitToken, tok)
@@ -101,7 +103,7 @@ func (g *GenTest) Split(token string) ([]string, error) {
 		}
 
 		tokenBestSplit := findBestSplit(potentialSplits)
-		splitToken = append(splitToken, splitOnMarkers(tokenBestSplit.split)...)
+		splitToken = append(splitToken, marker.SplitBy(tokenBestSplit.split)...)
 	}
 
 	return splitToken, nil
@@ -209,7 +211,7 @@ func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, inde
 // An average is used to avoid biasing the results toward excesive splitting.
 func (g *GenTest) score(split potentialSplit) float64 {
 	var expansionsScore float64
-	expandedWords := splitOnMarkers(split.bestExpansion())
+	expandedWords := marker.SplitBy(split.bestExpansion())
 	for i, w1 := range expandedWords {
 		var wordScore float64
 		// add expansions similarities
