@@ -36,7 +36,9 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		"no-type":     0.8564,
 		"no-typo":     0.0001,
 	}
-	context := []string{"none", "no", "never", "nine", "type", "typeset", "typhoon", "tire", "car", "boo", "foo"}
+	context := lists.NewBuilder().
+		Add("none", "no", "never", "nine", "type", "typeset").
+		Add("typhoon", "tire", "car", "boo", "foo").Build()
 	genTest := NewGenTest(simCalculatorMock, context, dicc)
 
 	for _, c := range cases {
@@ -79,10 +81,11 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 		{"blankspace_input", " ", []string{}},
 	}
 
+	emptyContext := lists.NewBuilder().Build()
 	dicc := lists.NewBuilder().
 		Add("car", "string", "steer", "set", "riflemen", "lender", "bar", "length", "kamikaze").Build()
 
-	gentest := NewGenTest(nil, []string{}, dicc)
+	gentest := NewGenTest(nil, emptyContext, dicc)
 	for _, fixture := range tests {
 		t.Run(fixture.name, func(t *testing.T) {
 			got := gentest.findExpansions(fixture.input)
@@ -93,8 +96,9 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 }
 
 func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
+	emptyContext := lists.NewBuilder().Build()
 	emptyDicc := lists.NewBuilder().Build()
-	genTest := NewGenTest(nil, []string{}, emptyDicc)
+	genTest := NewGenTest(nil, emptyContext, emptyDicc)
 
 	got := genTest.similarityScore("car", "car")
 
@@ -105,8 +109,9 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 	simCalculatorMock := simCalculatorMock{
 		"car-wheel": 0.8211,
 	}
+	emptyContext := lists.NewBuilder().Build()
 	emptyDicc := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock, []string{}, emptyDicc)
+	genTest := NewGenTest(simCalculatorMock, emptyContext, emptyDicc)
 
 	got := genTest.similarityScore("car", "wheel")
 
@@ -115,8 +120,9 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 }
 
 func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
+	emptyContext := lists.NewBuilder().Build()
 	emptyDicc := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock{}, []string{}, emptyDicc)
+	genTest := NewGenTest(simCalculatorMock{}, emptyContext, emptyDicc)
 
 	got := genTest.similarityScore("disco", "egypt")
 
@@ -132,8 +138,9 @@ func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
 		},
 	}
 
+	emptyContext := lists.NewBuilder().Build()
 	emptyDicc := lists.NewBuilder().Build()
-	genTest := NewGenTest(nil, []string{}, emptyDicc)
+	genTest := NewGenTest(nil, emptyContext, emptyDicc)
 	got := genTest.score(split)
 
 	assert.Equal(t, 0.0, got)
@@ -151,8 +158,9 @@ func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
 	simCalculatorMock := simCalculatorMock{
 		"length-string": 0.9123,
 	}
+	emptyContext := lists.NewBuilder().Build()
 	emptyDicc := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock, []string{}, emptyDicc)
+	genTest := NewGenTest(simCalculatorMock, emptyContext, emptyDicc)
 
 	got := genTest.score(split)
 
@@ -173,8 +181,9 @@ func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
 		"length-string":        0.9123,
 		"concatenation-string": 0.8912,
 	}
+	context := lists.NewBuilder().Add("concatenation").Build()
 	emptyDicc := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock, []string{"concatenation"}, emptyDicc)
+	genTest := NewGenTest(simCalculatorMock, context, emptyDicc)
 
 	got := genTest.score(split)
 

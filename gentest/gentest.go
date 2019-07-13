@@ -16,7 +16,7 @@ const (
 // GenTest represents a Generation and Test splitting algorithm, proposed by Lawrie, Binkley and Morrell.
 type GenTest struct {
 	simCalculator      SimCalculator
-	context            []string
+	context            lists.List
 	dicctionary        lists.List
 	possibleExpansions string
 }
@@ -25,7 +25,7 @@ type GenTest struct {
 //
 // GenTest requires a similarity calculator, a set of words known as "context information"
 // and a dicctionary.
-func NewGenTest(sc SimCalculator, ctx []string, dicc lists.List) *GenTest {
+func NewGenTest(sc SimCalculator, ctx lists.List, dicc lists.List) *GenTest {
 	return &GenTest{
 		simCalculator:      sc,
 		context:            ctx,
@@ -195,7 +195,7 @@ func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, inde
 	}
 
 	// add context cohesion
-	for _, contextWord := range g.context {
+	for _, contextWord := range g.context.Elements() {
 		cohesion += g.similarityScore(expansion, contextWord)
 	}
 
@@ -220,7 +220,7 @@ func (g *GenTest) score(split potentialSplit) float64 {
 		}
 
 		// add context similarities
-		for _, contextWord := range g.context {
+		for _, contextWord := range g.context.Elements() {
 			wordScore += g.similarityScore(w1, contextWord)
 		}
 
@@ -228,7 +228,7 @@ func (g *GenTest) score(split potentialSplit) float64 {
 	}
 
 	n := float64(len(split.softwords))
-	c := float64(len(g.context))
+	c := float64(g.context.Size())
 
 	return expansionsScore / (n * (n + c))
 }
