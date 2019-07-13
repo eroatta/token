@@ -1,4 +1,4 @@
-package splitters
+package gentest
 
 import "strings"
 
