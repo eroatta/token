@@ -39,11 +39,11 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 	context := lists.NewBuilder().
 		Add("none", "no", "never", "nine", "type", "typeset").
 		Add("typhoon", "tire", "car", "boo", "foo").Build()
-	genTest := NewGenTest(simCalculatorMock, context)
+	genTest := NewGenTest(simCalculatorMock)
 	expansionsSet := NewExpansions(dicc)
 
 	for _, c := range cases {
-		got := Split(c.token, genTest, expansionsSet)
+		got := Split(c.token, genTest, context, expansionsSet)
 
 		assert.Equal(t, c.expected, got, "elements should match in number and order for identifier number")
 	}
@@ -96,8 +96,7 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 }
 
 func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
-	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(nil, emptyContext)
+	genTest := NewGenTest(nil)
 
 	got := genTest.similarityScore("car", "car")
 
@@ -108,8 +107,7 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 	simCalculatorMock := simCalculatorMock{
 		"car-wheel": 0.8211,
 	}
-	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock, emptyContext)
+	genTest := NewGenTest(simCalculatorMock)
 
 	got := genTest.similarityScore("car", "wheel")
 
@@ -118,8 +116,7 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 }
 
 func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
-	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock{}, emptyContext)
+	genTest := NewGenTest(simCalculatorMock{})
 
 	got := genTest.similarityScore("disco", "egypt")
 
@@ -136,8 +133,8 @@ func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
 	}
 
 	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(nil, emptyContext)
-	got := genTest.score(split)
+	genTest := NewGenTest(nil)
+	got := genTest.score(split, emptyContext.Elements())
 
 	assert.Equal(t, 0.0, got)
 }
@@ -155,9 +152,9 @@ func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
 		"length-string": 0.9123,
 	}
 	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock, emptyContext)
+	genTest := NewGenTest(simCalculatorMock)
 
-	got := genTest.score(split)
+	got := genTest.score(split, emptyContext.Elements())
 
 	expected := (math.Log(0.9123) + math.Log(0.9123)) / (2.0 * (2.0 + 0.0))
 	assert.Equal(t, expected, got)
@@ -177,9 +174,9 @@ func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
 		"concatenation-string": 0.8912,
 	}
 	context := lists.NewBuilder().Add("concatenation").Build()
-	genTest := NewGenTest(simCalculatorMock, context)
+	genTest := NewGenTest(simCalculatorMock)
 
-	got := genTest.score(split)
+	got := genTest.score(split, context.Elements())
 
 	expected := (math.Log(0.9123) + math.Log(0.8912) + math.Log(0.9123) + math.Log(closeToZeroProbability)) / (2.0 * (2.0 + 1.0))
 	assert.Equal(t, expected, got)

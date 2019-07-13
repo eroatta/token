@@ -16,7 +16,6 @@ const (
 // GenTest represents a Generation and Test splitting algorithm, proposed by Lawrie, Binkley and Morrell.
 type GenTest struct {
 	simCalculator SimCalculator
-	context       lists.List
 }
 
 // Expansions represents a set of possible expansions stored in a convenient format.
@@ -37,10 +36,9 @@ func NewExpansions(list lists.List) *Expansions {
 //
 // GenTest requires a similarity calculator, a set of words known as "context information"
 // and a dicctionary.
-func NewGenTest(sc SimCalculator, ctx lists.List) *GenTest {
+func NewGenTest(sc SimCalculator) *GenTest {
 	return &GenTest{
 		simCalculator: sc,
-		context:       ctx,
 	}
 }
 
@@ -66,7 +64,9 @@ type SimCalculator interface {
 // with the rest of the expansions on every softword belonging to the same potential split.
 //
 // The potential split with the highest score is the selected split.
-func Split(token string, g *GenTest, expansionsSet *Expansions) []string {
+func Split(token string, g *GenTest, context lists.List, expansionsSet *Expansions) []string {
+	contextWords := context.Elements()
+
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
 
@@ -97,13 +97,13 @@ func Split(token string, g *GenTest, expansionsSet *Expansions) []string {
 			// of the softwords on the potential split
 			for i := 0; i < len(pSplit.softwords); i++ {
 				for j := 0; j < len(pSplit.softwords[i].expansions); j++ {
-					cohesion := g.cohesion(pSplit, pSplit.softwords[i].expansions[j].translation, i)
+					cohesion := g.cohesion(pSplit, pSplit.softwords[i].expansions[j].translation, i, contextWords)
 					pSplit.softwords[i].expansions[j].cohesion = cohesion
 				}
 			}
 
-			// calculate the score
-			pSplit.score = g.score(pSplit)
+			// calculate the score considering the context too
+			pSplit.score = g.score(pSplit, contextWords)
 
 			potentialSplits = append(potentialSplits, pSplit)
 		}
@@ -192,7 +192,8 @@ func (g *GenTest) similarityScore(word string, anotherWord string) float64 {
 
 // cohesion computes the similarity score between an expansion and the other soft words on the potential splittings
 // list, but for the same word (k not i).
-func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, index int) (cohesion float64) {
+func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, index int, context []string) float64 {
+	var cohesion float64
 	for i, softword := range potentialSplit.softwords {
 		if index == i {
 			continue
@@ -205,7 +206,7 @@ func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, inde
 	}
 
 	// add context cohesion
-	for _, contextWord := range g.context.Elements() {
+	for _, contextWord := range context {
 		cohesion += g.similarityScore(expansion, contextWord)
 	}
 
@@ -215,7 +216,7 @@ func (g *GenTest) cohesion(potentialSplit potentialSplit, expansion string, inde
 // score calculates the score for a split. The score is the average similarities computed over all
 // of pairs of expanded words and each expanded word paired with each context word.
 // An average is used to avoid biasing the results toward excesive splitting.
-func (g *GenTest) score(split potentialSplit) float64 {
+func (g *GenTest) score(split potentialSplit, context []string) float64 {
 	var expansionsScore float64
 	expandedWords := marker.SplitBy(split.bestExpansion())
 	for i, w1 := range expandedWords {
@@ -230,7 +231,7 @@ func (g *GenTest) score(split potentialSplit) float64 {
 		}
 
 		// add context similarities
-		for _, contextWord := range g.context.Elements() {
+		for _, contextWord := range context {
 			wordScore += g.similarityScore(w1, contextWord)
 		}
 
@@ -238,7 +239,7 @@ func (g *GenTest) score(split potentialSplit) float64 {
 	}
 
 	n := float64(len(split.softwords))
-	c := float64(g.context.Size())
+	c := float64(len(context))
 
 	return expansionsScore / (n * (n + c))
 }
