@@ -11,18 +11,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
-	cases := []struct {
-		ID       int
-		token    string
-		expected []string
+func TestSplit_ShouldReturnValidSplits(t *testing.T) {
+	tests := []struct {
+		name  string
+		token string
+		want  []string
 	}{
-		{0, "car", []string{"car"}},
-		{1, "getString", []string{"get", "String"}},
-		{2, "GPSstate", []string{"GPS", "state"}},
-		{3, "ASTVisitor", []string{"AST", "Visitor"}},
-		{4, "notype", []string{"no", "type"}},
-		{5, "type_notype", []string{"type", "no", "type"}},
+		{"no_split", "car", []string{"car"}},
+		{"by_lower_to_upper_case", "getString", []string{"get", "String"}},
+		{"by_upper_to_lower_case", "GPSstate", []string{"GPS", "state"}},
+		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", []string{"AST", "Visitor"}},
+		{"lowercase_softword", "notype", []string{"no", "type"}},
+		{"with_markers_and_lowercase", "type_notype", []string{"type", "no", "type"}},
 	}
 
 	dicc := lists.NewBuilder().
@@ -41,37 +41,42 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		Add("typhoon", "tire", "car", "boo", "foo").Build()
 	expansionsSet := NewExpansions(dicc)
 
-	for _, c := range cases {
-		got := Split(c.token, similarityCalculatorMock, context, expansionsSet)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Split(tt.token, similarityCalculatorMock, context, expansionsSet)
 
-		assert.Equal(t, c.expected, got, "elements should match in number and order for identifier number")
+			assert.Equal(t, tt.want, got, "elements should match in number and order")
+		})
 	}
 }
 
 func TestGeneratePotentialSplits_ShouldReturnEveryPossibleCombination(t *testing.T) {
-	cases := []struct {
-		token    string
-		expected []string
+	tests := []struct {
+		name  string
+		token string
+		want  []string
 	}{
-		{"car", []string{"car", "c_ar", "c_a_r", "ca_r"}},
-		{"bond", []string{"bond", "b_ond", "b_o_nd", "b_on_d", "bo_nd", "bo_n_d", "bon_d"}},
+		{"car_token", "car", []string{"car", "c_ar", "c_a_r", "ca_r"}},
+		{"bond_token", "bond", []string{"bond", "b_ond", "b_o_nd", "b_on_d", "bo_nd", "bo_n_d", "bon_d"}},
 	}
 
-	for _, c := range cases {
-		var got []string
-		for _, potentialSplit := range generatePotentialSplits(c.token) {
-			got = append(got, potentialSplit.split)
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got []string
+			for _, potentialSplit := range generatePotentialSplits(tt.token) {
+				got = append(got, potentialSplit.split)
+			}
 
-		assert.ElementsMatch(t, c.expected, got, "elements should match")
+			assert.ElementsMatch(t, tt.want, got, "elements should match")
+		})
 	}
 }
 
-func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testing.T) {
+func TestFindExpansions_ShouldReturnAllMatches(t *testing.T) {
 	tests := []struct {
-		name       string
-		input      string
-		expansions []string
+		name  string
+		input string
+		want  []string
 	}{
 		{"input_st", "st", []string{"string", "steer", "set"}},
 		{"input_rlen", "rlen", []string{}},
@@ -85,102 +90,87 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 		Add("car", "string", "steer", "set", "riflemen", "lender", "bar", "length", "kamikaze").Build()
 	expansionsSet := NewExpansions(dicc)
 
-	for _, fixture := range tests {
-		t.Run(fixture.name, func(t *testing.T) {
-			got := findExpansions(fixture.input, expansionsSet)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := findExpansions(tt.input, expansionsSet)
 
-			assert.ElementsMatch(t, fixture.expansions, got, fmt.Sprintf("found elements: %v", got))
+			assert.ElementsMatch(t, tt.want, got, fmt.Sprintf("found elements: %v", got))
 		})
 	}
 }
 
-func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
-	got := similarityScore(nil, "car", "car")
+func TestSimilarityScore_ShouldReturnSimilarity(t *testing.T) {
+	tests := []struct {
+		name          string
+		simCalculator similarityCalculatorMock
+		word1         string
+		word2         string
+		want          float64
+	}{
+		{"equal_words", nil, "car", "car", float64(0)},
+		{"high_probability", similarityCalculatorMock{"car-wheel": 0.8211}, "car", "wheel", math.Log(0.8211)},
+		{"no_probability", similarityCalculatorMock{}, "disco", "egypt", math.Log(closeToZeroProbability)},
+	}
 
-	assert.Equal(t, float64(0), got)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := similarityScore(tt.simCalculator, tt.word1, tt.word2)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }
 
-func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
-	similarityCalculatorMock := similarityCalculatorMock{
-		"car-wheel": 0.8211,
+func TestScore_ShouldReturnSimilarity(t *testing.T) {
+	tests := []struct {
+		name          string
+		split         potentialSplit
+		simCalculator similarityCalculatorMock
+		context       []string
+		want          float64
+	}{
+		{"one_word_and_no_context",
+			potentialSplit{
+				split: "bar",
+				softwords: []softword{
+					{"bar", []expansion{{"bar", 1.2345}}},
+				}},
+			similarityCalculatorMock{},
+			[]string{},
+			0.0},
+		{"two_words_and_no_context", potentialSplit{
+			split: "str_len",
+			softwords: []softword{
+				{"str", []expansion{{"string", 2.3432}}},
+				{"len", []expansion{{"length", 2.0011}}},
+			}},
+			similarityCalculatorMock{"length-string": 0.9123},
+			[]string{},
+			(math.Log(0.9123) + math.Log(0.9123)) / (2.0 * (2.0 + 0.0))},
+		{"two_words_and_context",
+			potentialSplit{
+				split: "str_len",
+				softwords: []softword{
+					{"str", []expansion{{"string", 2.3432}}},
+					{"len", []expansion{{"length", 2.0011}}},
+				},
+			}, similarityCalculatorMock{
+				"length-string":        0.9123,
+				"concatenation-string": 0.8912},
+			[]string{"concatenation"},
+			(math.Log(0.9123) + math.Log(0.8912) + math.Log(0.9123) + math.Log(closeToZeroProbability)) / (2.0 * (2.0 + 1.0))},
 	}
 
-	got := similarityScore(similarityCalculatorMock, "car", "wheel")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			simFunc := func(w1 string, w2 string) float64 {
+				return similarityScore(tt.simCalculator, w1, w2)
+			}
+			got := score(simFunc, tt.split, tt.context)
 
-	expected := math.Log(0.8211)
-	assert.Equal(t, expected, got)
-}
-
-func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
-	got := similarityScore(similarityCalculatorMock{}, "disco", "egypt")
-
-	expected := math.Log(closeToZeroProbability)
-	assert.Equal(t, expected, got)
-}
-
-func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
-	split := potentialSplit{
-		split: "bar",
-		softwords: []softword{
-			{"bar", []expansion{{"bar", 1.2345}}},
-		},
+			assert.Equal(t, tt.want, got)
+		})
 	}
-
-	emptyContext := lists.NewBuilder().Build()
-	simFunc := func(w1 string, w2 string) float64 {
-		return similarityScore(similarityCalculatorMock{}, w1, w2)
-	}
-
-	got := score(simFunc, split, emptyContext.Elements())
-
-	assert.Equal(t, 0.0, got)
-}
-
-func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
-	split := potentialSplit{
-		split: "str_len",
-		softwords: []softword{
-			{"str", []expansion{{"string", 2.3432}}},
-			{"len", []expansion{{"length", 2.0011}}},
-		},
-	}
-
-	similarityCalculatorMock := similarityCalculatorMock{
-		"length-string": 0.9123,
-	}
-	emptyContext := lists.NewBuilder().Build()
-	simFunc := func(w1 string, w2 string) float64 {
-		return similarityScore(similarityCalculatorMock, w1, w2)
-	}
-
-	got := score(simFunc, split, emptyContext.Elements())
-
-	expected := (math.Log(0.9123) + math.Log(0.9123)) / (2.0 * (2.0 + 0.0))
-	assert.Equal(t, expected, got)
-}
-
-func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
-	split := potentialSplit{
-		split: "str_len",
-		softwords: []softword{
-			{"str", []expansion{{"string", 2.3432}}},
-			{"len", []expansion{{"length", 2.0011}}},
-		},
-	}
-
-	similarityCalculatorMock := similarityCalculatorMock{
-		"length-string":        0.9123,
-		"concatenation-string": 0.8912,
-	}
-	context := lists.NewBuilder().Add("concatenation").Build()
-	simFunc := func(w1 string, w2 string) float64 {
-		return similarityScore(similarityCalculatorMock, w1, w2)
-	}
-
-	got := score(simFunc, split, context.Elements())
-
-	expected := (math.Log(0.9123) + math.Log(0.8912) + math.Log(0.9123) + math.Log(closeToZeroProbability)) / (2.0 * (2.0 + 1.0))
-	assert.Equal(t, expected, got)
 }
 
 // mocks
