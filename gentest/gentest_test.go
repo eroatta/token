@@ -28,7 +28,7 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 	dicc := lists.NewBuilder().
 		Add("car", "get", "string", "no", "not", "notary", "type", "typo").Build()
 
-	simCalculatorMock := simCalculatorMock{
+	similarityCalculatorMock := similarityCalculatorMock{
 		"car-gps":     0.9999,
 		"gps-status":  0.9999,
 		"state-tire":  0.9001,
@@ -39,11 +39,10 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 	context := lists.NewBuilder().
 		Add("none", "no", "never", "nine", "type", "typeset").
 		Add("typhoon", "tire", "car", "boo", "foo").Build()
-	genTest := NewGenTest(simCalculatorMock)
 	expansionsSet := NewExpansions(dicc)
 
 	for _, c := range cases {
-		got := Split(c.token, genTest, context, expansionsSet)
+		got := Split(c.token, similarityCalculatorMock, context, expansionsSet)
 
 		assert.Equal(t, c.expected, got, "elements should match in number and order for identifier number")
 	}
@@ -96,29 +95,24 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 }
 
 func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
-	genTest := NewGenTest(nil)
-
-	got := genTest.similarityScore("car", "car")
+	got := similarityScore(nil, "car", "car")
 
 	assert.Equal(t, float64(0), got)
 }
 
 func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
-	simCalculatorMock := simCalculatorMock{
+	similarityCalculatorMock := similarityCalculatorMock{
 		"car-wheel": 0.8211,
 	}
-	genTest := NewGenTest(simCalculatorMock)
 
-	got := genTest.similarityScore("car", "wheel")
+	got := similarityScore(similarityCalculatorMock, "car", "wheel")
 
 	expected := math.Log(0.8211)
 	assert.Equal(t, expected, got)
 }
 
 func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
-	genTest := NewGenTest(simCalculatorMock{})
-
-	got := genTest.similarityScore("disco", "egypt")
+	got := similarityScore(similarityCalculatorMock{}, "disco", "egypt")
 
 	expected := math.Log(closeToZeroProbability)
 	assert.Equal(t, expected, got)
@@ -133,8 +127,11 @@ func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
 	}
 
 	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(nil)
-	got := genTest.score(split, emptyContext.Elements())
+	simFunc := func(w1 string, w2 string) float64 {
+		return similarityScore(similarityCalculatorMock{}, w1, w2)
+	}
+
+	got := score(simFunc, split, emptyContext.Elements())
 
 	assert.Equal(t, 0.0, got)
 }
@@ -148,13 +145,15 @@ func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
 		},
 	}
 
-	simCalculatorMock := simCalculatorMock{
+	similarityCalculatorMock := similarityCalculatorMock{
 		"length-string": 0.9123,
 	}
 	emptyContext := lists.NewBuilder().Build()
-	genTest := NewGenTest(simCalculatorMock)
+	simFunc := func(w1 string, w2 string) float64 {
+		return similarityScore(similarityCalculatorMock, w1, w2)
+	}
 
-	got := genTest.score(split, emptyContext.Elements())
+	got := score(simFunc, split, emptyContext.Elements())
 
 	expected := (math.Log(0.9123) + math.Log(0.9123)) / (2.0 * (2.0 + 0.0))
 	assert.Equal(t, expected, got)
@@ -169,23 +168,25 @@ func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
 		},
 	}
 
-	simCalculatorMock := simCalculatorMock{
+	similarityCalculatorMock := similarityCalculatorMock{
 		"length-string":        0.9123,
 		"concatenation-string": 0.8912,
 	}
 	context := lists.NewBuilder().Add("concatenation").Build()
-	genTest := NewGenTest(simCalculatorMock)
+	simFunc := func(w1 string, w2 string) float64 {
+		return similarityScore(similarityCalculatorMock, w1, w2)
+	}
 
-	got := genTest.score(split, context.Elements())
+	got := score(simFunc, split, context.Elements())
 
 	expected := (math.Log(0.9123) + math.Log(0.8912) + math.Log(0.9123) + math.Log(closeToZeroProbability)) / (2.0 * (2.0 + 1.0))
 	assert.Equal(t, expected, got)
 }
 
 // mocks
-type simCalculatorMock map[string]float64
+type similarityCalculatorMock map[string]float64
 
-func (s simCalculatorMock) Sim(word string, another string) float64 {
+func (s similarityCalculatorMock) Similarity(word string, another string) float64 {
 	var key string
 	if word < another {
 		key = word + "-" + another
