@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/eroatta/token-splitex/lists"
 	"github.com/eroatta/token-splitex/marker"
 )
 
@@ -16,7 +17,7 @@ const (
 type GenTest struct {
 	simCalculator      SimCalculator
 	context            []string
-	dicctionary        map[string]interface{}
+	dicctionary        lists.List
 	possibleExpansions string
 }
 
@@ -24,17 +25,12 @@ type GenTest struct {
 //
 // GenTest requires a similarity calculator, a set of words known as "context information"
 // and a dicctionary.
-func NewGenTest(sc SimCalculator, ctx []string, dicc map[string]interface{}) *GenTest {
-	words := make([]string, len(dicc))
-	for k := range dicc {
-		words = append(words, k)
-	}
-
+func NewGenTest(sc SimCalculator, ctx []string, dicc lists.List) *GenTest {
 	return &GenTest{
 		simCalculator:      sc,
 		context:            ctx,
 		dicctionary:        dicc,
-		possibleExpansions: strings.Join(words, " "),
+		possibleExpansions: strings.Join(dicc.Elements(), " "),
 	}
 }
 
@@ -60,14 +56,14 @@ type SimCalculator interface {
 // with the rest of the expansions on every softword belonging to the same potential split.
 //
 // The potential split with the highest score is the selected split.
-func (g *GenTest) Split(token string) ([]string, error) {
+func Split(token string, g *GenTest) []string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
 
 	splitToken := make([]string, 0, 10)
 	for _, tok := range marker.SplitBy(preprocessedToken) {
 		// discard one letter tokens and dictionary words
-		if len(tok) == 1 || (g.dicctionary)[strings.ToLower(tok)] != nil {
+		if len(tok) == 1 || g.dicctionary.Contains(tok) {
 			splitToken = append(splitToken, tok)
 			continue
 		}
@@ -106,7 +102,7 @@ func (g *GenTest) Split(token string) ([]string, error) {
 		splitToken = append(splitToken, marker.SplitBy(tokenBestSplit.split)...)
 	}
 
-	return splitToken, nil
+	return splitToken
 }
 
 // generatePotentialSplits generates every possible splitting for a given token.

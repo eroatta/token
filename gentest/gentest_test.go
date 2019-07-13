@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/eroatta/token-splitex/lists"
+
 	"math"
 
 	"github.com/stretchr/testify/assert"
@@ -23,11 +25,9 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 		{5, "type_notype", []string{"type", "no", "type"}},
 	}
 
-	dicc := map[string]interface{}{
-		"car": true, "get": true, "string": true,
-		"no": true, "not": true, "notary": true,
-		"type": true, "typo": true,
-	}
+	dicc := lists.NewBuilder().
+		Add("car", "get", "string", "no", "not", "notary", "type", "typo").Build()
+
 	simCalculatorMock := simCalculatorMock{
 		"car-gps":     0.9999,
 		"gps-status":  0.9999,
@@ -40,10 +40,7 @@ func TestSplit_OnGenTest_ShouldReturnValidSplits(t *testing.T) {
 	genTest := NewGenTest(simCalculatorMock, context, dicc)
 
 	for _, c := range cases {
-		got, err := genTest.Split(c.token)
-		if err != nil {
-			assert.Fail(t, "we shouldn't get any errors at this point", err)
-		}
+		got := Split(c.token, genTest)
 
 		assert.Equal(t, c.expected, got, "elements should match in number and order for identifier number")
 	}
@@ -82,11 +79,9 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 		{"blankspace_input", " ", []string{}},
 	}
 
-	dicc := map[string]interface{}{
-		"car": true, "string": true, "steer": true,
-		"set": true, "riflemen": true, "lender": true,
-		"bar": true, "length": true, "kamikaze": true,
-	}
+	dicc := lists.NewBuilder().
+		Add("car", "string", "steer", "set", "riflemen", "lender", "bar", "length", "kamikaze").Build()
+
 	gentest := NewGenTest(nil, []string{}, dicc)
 	for _, fixture := range tests {
 		t.Run(fixture.name, func(t *testing.T) {
@@ -98,7 +93,8 @@ func TestFindExpansions_OnGenTestWithCustomList_ShouldReturnAllMatches(t *testin
 }
 
 func TestSimilarityScore_OnEqualWords_ShouldReturnZero(t *testing.T) {
-	genTest := NewGenTest(nil, []string{}, make(map[string]interface{}))
+	emptyDicc := lists.NewBuilder().Build()
+	genTest := NewGenTest(nil, []string{}, emptyDicc)
 
 	got := genTest.similarityScore("car", "car")
 
@@ -109,7 +105,8 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 	simCalculatorMock := simCalculatorMock{
 		"car-wheel": 0.8211,
 	}
-	genTest := NewGenTest(simCalculatorMock, []string{}, make(map[string]interface{}))
+	emptyDicc := lists.NewBuilder().Build()
+	genTest := NewGenTest(simCalculatorMock, []string{}, emptyDicc)
 
 	got := genTest.similarityScore("car", "wheel")
 
@@ -118,7 +115,8 @@ func TestSimilarityScore_OnWordsWithHighProb_ShouldReturnValue(t *testing.T) {
 }
 
 func TestSimilarityScore_OnDifferentWordsWithZeroProb_ShouldReturnCustomMinimalValue(t *testing.T) {
-	genTest := NewGenTest(simCalculatorMock{}, []string{}, make(map[string]interface{}))
+	emptyDicc := lists.NewBuilder().Build()
+	genTest := NewGenTest(simCalculatorMock{}, []string{}, emptyDicc)
 
 	got := genTest.similarityScore("disco", "egypt")
 
@@ -134,7 +132,8 @@ func TestScore_OnOneWordSplitAndNoContext_ShouldReturnZero(t *testing.T) {
 		},
 	}
 
-	genTest := NewGenTest(nil, []string{}, make(map[string]interface{}))
+	emptyDicc := lists.NewBuilder().Build()
+	genTest := NewGenTest(nil, []string{}, emptyDicc)
 	got := genTest.score(split)
 
 	assert.Equal(t, 0.0, got)
@@ -152,7 +151,8 @@ func TestScore_OnTwoWordsSplitAndNoContext_ShouldReturnScore(t *testing.T) {
 	simCalculatorMock := simCalculatorMock{
 		"length-string": 0.9123,
 	}
-	genTest := NewGenTest(simCalculatorMock, []string{}, make(map[string]interface{}))
+	emptyDicc := lists.NewBuilder().Build()
+	genTest := NewGenTest(simCalculatorMock, []string{}, emptyDicc)
 
 	got := genTest.score(split)
 
@@ -173,7 +173,8 @@ func TestScore_OnTwoWordsSplitAndContext_ShouldReturnScore(t *testing.T) {
 		"length-string":        0.9123,
 		"concatenation-string": 0.8912,
 	}
-	genTest := NewGenTest(simCalculatorMock, []string{"concatenation"}, make(map[string]interface{}))
+	emptyDicc := lists.NewBuilder().Build()
+	genTest := NewGenTest(simCalculatorMock, []string{"concatenation"}, emptyDicc)
 
 	got := genTest.score(split)
 
