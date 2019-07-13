@@ -64,3 +64,36 @@ func main() {
     fmt.Println(splitted) // [http response]
 }
 ```
+
+### Samurai
+
+Samurai algoritm, proposed by Hill et all, receives a token and splits it based on frequency information (local and global) and two lists of common prefixes and suffixes. For each token analysed Samurai starts by executing a _mixedCaseSplit_ algorithm, which outputs a delimited token and then applies a _sameCaseSplit_ algorithm to each part of the newly delimited token.
+The source code must be mined to extract and create two string frequency tables, which are passed to Samurai as `TokenContext`.
+Once we have our frequency tables and the lists of common prefixes and suffixes, we can call the splitting function on Samurai, providing the token, the context and the lists of words: `samurai.Split(token, context, prefixes, suffixes)`.
+
+```go
+package main
+
+import (
+    "fmt"
+
+    "github.com/eroatta/token-splitex/samurai"
+    "github.com/eroatta/token-splitex/lists"
+)
+
+func main() {
+    localFreqTable := samurai.NewFrequencyTable()
+    localFreqTable.SetOccurrences("http", 100)
+    localFreqTable.SetOccurrences("response", 100)
+
+    globalFreqTable := samurai.NewFrequencyTable()
+    globalFreqTable.SetOccurrences("http", 120)
+    globalFreqTable.SetOccurrences("response", 120)
+
+    tokenContext := samurai.NewTokenContext(localFreqTable, globalFreqTable)
+
+    splitted := samurai.Split("httpresponse", tokenContext, lists.Prefixes, lists.Suffixes)
+
+    fmt.Println(splitted) // [http response]
+}
+```
