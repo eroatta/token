@@ -15,22 +15,32 @@ const (
 
 // GenTest represents a Generation and Test splitting algorithm, proposed by Lawrie, Binkley and Morrell.
 type GenTest struct {
-	simCalculator      SimCalculator
-	context            lists.List
-	dicctionary        lists.List
-	possibleExpansions string
+	simCalculator SimCalculator
+	context       lists.List
+}
+
+// Expansions represents a set of possible expansions stored in a convenient format.
+type Expansions struct {
+	words         lists.List
+	wordsAsString string
+}
+
+// NewExpansions creates a new set of expansions built from a list.
+func NewExpansions(list lists.List) *Expansions {
+	return &Expansions{
+		words:         list,
+		wordsAsString: strings.Join(list.Elements(), " "),
+	}
 }
 
 // NewGenTest creates a new GenTest splitter/expander.
 //
 // GenTest requires a similarity calculator, a set of words known as "context information"
 // and a dicctionary.
-func NewGenTest(sc SimCalculator, ctx lists.List, dicc lists.List) *GenTest {
+func NewGenTest(sc SimCalculator, ctx lists.List) *GenTest {
 	return &GenTest{
-		simCalculator:      sc,
-		context:            ctx,
-		dicctionary:        dicc,
-		possibleExpansions: strings.Join(dicc.Elements(), " "),
+		simCalculator: sc,
+		context:       ctx,
 	}
 }
 
@@ -56,14 +66,14 @@ type SimCalculator interface {
 // with the rest of the expansions on every softword belonging to the same potential split.
 //
 // The potential split with the highest score is the selected split.
-func Split(token string, g *GenTest) []string {
+func Split(token string, g *GenTest, expansionsSet *Expansions) []string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
 
 	splitToken := make([]string, 0, 10)
 	for _, tok := range marker.SplitBy(preprocessedToken) {
 		// discard one letter tokens and dictionary words
-		if len(tok) == 1 || g.dicctionary.Contains(tok) {
+		if len(tok) == 1 || expansionsSet.words.Contains(tok) {
 			splitToken = append(splitToken, tok)
 			continue
 		}
@@ -73,7 +83,7 @@ func Split(token string, g *GenTest) []string {
 			// for each potential split softword find the list of expansions
 			for i := 0; i < len(pSplit.softwords); i++ {
 				// if no expansion is found, the input itself must be considered an expansion
-				expansions := g.findExpansions(pSplit.softwords[i].word)
+				expansions := findExpansions(pSplit.softwords[i].word, expansionsSet)
 				if len(expansions) == 0 {
 					expansions = append(expansions, pSplit.softwords[i].word)
 				}
@@ -126,7 +136,7 @@ func generatePotentialSplits(token string) []potentialSplit {
 }
 
 // findExpansions retrieves a set of words that could be considered expansions for the input string.
-func (g *GenTest) findExpansions(input string) []string {
+func findExpansions(input string, possibleExpansions *Expansions) []string {
 	if input == "" || strings.TrimSpace(input) == "" {
 		return []string{}
 	}
@@ -142,7 +152,7 @@ func (g *GenTest) findExpansions(input string) []string {
 	exp := regexp.MustCompile(pattern.String())
 
 	expansions := make([]string, 0)
-	for _, candidate := range exp.FindAllString(g.possibleExpansions, -1) {
+	for _, candidate := range exp.FindAllString(possibleExpansions.wordsAsString, -1) {
 		if any(input, candidate, isTruncation, hasRemovedChar, hasRemovedVowels, hasRemovedCharAfterRemovedVowels) {
 			expansions = append(expansions, candidate)
 		}
