@@ -26,12 +26,9 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 		globalFT: createTestGlobalFrequencyTable(),
 	}
 
-	var prefixes lists.List
-	var suffixes lists.List
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Split(tt.token, tCtx, prefixes, suffixes)
+			got := Split(tt.token, tCtx, lists.Prefixes, lists.Suffixes)
 
 			assert.Equal(t, tt.want, got, "elements should match in number and order")
 		})
@@ -83,11 +80,7 @@ func BenchmarkSamuraiSplitting(b *testing.B) {
 		globalFT: createTestGlobalFrequencyTable(),
 	}
 
-	var prefixes lists.List
-	var suffixes lists.List
-
-	// TODO: complete
 	for i := 0; i < b.N; i++ {
-		Split("notype", tCtx, prefixes, suffixes)
+		Split("notype", tCtx, lists.Prefixes, lists.Suffixes)
 	}
 }

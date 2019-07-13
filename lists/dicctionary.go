@@ -1,10 +1,7 @@
 package lists
 
-// Dicctionary is a list of words extracted from the aspell GNU tool.
-var Dicctionary []string
 
-func init() {
-	Dicctionary = []string{"W",
+var dicctionary = []string{"W",
 	"w",
 	"WW",
 	"WWW",
@@ -122677,4 +122674,4 @@ func init() {
 	"yodeler's",
 	"yodelers",
 	"yodeled"}
-}
+
