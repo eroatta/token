@@ -21,10 +21,7 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 		{"multiple_lowercase_softword", "astnotype", []string{"ast", "no", "type"}},
 	}
 
-	tCtx := TokenContext{
-		localFT:  createTestFrequencyTable(),
-		globalFT: createTestGlobalFrequencyTable(),
-	}
+	tCtx := NewTokenContext(createTestFrequencyTable(), createTestGlobalFrequencyTable())
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -75,10 +72,7 @@ func createTestGlobalFrequencyTable() *FrequencyTable {
 }
 
 func BenchmarkSamuraiSplitting(b *testing.B) {
-	tCtx := TokenContext{
-		localFT:  createTestFrequencyTable(),
-		globalFT: createTestGlobalFrequencyTable(),
-	}
+	tCtx := NewTokenContext(createTestFrequencyTable(), createTestGlobalFrequencyTable())
 
 	for i := 0; i < b.N; i++ {
 		Split("notype", tCtx, lists.Prefixes, lists.Suffixes)

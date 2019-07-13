@@ -13,19 +13,27 @@ var cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
 
 // TokenContext holds the local and global frequency tables in the context of a given token.
 type TokenContext struct {
-	localFT  *FrequencyTable
-	globalFT *FrequencyTable
+	local  *FrequencyTable
+	global *FrequencyTable
 }
 
 // Score calculates the score for a string based on how frequently a word
 // appears in the program under analysis and in a more global scope of a large set of programs.
 func (ctx TokenContext) Score(word string) float64 {
-	freqS := ctx.localFT.Frequency(word)
-	globalFreqS := ctx.globalFT.Frequency(word)
-	allStrsFreqP := float64(ctx.localFT.TotalOccurrences())
+	freqS := ctx.local.Frequency(word)
+	globalFreqS := ctx.global.Frequency(word)
+	allStrsFreqP := float64(ctx.local.TotalOccurrences())
 
 	// Freq(s,p) + (globalFreq(s) / log_10 (AllStrsFreq(p))
 	return freqS + globalFreqS/math.Log10(allStrsFreqP)
+}
+
+// NewTokenContext creates a context for the token, setting the local and global frequency tables.
+func NewTokenContext(local *FrequencyTable, global *FrequencyTable) TokenContext {
+	return TokenContext{
+		local:  local,
+		global: global,
+	}
 }
 
 // Split on Samurai receives a token and returns an array of hard/soft words,
