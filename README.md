@@ -57,7 +57,7 @@ func main() {
     listBuilder := greedy.NewListBuilder()
     list := listBuilder.Dicctionary(lists.Dicctionary).
         KnownAbbreviations(lists.KnownAbbreviations).
-        StopList(lists.Stop).build()
+        StopList(lists.Stop).Build()
 
     splitted := greedy.Split("httpResponse", list)
 
