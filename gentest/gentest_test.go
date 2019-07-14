@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/eroatta/token-splitex/expansion"
+
 	"github.com/eroatta/token-splitex/lists"
 
 	"math"
@@ -25,7 +27,7 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 		{"with_markers_and_lowercase", "type_notype", []string{"type", "no", "type"}},
 	}
 
-	dicc := lists.NewBuilder().
+	dict := lists.NewBuilder().
 		Add("car", "get", "string", "no", "not", "notary", "type", "typo").Build()
 
 	similarityCalculatorMock := similarityCalculatorMock{
@@ -39,7 +41,7 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 	context := lists.NewBuilder().
 		Add("none", "no", "never", "nine", "type", "typeset").
 		Add("typhoon", "tire", "car", "boo", "foo").Build()
-	expansionsSet := NewExpansions(dicc)
+	expansionsSet := expansion.NewSetBuilder().AddList(dict).Build()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -86,9 +88,9 @@ func TestFindExpansions_ShouldReturnAllMatches(t *testing.T) {
 		{"blankspace_input", " ", []string{}},
 	}
 
-	dicc := lists.NewBuilder().
+	dict := lists.NewBuilder().
 		Add("car", "string", "steer", "set", "riflemen", "lender", "bar", "length", "kamikaze").Build()
-	expansionsSet := NewExpansions(dicc)
+	expansionsSet := expansion.NewSetBuilder().AddList(dict).Build()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -133,7 +135,7 @@ func TestScore_ShouldReturnSimilarity(t *testing.T) {
 			potentialSplit{
 				split: "bar",
 				softwords: []softword{
-					{"bar", []expansion{{"bar", 1.2345}}},
+					{"bar", []possibleExpansion{{"bar", 1.2345}}},
 				}},
 			similarityCalculatorMock{},
 			[]string{},
@@ -141,8 +143,8 @@ func TestScore_ShouldReturnSimilarity(t *testing.T) {
 		{"two_words_and_no_context", potentialSplit{
 			split: "str_len",
 			softwords: []softword{
-				{"str", []expansion{{"string", 2.3432}}},
-				{"len", []expansion{{"length", 2.0011}}},
+				{"str", []possibleExpansion{{"string", 2.3432}}},
+				{"len", []possibleExpansion{{"length", 2.0011}}},
 			}},
 			similarityCalculatorMock{"length-string": 0.9123},
 			[]string{},
@@ -151,8 +153,8 @@ func TestScore_ShouldReturnSimilarity(t *testing.T) {
 			potentialSplit{
 				split: "str_len",
 				softwords: []softword{
-					{"str", []expansion{{"string", 2.3432}}},
-					{"len", []expansion{{"length", 2.0011}}},
+					{"str", []possibleExpansion{{"string", 2.3432}}},
+					{"len", []possibleExpansion{{"length", 2.0011}}},
 				},
 			}, similarityCalculatorMock{
 				"length-string":        0.9123,

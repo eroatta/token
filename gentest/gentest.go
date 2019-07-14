@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/eroatta/token-splitex/expansion"
 	"github.com/eroatta/token-splitex/lists"
 	"github.com/eroatta/token-splitex/marker"
 )
@@ -12,20 +13,6 @@ import (
 const (
 	closeToZeroProbability = 0.000000000000001
 )
-
-// Expansions represents a set of possible expansions stored in a convenient format.
-type Expansions struct {
-	words         lists.List
-	wordsAsString string
-}
-
-// NewExpansions creates a new set of expansions built from a list.
-func NewExpansions(list lists.List) *Expansions {
-	return &Expansions{
-		words:         list,
-		wordsAsString: strings.Join(list.Elements(), " "),
-	}
-}
 
 // SimilarityCalculator is the interface that wraps the basic Sim method.
 type SimilarityCalculator interface {
@@ -48,7 +35,7 @@ type SimilarityCalculator interface {
 // with the rest of the expansions on every softword belonging to the same potential split.
 //
 // The potential split with the highest score is the selected split.
-func Split(token string, simCalc SimilarityCalculator, context lists.List, expansionsSet *Expansions) []string {
+func Split(token string, simCalc SimilarityCalculator, context lists.List, peSet expansion.Set) []string {
 	similarity := func(w1 string, w2 string) float64 {
 		return similarityScore(simCalc, w1, w2)
 	}
@@ -60,7 +47,7 @@ func Split(token string, simCalc SimilarityCalculator, context lists.List, expan
 	splitToken := make([]string, 0, 10)
 	for _, tok := range marker.SplitBy(preprocessedToken) {
 		// discard one letter tokens and dictionary words
-		if len(tok) == 1 || expansionsSet.words.Contains(tok) {
+		if len(tok) == 1 || peSet.Contains(tok) {
 			splitToken = append(splitToken, tok)
 			continue
 		}
@@ -70,13 +57,13 @@ func Split(token string, simCalc SimilarityCalculator, context lists.List, expan
 			// for each potential split softword find the list of expansions
 			for i := 0; i < len(pSplit.softwords); i++ {
 				// if no expansion is found, the input itself must be considered an expansion
-				expansions := findExpansions(pSplit.softwords[i].word, expansionsSet)
+				expansions := findExpansions(pSplit.softwords[i].word, peSet)
 				if len(expansions) == 0 {
 					expansions = append(expansions, pSplit.softwords[i].word)
 				}
 
 				for _, translation := range expansions {
-					pSplit.softwords[i].expansions = append(pSplit.softwords[i].expansions, expansion{translation, 0})
+					pSplit.softwords[i].expansions = append(pSplit.softwords[i].expansions, possibleExpansion{translation, 0})
 				}
 			}
 
@@ -123,7 +110,7 @@ func generatePotentialSplits(token string) []potentialSplit {
 }
 
 // findExpansions retrieves a set of words that could be considered expansions for the input string.
-func findExpansions(input string, possibleExpansions *Expansions) []string {
+func findExpansions(input string, possibleExpansions expansion.Set) []string {
 	if input == "" || strings.TrimSpace(input) == "" {
 		return []string{}
 	}
@@ -139,7 +126,7 @@ func findExpansions(input string, possibleExpansions *Expansions) []string {
 	exp := regexp.MustCompile(pattern.String())
 
 	expansions := make([]string, 0)
-	for _, candidate := range exp.FindAllString(possibleExpansions.wordsAsString, -1) {
+	for _, candidate := range exp.FindAllString(possibleExpansions.String(), -1) {
 		if any(input, candidate, isTruncation, hasRemovedChar, hasRemovedVowels, hasRemovedCharAfterRemovedVowels) {
 			expansions = append(expansions, candidate)
 		}

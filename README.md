@@ -121,6 +121,7 @@ package main
 import (
     "fmt"
 
+    "github.com/eroatta/token-splitex/expansion"
     "github.com/eroatta/token-splitex/gentest"
     "github.com/eroatta/token-splitex/lists"
 )
@@ -128,7 +129,7 @@ import (
 func main() {
     var simCalculator gentest.SimilarityCalculator
     context := lists.NewBuilder().Add("http").Add("response").Build()
-    possibleExpansions := gentest.NewExpansions(lists.Dicctionary)
+    possibleExpansions := expansion.NewSetBuilder().AddList(lists.Dicctionary).Build()
 
     splitted := gentest.Split("httpResponse", simCalculator, context, possibleExpansions)
 

@@ -1,6 +1,7 @@
 package expansion
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/eroatta/token-splitex/lists"
@@ -12,6 +13,8 @@ type Set interface {
 	Array() []string
 	// String returns a string representation of the given set.
 	String() string
+	// Contains checks if a word is contained on the set.
+	Contains(string) bool
 }
 
 // Set represents a set expansions stored in convenient format.
@@ -26,6 +29,10 @@ func (s set) Array() []string {
 
 func (s set) String() string {
 	return s.wordsAsString
+}
+
+func (s set) Contains(word string) bool {
+	return s.words.Contains(word)
 }
 
 // NewSetBuilder creates a new SetBuilder.
@@ -60,8 +67,11 @@ func (sb *setBuilder) AddStrings(strs ...string) SetBuilder {
 
 func (sb *setBuilder) Build() Set {
 	list := sb.wb.Build()
+	elements := list.Elements()
+	sort.Strings(elements)
+
 	return &set{
 		words:         list,
-		wordsAsString: strings.Join(list.Elements(), " "),
+		wordsAsString: strings.Join(elements, " "),
 	}
 }

@@ -13,8 +13,8 @@ func TestNewPotentialSplit_OnMarkedHardword_ShouldReturnPotentialSplit(t *testin
 	assert.Equal(t, 2, len(got.softwords))
 
 	expectedSoftwords := []softword{
-		{"foo", make([]expansion, 0)},
-		{"bar", make([]expansion, 0)},
+		{"foo", make([]possibleExpansion, 0)},
+		{"bar", make([]possibleExpansion, 0)},
 	}
 	assert.ElementsMatch(t, expectedSoftwords, got.softwords)
 }
@@ -28,7 +28,7 @@ func TestNewPotentialSplit_OnEmptyHardword_ShouldReturnEmptyPotentialSplit(t *te
 func TestHighestCohesion_OnSoftwordWithoutExpansions_ShouldReturnZero(t *testing.T) {
 	softword := softword{
 		word:       "foo",
-		expansions: []expansion{},
+		expansions: []possibleExpansion{},
 	}
 
 	got := softword.highestCohesion()
@@ -39,7 +39,7 @@ func TestHighestCohesion_OnSoftwordWithoutExpansions_ShouldReturnZero(t *testing
 func TestHighestCohesion_OnSoftwordWithOnlyOneExpansion_ShouldReturnTheOnlyCohesionValue(t *testing.T) {
 	softword := softword{
 		word: "foo",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"floor", 1.2345},
 		},
 	}
@@ -52,7 +52,7 @@ func TestHighestCohesion_OnSoftwordWithOnlyOneExpansion_ShouldReturnTheOnlyCohes
 func TestHighestCohesion_OnSoftword_ShouldReturnTheHighestCohesionOnAnyExpansion(t *testing.T) {
 	softword := softword{
 		word: "foo",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"floor", 1.2345},
 			{"foot", 2.1123},
 			{"football", -0.1123},
@@ -67,7 +67,7 @@ func TestHighestCohesion_OnSoftword_ShouldReturnTheHighestCohesionOnAnyExpansion
 func TestBestExpansion_OnSoftwordWithNoExpansions_ShouldReturnTheSoftword(t *testing.T) {
 	softword := softword{
 		word:       "foo",
-		expansions: []expansion{},
+		expansions: []possibleExpansion{},
 	}
 
 	got := softword.bestExpansion()
@@ -78,7 +78,7 @@ func TestBestExpansion_OnSoftwordWithNoExpansions_ShouldReturnTheSoftword(t *tes
 func TestBestExpansion_OnSoftwordWithOnlyOneExpansion_ShouldReturnTheOnlyExpansion(t *testing.T) {
 	softword := softword{
 		word: "foo",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"floor", 1.2345},
 		},
 	}
@@ -91,7 +91,7 @@ func TestBestExpansion_OnSoftwordWithOnlyOneExpansion_ShouldReturnTheOnlyExpansi
 func TestBesExpansion_OnSoftwordWithSeveralExpansions_ShouldReturnTheExpansionWithHighestCohesion(t *testing.T) {
 	softword := softword{
 		word: "foo",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"floor", 1.2345},
 			{"foot", 2.1123},
 			{"football", -0.1123},
@@ -114,7 +114,7 @@ func TestHighestCohesion_OnEmptyPotentialSplit_ShouldReturnZero(t *testing.T) {
 func TestHighestCohesion_OnPotentialSplitWithOneSoftword_ShouldReturnTheSoftwordCohesion(t *testing.T) {
 	uniqueSoftword := softword{
 		word: "bar",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"bar", 1.2345},
 		},
 	}
@@ -132,14 +132,14 @@ func TestHighestCohesion_OnPotentialSplitWithOneSoftword_ShouldReturnTheSoftword
 func TestHighestCohesion_OnPotentialSplitWithSeveralSoftwords_ShouldReturnTheirHighestCohesion(t *testing.T) {
 	firstSoftword := softword{
 		word: "bar",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"bar", 1.2345},
 		},
 	}
 
 	secondSoftword := softword{
 		word: "bum",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"bump", 0.5551},
 			{"bumpy", 0.1999},
 		},
@@ -166,7 +166,7 @@ func TestBestExpansion_OnEmptyPotentialSplit_ShouldReturnEmptyString(t *testing.
 func TestBestExpansion_OnPotentialSplitWithOneSoftword_ShouldReturnTheSoftwordBestExpansion(t *testing.T) {
 	uniqueSoftword := softword{
 		word: "bar",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"bar", 1.2345},
 		},
 	}
@@ -184,14 +184,14 @@ func TestBestExpansion_OnPotentialSplitWithOneSoftword_ShouldReturnTheSoftwordBe
 func TestBestExpansion_OnPotentialSplitWithSeveralSoftwords_ShouldReturnTheSplitExpansion(t *testing.T) {
 	firstSoftword := softword{
 		word: "bar",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"bar", 1.2345},
 		},
 	}
 
 	secondSoftword := softword{
 		word: "bum",
-		expansions: []expansion{
+		expansions: []possibleExpansion{
 			{"bump", 0.5551},
 			{"bumpy", 0.1999},
 		},
@@ -219,7 +219,7 @@ func TestFindBestSplit_OnPotentialSplitsListWithOneItem_ShouldReturnTheOnlySplit
 	pSplit := potentialSplit{
 		split: "bar",
 		softwords: []softword{
-			{"bar", []expansion{{"bar", 1.2345}}},
+			{"bar", []possibleExpansion{{"bar", 1.2345}}},
 		},
 		score: 1.0012,
 	}
@@ -233,8 +233,8 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 	bestSplit := potentialSplit{
 		split: "str_len",
 		softwords: []softword{
-			{"str", []expansion{{"string", 2.3432}}},
-			{"len", []expansion{{"length", 2.0011}}},
+			{"str", []possibleExpansion{{"string", 2.3432}}},
+			{"len", []possibleExpansion{{"length", 2.0011}}},
 		},
 		score: 1.2131,
 	}
@@ -242,8 +242,8 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 	notSoBadSplit := potentialSplit{
 		split: "st_rlen",
 		softwords: []softword{
-			{"st", []expansion{{"string", 1.9432}}},
-			{"rlen", []expansion{{"riflemen", 0.9011}}},
+			{"st", []possibleExpansion{{"string", 1.9432}}},
+			{"rlen", []possibleExpansion{{"riflemen", 0.9011}}},
 		},
 		score: 1.0013,
 	}
@@ -251,8 +251,8 @@ func TestFindBestSplit_OnPotentialSplitsList_ShouldReturnTheSplitWithHighestCohe
 	badSplit := potentialSplit{
 		split: "s_trlen",
 		softwords: []softword{
-			{"s", []expansion{}},
-			{"trlen", []expansion{}},
+			{"s", []possibleExpansion{}},
+			{"trlen", []possibleExpansion{}},
 		},
 		score: 0.5541,
 	}

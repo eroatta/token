@@ -18,11 +18,11 @@ type potentialSplit struct {
 // softword represents a potential word and holds a set of related expansions.
 type softword struct {
 	word       string
-	expansions []expansion
+	expansions []possibleExpansion
 }
 
-// expansion is a posible translation that holds an specific cohesion score.
-type expansion struct {
+// possibleExpansion is a posible translation that holds an specific cohesion score.
+type possibleExpansion struct {
 	translation string
 	cohesion    float64
 }
@@ -34,7 +34,7 @@ func newPotentialSplit(hardword string) potentialSplit {
 		for _, word := range marker.SplitBy(hardword) {
 			softwords = append(softwords, softword{
 				word:       word,
-				expansions: make([]expansion, 0),
+				expansions: make([]possibleExpansion, 0),
 			})
 		}
 	}
