@@ -10,18 +10,14 @@ import (
 
 type searchExpansion func(pattern, []string, string, string, string, string) []string
 
-var consonants *regexp.Regexp
-var manyVowels *regexp.Regexp
-var searchers map[string]searchExpansion
-
-func init() {
+var (
 	consonants, _ = regexp.Compile("[a-z][^aeiou]+")
 	manyVowels, _ = regexp.Compile("[a-z][aeiou][aeiou]+")
-	searchers = map[string]searchExpansion{
+	searchers     = map[string]searchExpansion{
 		singleWordGroup: searchSingleWordExpansion,
 		multiWordGroup:  searchMultiWordExpansion,
 	}
-}
+)
 
 // Amap represents an Automatically Mining Abbreviations in Programs expander.
 type Amap struct {
