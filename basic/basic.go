@@ -1,51 +1,24 @@
+// Package basic declares the functions and default expansions lists for expanding a token using the
+// Basic algorithm.
 package basic
 
 import (
 	"regexp"
 	"strings"
+
+	"github.com/eroatta/token-splitex/expansion"
+	"github.com/eroatta/token-splitex/lists"
 )
 
-// Basic represents the Basic expansion algorithm, proposed by Lawrie, Feild and Binkley.
-type Basic struct {
-	words       *string
-	stopAndDicc *string
-	srcPhrases  map[string]string
-}
-
-// NewBasic creates a new Basic expander with the given lists.
-func NewBasic(srcWords map[string]interface{}, srcPhrases map[string]string, stopList map[string]interface{}, dicc map[string]interface{}) *Basic {
-	arrWords := make([]string, len(srcWords))
-	for k := range srcWords {
-		arrWords = append(arrWords, k)
-	}
-	words := strings.Join(arrWords, " ")
-
-	arrStopAndDicc := make([]string, len(dicc)+len(stopList))
-	for k := range dicc {
-		arrStopAndDicc = append(arrStopAndDicc, k)
-	}
-
-	// merge lists to avoid duplication
-	for k := range stopList {
-		if _, found := dicc[k]; !found {
-			arrStopAndDicc = append(arrStopAndDicc, k)
-		}
-	}
-	stopAndDicc := strings.Join(arrStopAndDicc, " ")
-
-	return &Basic{
-		words:       &words,
-		srcPhrases:  srcPhrases,
-		stopAndDicc: &stopAndDicc,
-	}
-}
+// DefaultExpansions contains the set of possible expansions included on the default configuration for Basic.
+var DefaultExpansions = expansion.NewSetBuilder().AddList(lists.Dicctionary).Build()
 
 // Expand on Basic receives a token and returns an array of possible expansions.
 //
 // The Basic expansion algortihm builds a regular expression for the given token and
 // runs it against several lists built from the source code and natural words from
-// stop lists and dicctionaries.
-func (b Basic) Expand(token string) []string {
+// stop lists and dicctionaries. It was proposed by Lawrie, Feild and Binkley.
+func Expand(token string, srcWords expansion.Set, phrases map[string]string, defaultWords expansion.Set) []string {
 	token = strings.ToLower(token)
 
 	// build the search regex
@@ -59,17 +32,17 @@ func (b Basic) Expand(token string) []string {
 	exp := regexp.MustCompile(pattern.String())
 
 	// stage 1: should look on the words from the source code and then phrases lists
-	expansions := exp.FindAllString(*b.words, -1)
+	expansions := exp.FindAllString(srcWords.String(), -1)
 	if len(expansions) > 0 {
 		return expansions
 	}
 
-	if phrase := b.srcPhrases[token]; phrase != "" {
+	if phrase := phrases[token]; phrase != "" {
 		return strings.Split(phrase, "-")
 	}
 
 	// stage 2: should look on the dicctionary and stop lists
-	expansions = exp.FindAllString(*b.stopAndDicc, -1)
+	expansions = exp.FindAllString(defaultWords.String(), -1)
 
 	return expansions
 }
