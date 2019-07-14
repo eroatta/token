@@ -1,4 +1,4 @@
-package expanders
+package basic
 
 import (
 	"fmt"
