@@ -19,19 +19,14 @@ var (
 	}
 )
 
-// Amap represents an Automatically Mining Abbreviations in Programs expander.
-type Amap struct {
+// TokenScope represents the elements on the scoped-approach for the AMAP expander.
+type TokenScope struct {
 	variableDeclarations []string
 	methodName           string
 	methodBodyText       string
-	methodComments       string
-	packageComments      string
-	text                 []string
-}
-
-// NewAmap creates an AMAP expander.
-func NewAmap() *Amap {
-	return &Amap{}
+	methodComments       []string
+	packageComments      []string
+	referenceText        []string
 }
 
 // Expand on AMAP receives a token and returns and array of possible expansions.
@@ -40,7 +35,7 @@ func NewAmap() *Amap {
 // For each type of abbreviation AMAP creates and applies a pattern to look for possible
 // expansions. AMAP is capable of select the more appropiate expansions based on available
 // information on the given context.
-func (a Amap) Expand(token string) []string {
+func Expand(token string, scope TokenScope) []string {
 	patterns := []pattern{
 		(&patternBuilder{}).kind(acronymType).shortForm(token).build(),
 		(&patternBuilder{}).kind(prefixType).shortForm(token).build(),
@@ -48,26 +43,18 @@ func (a Amap) Expand(token string) []string {
 		(&patternBuilder{}).kind(wordCombinationType).shortForm(token).build(),
 	}
 
-	// TODO: refactor
-	varDeclarations := a.variableDeclarations
-	methodName := a.methodName
-	methodBodyText := a.methodBodyText
-	methodComments := a.methodComments
-	packageComments := a.packageComments
-	referenceText := a.text
-
 	var expansion string
 	for _, pttrn := range patterns {
 		search := searchers[pttrn.group]
-		longForms := search(pttrn, varDeclarations, methodName, methodBodyText,
-			methodComments, packageComments)
+		longForms := search(pttrn, scope.variableDeclarations, scope.methodName,
+			scope.methodBodyText, scope.methodComments, scope.packageComments)
 		if len(longForms) == 1 {
 			expansion = longForms[0]
 			break
 		}
 
 		if len(longForms) > 1 {
-			expansion = findMostFrequentLongForm(pttrn, longForms, referenceText)
+			expansion = findMostFrequentLongForm(pttrn, longForms, scope.referenceText)
 			break
 		}
 	}
