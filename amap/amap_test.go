@@ -7,15 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewAmap_ShouldReturnNewAmapInstanceWithEmptyProperties(t *testing.T) {
-	amap := NewAmap()
+func TestNewTokenScope_ShouldReturnNewTokenScope(t *testing.T) {
+	scope := NewTokenScope([]string{"vardecl"}, "methodName", "bodyText",
+		[]string{"method comments"}, []string{"package comments"})
 
-	assert.Empty(t, amap.variableDeclarations)
-	assert.Equal(t, "", amap.methodName)
-	assert.Equal(t, "", amap.methodBodyText)
-	assert.Equal(t, "", amap.methodComments)
-	assert.Equal(t, "", amap.packageComments)
-	assert.Empty(t, amap.text)
+	assert.ElementsMatch(t, []string{"vardecl"}, scope.variableDeclarations)
+	assert.Equal(t, "methodName", scope.methodName)
+	assert.Equal(t, "bodyText", scope.methodBodyText)
+	assert.ElementsMatch(t, []string{"method comments"}, scope.methodComments)
+	assert.ElementsMatch(t, []string{"package comments"}, scope.packageComments)
 }
 
 func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
@@ -32,13 +32,14 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 		{"short_from_skipped_during_validation", "ex", []string{}},
 	}
 
-	amap := NewAmap()
-	amap.methodBodyText = "expansion interface interfacing interface interfaces"
-	amap.methodComments = "providing graphical user interface for Linux, setting a card reader implementation"
-	amap.packageComments = "provides a card reader implementation"
+	methodBodyText := "expansion interface interfacing interface interfaces"
+	methodComments := []string{"providing graphical user interface for Linux, setting a card reader implementation"}
+	packageComments := []string{"provides a card reader implementation"}
+	scope := NewTokenScope([]string{}, "", methodBodyText, methodComments, packageComments)
+
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
-			got := amap.Expand(fixture.token)
+			got := Expand(fixture.token, scope, []string{})
 
 			assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
 		})
@@ -46,24 +47,25 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 }
 
 func TestSingleWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongForms(t *testing.T) {
-	variableDeclarations := []string{"cpol Carpool"}
-	methodName := "buildCarpool"
-	var emptyMethodBody, emptyMethodComments, emptyPackageComments string
-
 	pattern := (&patternBuilder{}).kind("prefix").shortForm("cp").build()
-	got := searchSingleWordExpansion(pattern, variableDeclarations, methodName, emptyMethodBody,
-		emptyMethodComments, emptyPackageComments)
+
+	variableDeclarations := []string{"cpol Carpool"}
+	emptyComments := []string{}
+	scope := NewTokenScope(variableDeclarations, "buildCarpool", "", emptyComments, emptyComments)
+
+	got := searchSingleWordExpansion(pattern, scope)
 
 	assert.Empty(t, got)
 }
 
 func TestSingleWordExpansion_OnAmapWithPrefixPatternButTooManyWovels_ShouldReturnEmptyLongForms(t *testing.T) {
-	possibleButSkippedMatch := []string{"iooboooo ioob"}
-	var emptyMethodName, emptyMethodBody, emptyMethodComments, emptyPackageComments string
-
 	pattern := (&patternBuilder{}).kind("prefix").shortForm("ioob").build()
-	got := searchSingleWordExpansion(pattern, possibleButSkippedMatch, emptyMethodName, emptyMethodBody,
-		emptyMethodComments, emptyPackageComments)
+
+	possibleButSkippedMatch := []string{"iooboooo ioob"}
+	emptyComments := []string{}
+	scope := NewTokenScope(possibleButSkippedMatch, "", "", emptyComments, emptyComments)
+
+	got := searchSingleWordExpansion(pattern, scope)
 
 	assert.Empty(t, got)
 }
@@ -86,15 +88,15 @@ func TestSingleWordExpansion_OnAmapWithPrefixPatternAndNotManyVowels_ShouldRetur
 	variableDeclarations := []string{"carpool carp"}
 	methodName := "buildCarpool"
 	methodBodyText := "syntax analizer"
-	methodComments := "abstract watcher"
-	packageComments := "walker"
+	methodComments := []string{"abstract watcher"}
+	packageComments := []string{"walker"}
+	scope := NewTokenScope(variableDeclarations, methodName, methodBodyText, methodComments, packageComments)
 
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
 			pattern := (&patternBuilder{}).kind("prefix").shortForm(fixture.shortForm).build()
 
-			got := searchSingleWordExpansion(pattern, variableDeclarations, methodName, methodBodyText,
-				methodComments, packageComments)
+			got := searchSingleWordExpansion(pattern, scope)
 
 			assert.ElementsMatch(t, fixture.candidates, got, fmt.Sprintf("found elements: %v", got))
 		})
@@ -102,12 +104,13 @@ func TestSingleWordExpansion_OnAmapWithPrefixPatternAndNotManyVowels_ShouldRetur
 }
 
 func TestSingleWordExpansion_OnAmapWithNoPrefixPatternButTooManyVowels_ShouldReturnEmptyLongForms(t *testing.T) {
-	possibleButSkippedMatch := []string{"contextpool coo"}
-	var emptyMethodName, emptyMethodBody, emptyMethodComments, emptyPackageComments string
-
 	pattern := (&patternBuilder{}).kind("dropped-letters").shortForm("cool").build()
-	got := searchSingleWordExpansion(pattern, possibleButSkippedMatch, emptyMethodName, emptyMethodBody,
-		emptyMethodComments, emptyPackageComments)
+
+	possibleButSkippedMatch := []string{"contextpool coo"}
+	emptyComments := []string{}
+	scope := NewTokenScope(possibleButSkippedMatch, "", "", emptyComments, emptyComments)
+
+	got := searchSingleWordExpansion(pattern, scope)
 
 	assert.Empty(t, got)
 }
@@ -130,15 +133,15 @@ func TestSingleWordExpansion_OnAmapWithNotPrefixPatternAndNotManyVowels_ShouldRe
 	variableDeclarations := []string{"carpool cpl"}
 	methodName := "buildcarpool"
 	methodBodyText := "syntax analizer"
-	methodComments := "abstract watcher"
-	packageComments := "walker"
+	methodComments := []string{"abstract watcher"}
+	packageComments := []string{"walker"}
+	scope := NewTokenScope(variableDeclarations, methodName, methodBodyText, methodComments, packageComments)
 
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
 			pattern := (&patternBuilder{}).kind("dropped-letters").shortForm(fixture.shortForm).build()
 
-			got := searchSingleWordExpansion(pattern, variableDeclarations, methodName, methodBodyText,
-				methodComments, packageComments)
+			got := searchSingleWordExpansion(pattern, scope)
 
 			assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
 		})
@@ -146,38 +149,37 @@ func TestSingleWordExpansion_OnAmapWithNotPrefixPatternAndNotManyVowels_ShouldRe
 }
 
 func TestSingleWordExpansion_OnAmapWithPrefixPatternButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
-	var emptyVariableDecls []string
-	var emptyMethodName, emptyMethodBody string
-	methodComments := "abstraction for abstract syntax tree"
-	packageComments := "absolute"
-
 	pattern := (&patternBuilder{}).kind("prefix").shortForm("abs").build()
-	got := searchSingleWordExpansion(pattern, emptyVariableDecls, emptyMethodName, emptyMethodBody,
-		methodComments, packageComments)
+
+	methodComments := []string{"abstraction for abstract syntax tree"}
+	packageComments := []string{"absolute"}
+	scope := NewTokenScope([]string{}, "", "", methodComments, packageComments)
+
+	got := searchSingleWordExpansion(pattern, scope)
 
 	assert.ElementsMatch(t, []string{"abstraction", "abstract", "absolute"}, got, fmt.Sprintf("found elements: %v", got))
 }
 
 func TestMultiWordExpansion_OnAmapWithNoMatches_ShouldReturnEmptyLongForms(t *testing.T) {
-	variableDeclarations := []string{"cpol Carpool"}
-	methodName := "buildCarpool"
-	var emptyMethodBody, emptyMethodComments, emptyPackageComments string
-
 	pattern := (&patternBuilder{}).kind("acronym").shortForm("json").build()
-	got := searchMultiWordExpansion(pattern, variableDeclarations, methodName, emptyMethodBody,
-		emptyMethodComments, emptyPackageComments)
+
+	variableDeclarations := []string{"cpol Carpool"}
+	emptyComments := []string{}
+	scope := NewTokenScope(variableDeclarations, "buildCarpool", "", emptyComments, emptyComments)
+
+	got := searchMultiWordExpansion(pattern, scope)
 
 	assert.Empty(t, got)
 }
 
 func TestMultiWordExpansion_OnAmapWithNotAcronymPatternButTooShortShortForm_ShouldReturnEmptyLongForms(t *testing.T) {
-	var emptyVariableDecls []string
-	var emptyMethodName, emptyMethodBody, emptyPackageComments string
-	possibleButSkippedMethodComments := "javascript notation"
-
 	pattern := (&patternBuilder{}).kind("word-combination").shortForm("jsn").build()
-	got := searchMultiWordExpansion(pattern, emptyVariableDecls, emptyMethodName, emptyMethodBody,
-		possibleButSkippedMethodComments, emptyPackageComments)
+
+	var emptyVariableDecls, emptyComments []string
+	possibleButSkippedMethodComments := []string{"javascript notation"}
+	scope := NewTokenScope(emptyVariableDecls, "", "", possibleButSkippedMethodComments, emptyComments)
+
+	got := searchMultiWordExpansion(pattern, scope)
 
 	assert.Empty(t, got)
 }
@@ -204,15 +206,15 @@ func TestMultiWordExpansion_OnAmap_ShouldReturnMatchingLongForms(t *testing.T) {
 	variableDeclarations := []string{"json parser factory jpf", "json parser factory jsonpf"}
 	methodName := "json parser builder"
 	methodBodyText := "factory function"
-	methodComments := "extensible markup language"
-	packageComments := "file transfer protocol enables file transfering between"
+	methodComments := []string{"extensible markup language"}
+	packageComments := []string{"file transfer protocol enables file transfering between"}
+	scope := NewTokenScope(variableDeclarations, methodName, methodBodyText, methodComments, packageComments)
 
 	for _, fixture := range cases {
 		t.Run(fixture.name, func(t *testing.T) {
 			pattern := (&patternBuilder{}).kind(fixture.patternType).shortForm(fixture.shortForm).build()
 
-			got := searchMultiWordExpansion(pattern, variableDeclarations, methodName, methodBodyText,
-				methodComments, packageComments)
+			got := searchMultiWordExpansion(pattern, scope)
 
 			assert.ElementsMatch(t, fixture.expected, got, fmt.Sprintf("found elements: %v", got))
 		})
@@ -220,27 +222,25 @@ func TestMultiWordExpansion_OnAmap_ShouldReturnMatchingLongForms(t *testing.T) {
 }
 
 func TestMultiWordExpansion_OnAmapWithAcronymPatternButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
-	var emptyVariableDecls []string
-	var emptyMethodName, emptyMethodBody string
-	methodComments := "java script define json source"
-	packageComments := "java script"
-
 	pattern := (&patternBuilder{}).kind("acronym").shortForm("js").build()
-	got := searchMultiWordExpansion(pattern, emptyVariableDecls, emptyMethodName, emptyMethodBody,
-		methodComments, packageComments)
+
+	methodComments := []string{"java script define json source"}
+	packageComments := []string{"java script"}
+	scope := NewTokenScope([]string{}, "", "", methodComments, packageComments)
+
+	got := searchMultiWordExpansion(pattern, scope)
 
 	assert.ElementsMatch(t, []string{"java script", "json source", "java script"}, got, fmt.Sprintf("found elements: %v", got))
 }
 
 func TestMultiWordExpansion_OnAmapWithWordCombinationPatternButNoSingleMatch_ShouldReturnMatchingLongForms(t *testing.T) {
-	var emptyVariableDecls []string
-	var emptyMethodName, emptyPackageComments string
-	methodBodyText := "java script is not a java scripting language"
-	methodComments := "java script define json source"
-
 	pattern := (&patternBuilder{}).kind("word-combination").shortForm("jspt").build()
-	got := searchMultiWordExpansion(pattern, emptyVariableDecls, emptyMethodName, methodBodyText,
-		methodComments, emptyPackageComments)
+
+	methodBodyText := "java script is not a java scripting language"
+	methodComments := []string{"java script define json source"}
+	scope := NewTokenScope([]string{}, "", methodBodyText, methodComments, []string{})
+
+	got := searchMultiWordExpansion(pattern, scope)
 
 	assert.ElementsMatch(t, []string{"java script", "java scripting", "java script"}, got, fmt.Sprintf("found elements: %v", got))
 }

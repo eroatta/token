@@ -8,7 +8,7 @@ import (
 	porterstemmer "github.com/reiver/go-porterstemmer"
 )
 
-type searchExpansion func(pattern, []string, string, string, string, string) []string
+type searchExpansion func(pattern, TokenScope) []string
 
 var (
 	consonants, _ = regexp.Compile("[a-z][^aeiou]+")
@@ -26,7 +26,18 @@ type TokenScope struct {
 	methodBodyText       string
 	methodComments       []string
 	packageComments      []string
-	referenceText        []string
+}
+
+// NewTokenScope creates a new token scope.
+func NewTokenScope(variableDeclarations []string, methodName string, methodBodyText string,
+	methodComments []string, packageComments []string) TokenScope {
+	return TokenScope{
+		variableDeclarations: variableDeclarations,
+		methodName:           methodName,
+		methodBodyText:       methodBodyText,
+		methodComments:       methodComments,
+		packageComments:      packageComments,
+	}
 }
 
 // Expand on AMAP receives a token and returns and array of possible expansions.
@@ -35,7 +46,7 @@ type TokenScope struct {
 // For each type of abbreviation AMAP creates and applies a pattern to look for possible
 // expansions. AMAP is capable of select the more appropiate expansions based on available
 // information on the given context.
-func Expand(token string, scope TokenScope) []string {
+func Expand(token string, scope TokenScope, referenceText []string) []string {
 	patterns := []pattern{
 		(&patternBuilder{}).kind(acronymType).shortForm(token).build(),
 		(&patternBuilder{}).kind(prefixType).shortForm(token).build(),
@@ -46,15 +57,14 @@ func Expand(token string, scope TokenScope) []string {
 	var expansion string
 	for _, pttrn := range patterns {
 		search := searchers[pttrn.group]
-		longForms := search(pttrn, scope.variableDeclarations, scope.methodName,
-			scope.methodBodyText, scope.methodComments, scope.packageComments)
+		longForms := search(pttrn, scope)
 		if len(longForms) == 1 {
 			expansion = longForms[0]
 			break
 		}
 
 		if len(longForms) > 1 {
-			expansion = findMostFrequentLongForm(pttrn, longForms, scope.referenceText)
+			expansion = findMostFrequentLongForm(pttrn, longForms, referenceText)
 			break
 		}
 	}
@@ -68,8 +78,7 @@ func Expand(token string, scope TokenScope) []string {
 }
 
 // searchSingleWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
-func searchSingleWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
-	methodBodyText string, methodComments string, packageComments string) []string {
+func searchSingleWordExpansion(pttrn pattern, scope TokenScope) []string {
 	var longForms []string
 
 	// restricts the search to prefix or dropped letters to those short forms longer than 3 letters or
@@ -79,7 +88,7 @@ func searchSingleWordExpansion(pttrn pattern, variableDeclarations []string, met
 
 		// 9: Search TypeNames and corresponding declared variable names for “pattern sf”
 		matcher, _ := regexp.Compile(pttrn.regex + "[ ]" + pttrn.shortForm)
-		for _, v := range variableDeclarations {
+		for _, v := range scope.variableDeclarations {
 			if matcher.MatchString(v) {
 				// append only the matching name to the candidate expansions
 				longForms = append(longForms, strings.Split(v, " ")[0])
@@ -91,8 +100,8 @@ func searchSingleWordExpansion(pttrn pattern, variableDeclarations []string, met
 
 		// 10: Search MethodName for “pattern”
 		matcher, _ = regexp.Compile(pttrn.regex)
-		if matcher.MatchString(methodName) {
-			longForms = append(longForms, methodName)
+		if matcher.MatchString(scope.methodName) {
+			longForms = append(longForms, scope.methodName)
 			if len(longForms) == 1 {
 				return longForms
 			}
@@ -103,23 +112,27 @@ func searchSingleWordExpansion(pttrn pattern, variableDeclarations []string, met
 		if len(pttrn.shortForm) != 2 {
 			// 13: Search method words for “pattern”
 			matcher, _ := regexp.Compile(pttrn.regex)
-			longForms = append(longForms, matcher.FindAllString(methodBodyText, -1)...)
+			longForms = append(longForms, matcher.FindAllString(scope.methodBodyText, -1)...)
 			if len(longForms) == 1 {
 				return longForms
 			}
 
 			// 14: Search method comment words for “pattern”
-			longForms = append(longForms, matcher.FindAllString(methodComments, -1)...)
-			if len(longForms) == 1 {
-				return longForms
+			for _, mComm := range scope.methodComments {
+				longForms = append(longForms, matcher.FindAllString(mComm, -1)...)
+				if len(longForms) == 1 {
+					return longForms
+				}
 			}
 		}
 		if pttrn.kind == prefixType && len(pttrn.shortForm) > 1 {
 			// 17: Search class comment words for “pattern”
 			matcher, _ := regexp.Compile(pttrn.regex)
-			longForms = append(longForms, matcher.FindAllString(packageComments, -1)...)
-			if len(longForms) == 1 {
-				return longForms
+			for _, pComm := range scope.packageComments {
+				longForms = append(longForms, matcher.FindAllString(pComm, -1)...)
+				if len(longForms) == 1 {
+					return longForms
+				}
 			}
 		}
 	}
@@ -129,14 +142,13 @@ func searchSingleWordExpansion(pttrn pattern, variableDeclarations []string, met
 }
 
 // searchMultiWordExpansion looks for candidate long forms for a given pattern, focusing on single word expansions.
-func searchMultiWordExpansion(pttrn pattern, variableDeclarations []string, methodName string,
-	methodBodyText string, methodComments string, packageComments string) []string {
+func searchMultiWordExpansion(pttrn pattern, scope TokenScope) []string {
 	var longForms []string
 
 	if pttrn.kind == acronymType || len(pttrn.shortForm) > 3 {
 		// 9: Search TypeNames and corresponding declared variable names for “pattern sf”
 		matcher, _ := regexp.Compile(pttrn.regex + "[ ]" + pttrn.shortForm)
-		for _, v := range variableDeclarations {
+		for _, v := range scope.variableDeclarations {
 			if matcher.MatchString(v) {
 				// append only the matching name to the candidate expansions
 				longForms = append(longForms, strings.TrimSpace(strings.TrimSuffix(v, pttrn.shortForm)))
@@ -148,8 +160,8 @@ func searchMultiWordExpansion(pttrn pattern, variableDeclarations []string, meth
 
 		// 10: Search MethodName for “pattern”
 		matcher, _ = regexp.Compile(pttrn.regex)
-		if matcher.MatchString(methodName) {
-			longForms = append(longForms, methodName)
+		if matcher.MatchString(scope.methodName) {
+			longForms = append(longForms, scope.methodName)
 			if len(longForms) == 1 {
 				return longForms
 			}
@@ -158,20 +170,27 @@ func searchMultiWordExpansion(pttrn pattern, variableDeclarations []string, meth
 		// 11: Search all identifiers in the method for “pattern” (ignored)
 
 		// 12: Search string literals for “pattern”
-		longForms = append(longForms, matcher.FindAllString(methodBodyText, -1)...)
+		longForms = append(longForms, matcher.FindAllString(scope.methodBodyText, -1)...)
 		if len(longForms) == 1 {
 			return longForms
 		}
 
 		// 13: Search method comment words for “pattern”
-		longForms = append(longForms, matcher.FindAllString(methodComments, -1)...)
-		if len(longForms) == 1 {
-			return longForms
+		for _, mComm := range scope.methodComments {
+			longForms = append(longForms, matcher.FindAllString(mComm, -1)...)
+			if len(longForms) == 1 {
+				return longForms
+			}
 		}
 
 		// 15: If acronym, search class comment words for “pattern”
 		if pttrn.kind == acronymType {
-			longForms = append(longForms, matcher.FindAllString(packageComments, -1)...)
+			for _, pComm := range scope.packageComments {
+				longForms = append(longForms, matcher.FindAllString(pComm, -1)...)
+				if len(longForms) == 1 {
+					return longForms
+				}
+			}
 		}
 	}
 
