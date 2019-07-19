@@ -13,13 +13,14 @@ Each token is split using separation markers as underscores, numbers and regular
 This is a technique to split identifiers into their component terms by mining frequencies in large source code bases, and relies on two assumptions:
   1. A substring composed an identifier is also likely to be used in other parts of the program or in other programs alone or as part of other identifiers.
   2. Given two possible splits of a given identifier, the split that most likely represents the developer's intent partitions the identifier into terms occurring more often in the program.
-* **GenTest**: is a splitting algorithm that consists of two parts: generation and test. The generation part of GenTest generates all possible splittings; the test part, however, evaluates a scoring function against each proposed splitting.
+* **GenTest**: This is a splitting algorithm that consists of two parts: generation and test. The generation part of GenTest generates all possible splittings; the test part, however, evaluates a scoring function against each proposed splitting.
 GenTest uses a set of metrics to characterize the quality of the split.
 
 ## Expansion algorithms
 
 * **Basic**: It's the basic abbreviation and acronym expansion algorithm, which was proposed by Lawrie. This algorithm uses lists of words from the source code, a dicctionary and also a phrase list to match a token to the possible expansions.
-* **AMAP**: *TODO*
+* **AMAP**: This algorithm applies an automated approach to mining abbreviation expansions from source code.
+It's based on a scoped approach which uses contextual information at the method, program, and general software level to automatically select the most appropriate expansion for a given abbreviation.
 * **Normalize**: *TODO*
 
 ## Usage
@@ -110,7 +111,7 @@ func main() {
 
 ### GenTest
 
-GenTest requires a similarity calculator, because it relies on the fact that words (expanded words) should be found co-located in the documentation or in general text. 
+GenTest requires a similarity calculator, because it relies on the fact that words (expanded words) should be found co-located in the documentation or in general text.
 Also, it requires a list of words that form the context where the token is located, and an expansion set.
 
 Once we have our similarity calculator, context words and list of possible expansions, we can call the splitting function on GenTest, providing each required parameter: `gentest.Split(token, similarityCalculator, context, expansions)`.
@@ -166,4 +167,47 @@ func main() {
 
     fmt.Println(expanded) // [java script object notation]
 }
+```
+
+### AMAP
+
+Automatically expanding abbreviations requires the following steps: (1) identifying whether a token is a non-dictionary word, and therefore a short form candidate; (2) searching for potential long forms for the given short form; and (3) selecting the most appropriate long form from among the set of mined potential long form candidates.
+The automatic long form mining technique is inspired by the static scoping of variables represented by a compiler’s symbol table.
+When looking for potential long forms, the algorithm starts at the closest scope to the short form, such as type names and statements, and gradually broadens the scope to include the method, its omments, and the package comments.
+If the technique is still unsuccessful in finding a long form, it attempts to find the most likely long form found within the program and Go.
+
+Once the token scope and the reference text are defined, we can call the expansion function on AMAP, providing each required parameter: `amap.Expand(token, scope, referece)`.
+
+```go
+package main
+
+import (
+    "fmt"
+
+    "github.com/eroatta/token-splitex/amap"
+)
+
+func main() {
+    // func Marshal(v interface{}) ([]byte, error)
+    variableDeclarations := []string{"v interface"}
+    methodName := "marshal"
+    methodBodyText := ""
+    methodComments := []string{
+        "marshal returns the java script object notation encoding of v",
+    }
+    packageComments := []string{
+        "package json implements encoding and decoding of java script object notation as defined in rfc",
+        "the mapping between java script object notation and go",
+    }
+
+    scope := amap.NewTokenScope(variableDeclarations, methodName, methodBodyText,
+        methodComments, packageComments)
+
+    reference := []string{}
+
+    expanded := amap.Expand("json", scope, reference)
+
+    fmt.Println(expanded) // [java script object notation]
+}
+
 ```
