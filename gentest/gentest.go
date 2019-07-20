@@ -34,8 +34,47 @@ type SimilarityCalculator interface {
 // Cohesion is calculated for every expansion on every softword of each potential split, comparing the expansion
 // with the rest of the expansions on every softword belonging to the same potential split.
 //
-// The potential split with the highest score is the selected split.
+// The potential split with the highest score is the selected split, and all the combined selected splits
+// form the splitted token.
 func Split(token string, simCalc SimilarityCalculator, context lists.List, peSet expansion.Set) []string {
+	parts := generateAndTest(token, simCalc, context, peSet)
+
+	splits := make([]string, 0, len(parts))
+	for _, part := range parts {
+		splits = append(splits, marker.SplitBy(part.split)...)
+	}
+
+	return splits
+}
+
+// Expand on GenTest receives a token and returns an array of hard and expanded softwords,
+// based on the Generation and Test algorithm proposed by Lawrie, Binkley and Morrell.
+//
+// The algorithm splits the token by its markers. Then, for each new token, checks if
+// it is a dicctionary word or not. If it is a dicctionary word, then no more processing is done.
+// But if the token is not a dicctionary word, then the generate and testing algorithm starts.
+//
+// The first step is to retrieve the list of potential splits, each potential split composed by a
+// list of softwords.
+// For each softword on the potential split, the algorithm looks for a set of expansions, and then
+// calculates the cohesion.
+// Cohesion is calculated for every expansion on every softword of each potential split, comparing the expansion
+// with the rest of the expansions on every softword belonging to the same potential split.
+//
+// The potential split with the highest score is the selected split, and all the combined best expansions
+// form the expanded token.
+func Expand(token string, simCalc SimilarityCalculator, context lists.List, peSet expansion.Set) []string {
+	parts := generateAndTest(token, simCalc, context, peSet)
+
+	expansions := make([]string, 0, len(parts))
+	for _, part := range parts {
+		expansions = append(expansions, marker.SplitBy(part.bestExpansion())...)
+	}
+
+	return expansions
+}
+
+func generateAndTest(token string, simCalc SimilarityCalculator, context lists.List, peSet expansion.Set) []potentialSplit {
 	similarity := func(w1 string, w2 string) float64 {
 		return similarityScore(simCalc, w1, w2)
 	}
@@ -44,11 +83,11 @@ func Split(token string, simCalc SimilarityCalculator, context lists.List, peSet
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
 
-	splitToken := make([]string, 0, 10)
+	selectedSplits := make([]potentialSplit, 0, 10)
 	for _, tok := range marker.SplitBy(preprocessedToken) {
 		// discard one letter tokens and dictionary words
 		if len(tok) == 1 || peSet.Contains(tok) {
-			splitToken = append(splitToken, tok)
+			selectedSplits = append(selectedSplits, hardwordAsPotentialSplit(tok))
 			continue
 		}
 
@@ -83,10 +122,10 @@ func Split(token string, simCalc SimilarityCalculator, context lists.List, peSet
 		}
 
 		tokenBestSplit := findBestSplit(potentialSplits)
-		splitToken = append(splitToken, marker.SplitBy(tokenBestSplit.split)...)
+		selectedSplits = append(selectedSplits, tokenBestSplit)
 	}
 
-	return splitToken
+	return selectedSplits
 }
 
 // generatePotentialSplits generates every possible splitting for a given token.
@@ -107,6 +146,18 @@ func generatePotentialSplits(token string) []potentialSplit {
 	}
 
 	return potentialSplits
+}
+
+func hardwordAsPotentialSplit(hardword string) potentialSplit {
+	return potentialSplit{
+		split: hardword,
+		softwords: []softword{{
+			word: hardword,
+			expansions: []possibleExpansion{
+				{translation: hardword},
+			},
+		}},
+	}
 }
 
 // findExpansions retrieves a set of words that could be considered expansions for the input string.

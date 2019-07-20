@@ -175,6 +175,45 @@ func TestScore_ShouldReturnSimilarity(t *testing.T) {
 	}
 }
 
+func TestExpand_ShouldReturnValidExpansions(t *testing.T) {
+	tests := []struct {
+		name  string
+		token string
+		want  []string
+	}{
+		{"no_split", "cr", []string{"car"}},
+		{"by_lower_to_upper_case", "getString", []string{"get", "String"}},
+		{"by_upper_to_lower_case", "GPSsttus", []string{"GPS", "status"}},
+		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", []string{"AST", "Visitor"}},
+		{"lowercase_softword", "notype", []string{"no", "type"}},
+		{"with_markers_and_lowercase", "type_notype", []string{"type", "no", "type"}},
+	}
+
+	dict := lists.NewBuilder().
+		Add("car", "get", "string", "no", "not", "notary", "type", "typo", "status").Build()
+
+	similarityCalculatorMock := similarityCalculatorMock{
+		"car-gps":     0.9999,
+		"gps-status":  0.9999,
+		"state-tire":  0.9001,
+		"ast-visitor": 1.0,
+		"no-type":     0.8564,
+		"no-typo":     0.0001,
+	}
+	context := lists.NewBuilder().
+		Add("none", "no", "never", "nine", "type", "typeset").
+		Add("typhoon", "tire", "car", "boo", "foo", "state", "states").Build()
+	expansionsSet := expansion.NewSetBuilder().AddList(dict).Build()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Expand(tt.token, similarityCalculatorMock, context, expansionsSet)
+
+			assert.Equal(t, tt.want, got, "elements should match in number and order")
+		})
+	}
+}
+
 // mocks
 type similarityCalculatorMock map[string]float64
 
