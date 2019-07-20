@@ -1,4 +1,4 @@
-# token-splitex [WIP]
+# token-splitex
 
 Collection of token splitting and expanding algorithms.
 The following lists show the supported algorithms.
@@ -21,7 +21,7 @@ GenTest uses a set of metrics to characterize the quality of the split.
 * **Basic**: It's the basic abbreviation and acronym expansion algorithm, which was proposed by Lawrie. This algorithm uses lists of words from the source code, a dicctionary and also a phrase list to match a token to the possible expansions.
 * **AMAP**: This algorithm applies an automated approach to mining abbreviation expansions from source code.
 It's based on a scoped approach which uses contextual information at the method, program, and general software level to automatically select the most appropriate expansion for a given abbreviation.
-* **Normalize**: *TODO*
+* **Normalize**: This algorithm is based on GenTest, and selects the best expansion for a given token on a context using the one that produces the highest score.
 
 ## Usage
 
@@ -210,4 +210,49 @@ func main() {
     fmt.Println(expanded) // [java script object notation]
 }
 
+```
+
+### Normalize
+
+Normalize is based on GenTest, and requires a similarity calculator, because it relies on the fact that words (expanded words) should be found co-located in the documentation or in general text.
+Also, it requires a list of words that form the context where the token is located, and an expansion set.
+
+Once we have our similarity calculator, context words and list of possible expansions, we can call the expanding function on GenTest, providing each required parameter: `gentest.Expand(token, similarityCalculator, context, expansions)`.
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/eroatta/token-splitex/expansion"
+	"github.com/eroatta/token-splitex/gentest"
+	"github.com/eroatta/token-splitex/lists"
+)
+
+func main() {
+	simCalculator := similarityCalculatorMock{
+		"http-response": 1.0,
+	}
+
+	context := lists.NewBuilder().Add("http").Add("response").Build()
+	possibleExpansions := expansion.NewSetBuilder().AddStrings("response").Build()
+
+	expanded := gentest.Expand("httpresp", simCalculator, context, possibleExpansions)
+
+	fmt.Println(expanded) // [http response]
+}
+
+type similarityCalculatorMock map[string]float64
+
+func (s similarityCalculatorMock) Similarity(word string, another string) float64 {
+	var key string
+	if word < another {
+		key = word + "-" + another
+	} else {
+		key = another + "-" + word
+	}
+
+	return s[key]
+}
 ```
