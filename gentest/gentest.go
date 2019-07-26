@@ -1,3 +1,4 @@
+// Package gentest provides the functions to split and expand a token using the GenTest algorithm.
 package gentest
 
 import (

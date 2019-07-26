@@ -1,3 +1,5 @@
+// Package conserv provides the methods to split a token with the conservative approach,
+// which is the benchmark algorithm.
 package conserv
 
 import (

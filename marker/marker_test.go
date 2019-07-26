@@ -64,6 +64,7 @@ func TestOnUpperToLowerCase_ShouldAddMarkersOnChangesFromUpperToLowerCase(t *tes
 		{"no_marker_at_the_end", "responseHTTP", "responseHTTP"},
 		{"no_markers_for_empty_string", "", ""},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := OnUpperToLowerCase(tt.token)

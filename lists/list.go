@@ -1,3 +1,4 @@
+// Package lists provides common lists, and also ways to create custom lists.
 package lists
 
 import (

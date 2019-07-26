@@ -1,3 +1,4 @@
+// Package marker defines functions to add and splits tokens by markers.
 package marker
 
 import (

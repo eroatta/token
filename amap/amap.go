@@ -1,3 +1,4 @@
+// Package amap provides the functions to expand a token using the AMAP algorithm.
 package amap
 
 import (
