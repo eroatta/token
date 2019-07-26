@@ -223,36 +223,36 @@ Once we have our similarity calculator, context words and list of possible expan
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	"github.com/eroatta/token-splitex/expansion"
-	"github.com/eroatta/token-splitex/gentest"
-	"github.com/eroatta/token-splitex/lists"
+    "github.com/eroatta/token-splitex/expansion"
+    "github.com/eroatta/token-splitex/gentest"
+    "github.com/eroatta/token-splitex/lists"
 )
 
 func main() {
-	simCalculator := similarityCalculatorMock{
-		"http-response": 1.0,
-	}
+    simCalculator := similarityCalculatorMock{
+        "http-response": 1.0,
+    }
 
-	context := lists.NewBuilder().Add("http").Add("response").Build()
-	possibleExpansions := expansion.NewSetBuilder().AddStrings("response").Build()
+    context := lists.NewBuilder().Add("http").Add("response").Build()
+    possibleExpansions := expansion.NewSetBuilder().AddStrings("response").Build()
 
-	expanded := gentest.Expand("httpresp", simCalculator, context, possibleExpansions)
+    expanded := gentest.Expand("httpresp", simCalculator, context, possibleExpansions)
 
-	fmt.Println(expanded) // [http response]
+    fmt.Println(expanded) // [http response]
 }
 
 type similarityCalculatorMock map[string]float64
 
 func (s similarityCalculatorMock) Similarity(word string, another string) float64 {
-	var key string
-	if word < another {
-		key = word + "-" + another
-	} else {
-		key = another + "-" + word
-	}
+    var key string
+    if word < another {
+        key = word + "-" + another
+    } else {
+        key = another + "-" + word
+    }
 
-	return s[key]
+    return s[key]
 }
 ```
