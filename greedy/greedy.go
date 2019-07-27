@@ -23,7 +23,7 @@ var DefaultList = lists.NewBuilder().Add(lists.Dicctionary.Elements()...).
 // This technique splits a token into hard words and checks for a greedy splitting those hard words
 // that cannot be matched to any word on the list.
 // The process evaluates prefixes and suffixes recursively until any of them are found on the list,
-// prefering longer words.
+// preferring longer words.
 func Split(token string, list lists.List) []string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)

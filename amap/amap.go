@@ -45,7 +45,7 @@ func NewTokenScope(variableDeclarations []string, methodName string, methodBodyT
 //
 // The AMAP expansion algorithm handles single-word and multi-word abbreviations.
 // For each type of abbreviation AMAP creates and applies a pattern to look for possible
-// expansions. AMAP is capable of select the more appropiate expansions based on available
+// expansions. AMAP is capable of select the more appropriate expansions based on available
 // information on the given context.
 func Expand(token string, scope TokenScope, referenceText []string) []string {
 	patterns := []pattern{

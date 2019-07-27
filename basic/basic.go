@@ -15,7 +15,7 @@ var DefaultExpansions = expansion.NewSetBuilder().AddList(lists.Dicctionary).Bui
 
 // Expand on Basic receives a token and returns an array of possible expansions.
 //
-// The Basic expansion algortihm builds a regular expression for the given token and
+// The Basic expansion algorithm builds a regular expression for the given token and
 // runs it against several lists built from the source code and natural words from
 // stop lists and dicctionaries. It was proposed by Lawrie, Feild and Binkley.
 func Expand(token string, srcWords expansion.Set, phrases map[string]string, defaultWords expansion.Set) []string {

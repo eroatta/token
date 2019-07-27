@@ -207,7 +207,7 @@ func TestMultiWordExpansion_OnAmap_ShouldReturnMatchingLongForms(t *testing.T) {
 	methodName := "json parser builder"
 	methodBodyText := "factory function"
 	methodComments := []string{"extensible markup language"}
-	packageComments := []string{"file transfer protocol enables file transfering between"}
+	packageComments := []string{"file transfer protocol enables file transferring between"}
 	scope := NewTokenScope(variableDeclarations, methodName, methodBodyText, methodComments, packageComments)
 
 	for _, fixture := range cases {

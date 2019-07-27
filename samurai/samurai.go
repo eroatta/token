@@ -1,5 +1,5 @@
 // Package samurai provides the functions to split a token based on the Samurai algorithm,
-// and its required context infromation and tables.
+// and its required context information and tables.
 package samurai
 
 import (

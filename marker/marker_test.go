@@ -38,7 +38,7 @@ func TestOnLowerToUpperCase_ShouldAddMarkersOnChangesFromLowerToUpperCase(t *tes
 		{"one_variation", "squarePants", "square_Pants"},
 		{"multiple_variations", "squarePantsBob", "square_Pants_Bob"},
 		{"one_variation_multiple_uppercase_letters", "responseHTTP", "response_HTTP"},
-		{"no_marker_at_the_beggining", "HTTPresponse", "HTTPresponse"},
+		{"no_marker_at_the_beginning", "HTTPresponse", "HTTPresponse"},
 		{"no_markers_for_empty_string", "", ""},
 	}
 

@@ -16,7 +16,7 @@ type FrequencyTable struct {
 	totalOccurrences int
 }
 
-// NewFrequencyTable creates and initializes an emtpy frequency table.
+// NewFrequencyTable creates and initializes an empty frequency table.
 func NewFrequencyTable() *FrequencyTable {
 	return &FrequencyTable{
 		occurrences:      make(map[string]int),
