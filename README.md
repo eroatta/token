@@ -1,6 +1,7 @@
 # token-splitex
 
 [![GoDoc](https://godoc.org/github.com/eroatta/token-splitex?status.svg)](https://godoc.org/github.com/eroatta/token-splitex)
+[![Go Report Card](https://goreportcard.com/badge/github.com/eroatta/token-splitex)](https://goreportcard.com/report/github.com/eroatta/token-splitex)
 
 Collection of token splitting and expanding algorithms.
 The following lists show the supported algorithms.
