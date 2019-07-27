@@ -1,5 +1,7 @@
 # token-splitex
 
+[![GoDoc](https://godoc.org/github.com/eroatta/token-splitex?status.svg)](https://godoc.org/github.com/eroatta/token-splitex)
+
 Collection of token splitting and expanding algorithms.
 The following lists show the supported algorithms.
 
@@ -256,3 +258,7 @@ func (s similarityCalculatorMock) Similarity(word string, another string) float6
     return s[key]
 }
 ```
+
+## License
+
+See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
