@@ -3,7 +3,7 @@
 package conserv
 
 import (
-	"github.com/eroatta/token-splitex/marker"
+	"github.com/eroatta/token/marker"
 )
 
 // Split on Conserv receives a token and returns an array of hard/soft words,

@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/eroatta/token-splitex/lists"
+	"github.com/eroatta/token/lists"
 )
 
 // Set represents a set expansions stored in convenient format.

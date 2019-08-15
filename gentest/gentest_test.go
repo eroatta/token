@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/eroatta/token-splitex/expansion"
-
-	"github.com/eroatta/token-splitex/lists"
+	"github.com/eroatta/token/expansion"
+	"github.com/eroatta/token/lists"
 
 	"math"
 

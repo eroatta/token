@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/eroatta/token-splitex/marker"
+	"github.com/eroatta/token/marker"
 )
 
 // potentialSplit represents a GenTest potential split. It holds data related to the split, the softwords

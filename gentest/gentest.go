@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/eroatta/token-splitex/expansion"
-	"github.com/eroatta/token-splitex/lists"
-	"github.com/eroatta/token-splitex/marker"
+	"github.com/eroatta/token/expansion"
+	"github.com/eroatta/token/lists"
+	"github.com/eroatta/token/marker"
 )
 
 const (

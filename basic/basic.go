@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/eroatta/token-splitex/expansion"
-	"github.com/eroatta/token-splitex/lists"
+	"github.com/eroatta/token/expansion"
+	"github.com/eroatta/token/lists"
 )
 
 // DefaultExpansions contains the set of possible expansions included on the default configuration for Basic.

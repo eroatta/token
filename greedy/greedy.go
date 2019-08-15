@@ -3,8 +3,8 @@
 package greedy
 
 import (
-	"github.com/eroatta/token-splitex/lists"
-	"github.com/eroatta/token-splitex/marker"
+	"github.com/eroatta/token/lists"
+	"github.com/eroatta/token/marker"
 )
 
 // DefaultList contains the words included on the default configuration for Greedy,

@@ -3,7 +3,7 @@ package samurai
 import (
 	"testing"
 
-	"github.com/eroatta/token-splitex/lists"
+	"github.com/eroatta/token/lists"
 	"github.com/stretchr/testify/assert"
 )
 

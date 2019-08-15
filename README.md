@@ -1,7 +1,7 @@
-# token-splitex
+# token
 
-[![GoDoc](https://godoc.org/github.com/eroatta/token-splitex?status.svg)](https://godoc.org/github.com/eroatta/token-splitex)
-[![Go Report Card](https://goreportcard.com/badge/github.com/eroatta/token-splitex)](https://goreportcard.com/report/github.com/eroatta/token-splitex)
+[![GoDoc](https://godoc.org/github.com/eroatta/token?status.svg)](https://godoc.org/github.com/eroatta/token)
+[![Go Report Card](https://goreportcard.com/badge/github.com/eroatta/token)](https://goreportcard.com/report/github.com/eroatta/token)
 
 Collection of token splitting and expanding algorithms.
 The following lists show the supported algorithms.
@@ -38,7 +38,7 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/conserv"
+    "github.com/eroatta/token/conserv"
 )
 
 func main() {
@@ -61,8 +61,8 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/greedy"
-    "github.com/eroatta/token-splitex/lists"
+    "github.com/eroatta/token/greedy"
+    "github.com/eroatta/token/lists"
 )
 
 func main() {
@@ -91,8 +91,8 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/samurai"
-    "github.com/eroatta/token-splitex/lists"
+    "github.com/eroatta/token/samurai"
+    "github.com/eroatta/token/lists"
 )
 
 func main() {
@@ -125,9 +125,9 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/expansion"
-    "github.com/eroatta/token-splitex/gentest"
-    "github.com/eroatta/token-splitex/lists"
+    "github.com/eroatta/token/expansion"
+    "github.com/eroatta/token/gentest"
+    "github.com/eroatta/token/lists"
 )
 
 func main() {
@@ -156,8 +156,8 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/basic"
-    "github.com/eroatta/token-splitex/expansion"
+    "github.com/eroatta/token/basic"
+    "github.com/eroatta/token/expansion"
 )
 
 func main() {
@@ -187,7 +187,7 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/amap"
+    "github.com/eroatta/token/amap"
 )
 
 func main() {
@@ -228,9 +228,9 @@ package main
 import (
     "fmt"
 
-    "github.com/eroatta/token-splitex/expansion"
-    "github.com/eroatta/token-splitex/gentest"
-    "github.com/eroatta/token-splitex/lists"
+    "github.com/eroatta/token/expansion"
+    "github.com/eroatta/token/gentest"
+    "github.com/eroatta/token/lists"
 )
 
 func main() {

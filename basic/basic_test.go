@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/eroatta/token-splitex/expansion"
+	"github.com/eroatta/token/expansion"
 
 	"github.com/stretchr/testify/assert"
 )

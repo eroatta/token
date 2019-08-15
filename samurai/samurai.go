@@ -6,9 +6,9 @@ import (
 	"math"
 	"regexp"
 
-	"github.com/eroatta/token-splitex/marker"
+	"github.com/eroatta/token/marker"
 
-	"github.com/eroatta/token-splitex/lists"
+	"github.com/eroatta/token/lists"
 )
 
 var cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
