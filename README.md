@@ -44,7 +44,7 @@ import (
 func main() {
     splitted := conserv.Split("httpResponse")
 
-    fmt.Println(splitted) // [http response]
+    fmt.Println(splitted) // "http response"
 }
 ```
 

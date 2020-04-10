@@ -9,20 +9,20 @@ import (
 func TestSplit_OnConserv_ShouldReturnValidSplits(t *testing.T) {
 	cases := []struct {
 		token    string
-		expected []string
+		expected string
 	}{
-		{"spongebob_squarePants", []string{"spongebob", "square", "Pants"}},
-		{"Extraordinaire", []string{"Extraordinaire"}},
-		{"extraordinairE", []string{"extraordinair", "E"}},
-		{"extraordinaire", []string{"extraordinaire"}},
-		{"extra_ordinaire", []string{"extra", "ordinaire"}},
-		{"leto2nd", []string{"leto", "2", "nd"}},
-		{"brooklyn99", []string{"brooklyn", "99"}},
-		{"mySQL", []string{"my", "SQL"}},
-		{"mySql", []string{"my", "Sql"}},
-		{"mySQl", []string{"my", "S", "Ql"}},
-		{"9999", []string{"9999"}},
-		{"", []string{""}},
+		{"spongebob_squarePants", "spongebob square Pants"},
+		{"Extraordinaire", "Extraordinaire"},
+		{"extraordinairE", "extraordinair E"},
+		{"extraordinaire", "extraordinaire"},
+		{"extra_ordinaire", "extra ordinaire"},
+		{"leto2nd", "leto 2 nd"},
+		{"brooklyn99", "brooklyn 99"},
+		{"mySQL", "my SQL"},
+		{"mySql", "my Sql"},
+		{"mySQl", "my S Ql"},
+		{"9999", "9999"},
+		{"", ""},
 	}
 
 	for _, c := range cases {
