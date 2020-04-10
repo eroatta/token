@@ -108,7 +108,7 @@ func main() {
 
     splitted := samurai.Split("httpresponse", tokenContext, lists.Prefixes, lists.Suffixes)
 
-    fmt.Println(splitted) // [http response]
+    fmt.Println(splitted) // "http response"
 }
 ```
 

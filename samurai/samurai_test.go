@@ -11,14 +11,14 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 	tests := []struct {
 		name  string
 		token string
-		want  []string
+		want  string
 	}{
-		{"no_split", "car", []string{"car"}},
-		{"by_lower_to_upper_case", "getString", []string{"get", "String"}},
-		{"by_upper_to_lower_case", "GPSstate", []string{"GPS", "state"}},
-		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", []string{"AST", "Visitor"}},
-		{"lowercase_softword", "notype", []string{"no", "type"}},
-		{"multiple_lowercase_softword", "astnotype", []string{"ast", "no", "type"}},
+		{"no_split", "car", "car"},
+		{"by_lower_to_upper_case", "getString", "get String"},
+		{"by_upper_to_lower_case", "GPSstate", "GPS state"},
+		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", "AST Visitor"},
+		{"lowercase_softword", "notype", "no type"},
+		{"multiple_lowercase_softword", "astnotype", "ast no type"},
 	}
 
 	tCtx := NewTokenContext(createTestFrequencyTable(), createTestGlobalFrequencyTable())

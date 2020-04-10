@@ -5,11 +5,15 @@ package samurai
 import (
 	"math"
 	"regexp"
+	"strings"
 
 	"github.com/eroatta/token/marker"
 
 	"github.com/eroatta/token/lists"
 )
+
+// Separator specifies the current separator.
+var Separator string = " "
 
 var cutLocationRegex = regexp.MustCompile("[A-Z][a-z]")
 
@@ -38,9 +42,9 @@ func NewTokenContext(local *FrequencyTable, global *FrequencyTable) TokenContext
 	}
 }
 
-// Split on Samurai receives a token and returns an array of hard/soft words,
+// Split on Samurai receives a token and returns a string of hard/soft words separated by the defined separator,
 // split by the Samurai algorithm proposed by Hill et all.
-func Split(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.List) []string {
+func Split(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.List) string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(token)
 
@@ -77,7 +81,7 @@ func Split(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.
 		splitToken = append(splitToken, sameCaseSplitting...)
 	}
 
-	return splitToken
+	return strings.Join(splitToken, Separator)
 }
 
 func sameCaseSplit(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.List, baseScore float64) []string {
