@@ -168,7 +168,7 @@ func main() {
 
     expanded := basic.Expand("json", srcWords, phraseList, basic.DefaultExpansions)
 
-    fmt.Println(expanded) // [java script object notation]
+    fmt.Println(expanded) // ["java script object notation"]
 }
 ```
 

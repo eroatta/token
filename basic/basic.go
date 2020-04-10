@@ -38,7 +38,7 @@ func Expand(token string, srcWords expansion.Set, phrases map[string]string, def
 	}
 
 	if phrase := phrases[token]; phrase != "" {
-		return strings.Split(phrase, "-")
+		return []string{strings.ReplaceAll(phrase, "-", " ")}
 	}
 
 	// stage 2: should look on the dicctionary and stop lists
