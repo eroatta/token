@@ -3,9 +3,14 @@
 package greedy
 
 import (
+	"strings"
+
 	"github.com/eroatta/token/lists"
 	"github.com/eroatta/token/marker"
 )
+
+// Separator specifies the current separator.
+var Separator string = " "
 
 // DefaultList contains the words included on the default configuration for Greedy,
 // defined on Field, Binkley and Lawrie's paper.
@@ -24,7 +29,7 @@ var DefaultList = lists.NewBuilder().Add(lists.Dicctionary.Elements()...).
 // that cannot be matched to any word on the list.
 // The process evaluates prefixes and suffixes recursively until any of them are found on the list,
 // preferring longer words.
-func Split(token string, list lists.List) []string {
+func Split(token string, list lists.List) string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
 
@@ -41,7 +46,7 @@ func Split(token string, list lists.List) []string {
 		}
 	}
 
-	return splitToken
+	return strings.Join(splitToken, Separator)
 }
 
 // findPrefix looks for the longest prefix exinsting on the list.

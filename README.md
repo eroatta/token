@@ -73,7 +73,7 @@ func main() {
 
     splitted := greedy.Split("httpResponse", list)
 
-    fmt.Println(splitted) // [http response]
+    fmt.Println(splitted) // "http response"
 }
 ```
 
