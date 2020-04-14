@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	// Dicctionary is a list of words extracted from the aspell GNU tool.
-	Dicctionary = NewBuilder().Add(dicctionary...).Build()
+	// Dictionary is a list of words extracted from the aspell GNU tool.
+	Dictionary = NewBuilder().Add(dictionary...).Build()
 	// KnownAbbreviations is a list of strings that are known and common abbreviations on the language.
 	KnownAbbreviations = NewBuilder().Add(knownAbbreviations...).Build()
 	// Stop is a list of reserved words, data types and Go library names.

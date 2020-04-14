@@ -15,10 +15,10 @@ var Separator string = " "
 // DefaultList contains the words included on the default configuration for Greedy,
 // defined on Field, Binkley and Lawrie's paper.
 // This list includes words from:
-// * a dicctionary
+// * a dictionary
 // * a known abbreviations list
 // * a stop list
-var DefaultList = lists.NewBuilder().Add(lists.Dicctionary.Elements()...).
+var DefaultList = lists.NewBuilder().Add(lists.Dictionary.Elements()...).
 	Add(lists.KnownAbbreviations.Elements()...).
 	Add(lists.Stop.Elements()...).
 	Build()
@@ -32,6 +32,7 @@ var DefaultList = lists.NewBuilder().Add(lists.Dicctionary.Elements()...).
 func Split(token string, list lists.List) string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(preprocessedToken)
+	preprocessedToken = strings.ToLower(preprocessedToken)
 
 	splitToken := make([]string, 0, 10)
 	for _, s := range marker.SplitBy(preprocessedToken) {

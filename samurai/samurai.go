@@ -47,6 +47,7 @@ func NewTokenContext(local *FrequencyTable, global *FrequencyTable) TokenContext
 func Split(token string, tCtx TokenContext, prefixes lists.List, suffixes lists.List) string {
 	preprocessedToken := marker.OnDigits(token)
 	preprocessedToken = marker.OnLowerToUpperCase(token)
+	preprocessedToken = strings.ToLower(preprocessedToken)
 
 	var processedToken string
 	for _, word := range marker.SplitBy(preprocessedToken) {

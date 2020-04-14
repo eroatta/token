@@ -20,6 +20,7 @@ func Split(token string) string {
 	processedToken := marker.OnDigits(token)
 	processedToken = marker.OnLowerToUpperCase(processedToken)
 	processedToken = marker.OnUpperToLowerCase(processedToken)
+	processedToken = strings.ToLower(processedToken)
 
 	return strings.Join(marker.SplitBy(processedToken), Separator)
 }

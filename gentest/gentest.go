@@ -25,8 +25,8 @@ type SimilarityCalculator interface {
 // split by the Generation and Test algorithm proposed by Lawrie, Binkley and Morrell.
 //
 // The algorithm splits the token by its markers. Then, for each new token, checks if
-// it is a dicctionary word or not. If it is a dicctionary word, then no more processing is done.
-// But if the token is not a dicctionary word, then the generate and testing algorithm starts.
+// it is a dictionary word or not. If it is a dictionary word, then no more processing is done.
+// But if the token is not a dictionary word, then the generate and testing algorithm starts.
 //
 // The first step is to retrieve the list of potential splits, each potential split composed by a
 // list of softwords.
@@ -52,8 +52,8 @@ func Split(token string, simCalc SimilarityCalculator, context lists.List, peSet
 // based on the Generation and Test algorithm proposed by Lawrie, Binkley and Morrell.
 //
 // The algorithm splits the token by its markers. Then, for each new token, checks if
-// it is a dicctionary word or not. If it is a dicctionary word, then no more processing is done.
-// But if the token is not a dicctionary word, then the generate and testing algorithm starts.
+// it is a dictionary word or not. If it is a dictionary word, then no more processing is done.
+// But if the token is not a dictionary word, then the generate and testing algorithm starts.
 //
 // The first step is to retrieve the list of potential splits, each potential split composed by a
 // list of softwords.

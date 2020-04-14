@@ -11,16 +11,16 @@ func TestSplit_OnConserv_ShouldReturnValidSplits(t *testing.T) {
 		token    string
 		expected string
 	}{
-		{"spongebob_squarePants", "spongebob square Pants"},
-		{"Extraordinaire", "Extraordinaire"},
-		{"extraordinairE", "extraordinair E"},
+		{"spongebob_squarePants", "spongebob square pants"},
+		{"Extraordinaire", "extraordinaire"},
+		{"extraordinairE", "extraordinair e"},
 		{"extraordinaire", "extraordinaire"},
 		{"extra_ordinaire", "extra ordinaire"},
 		{"leto2nd", "leto 2 nd"},
 		{"brooklyn99", "brooklyn 99"},
-		{"mySQL", "my SQL"},
-		{"mySql", "my Sql"},
-		{"mySQl", "my S Ql"},
+		{"mySQL", "my sql"},
+		{"mySql", "my sql"},
+		{"mySQl", "my s ql"},
 		{"9999", "9999"},
 		{"", ""},
 	}

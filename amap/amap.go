@@ -48,6 +48,7 @@ func NewTokenScope(variableDeclarations []string, methodName string, methodBodyT
 // expansions. AMAP is capable of select the more appropriate expansions based on available
 // information on the given context.
 func Expand(token string, scope TokenScope, referenceText []string) []string {
+	token = strings.ToLower(token)
 	patterns := []pattern{
 		(&patternBuilder{}).kind(acronymType).shortForm(token).build(),
 		(&patternBuilder{}).kind(prefixType).shortForm(token).build(),

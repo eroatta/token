@@ -1,7 +1,6 @@
 package lists
 
-
-var dicctionary = []string{"W",
+var dictionary = []string{"W",
 	"w",
 	"WW",
 	"WWW",
@@ -122674,4 +122673,3 @@ var dicctionary = []string{"W",
 	"yodeler's",
 	"yodelers",
 	"yodeled"}
-

@@ -11,13 +11,13 @@ import (
 )
 
 // DefaultExpansions contains the set of possible expansions included on the default configuration for Basic.
-var DefaultExpansions = expansion.NewSetBuilder().AddList(lists.Dicctionary).Build()
+var DefaultExpansions = expansion.NewSetBuilder().AddList(lists.Dictionary).Build()
 
 // Expand on Basic receives a token and returns an array of possible expansions.
 //
 // The Basic expansion algorithm builds a regular expression for the given token and
 // runs it against several lists built from the source code and natural words from
-// stop lists and dicctionaries. It was proposed by Lawrie, Feild and Binkley.
+// stop lists and dictionaries. It was proposed by Lawrie, Feild and Binkley.
 func Expand(token string, srcWords expansion.Set, phrases map[string]string, defaultWords expansion.Set) []string {
 	token = strings.ToLower(token)
 
@@ -41,7 +41,7 @@ func Expand(token string, srcWords expansion.Set, phrases map[string]string, def
 		return []string{strings.ReplaceAll(phrase, "-", " ")}
 	}
 
-	// stage 2: should look on the dicctionary and stop lists
+	// stage 2: should look on the dictionary and stop lists
 	expansions = exp.FindAllString(defaultWords.String(), -1)
 
 	return expansions

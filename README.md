@@ -21,7 +21,7 @@ GenTest uses a set of metrics to characterize the quality of the split.
 
 ## Expansion algorithms
 
-* **Basic**: It's the basic abbreviation and acronym expansion algorithm, which was proposed by Lawrie. This algorithm uses lists of words from the source code, a dicctionary and also a phrase list to match a token to the possible expansions.
+* **Basic**: It's the basic abbreviation and acronym expansion algorithm, which was proposed by Lawrie. This algorithm uses lists of words from the source code, a dictionary and also a phrase list to match a token to the possible expansions.
 * **AMAP**: This algorithm applies an automated approach to mining abbreviation expansions from source code.
 It's based on a scoped approach which uses contextual information at the method, program, and general software level to automatically select the most appropriate expansion for a given abbreviation.
 * **Normalize**: This algorithm is based on GenTest, and selects the best expansion for a given token on a context using the one that produces the highest score.
@@ -50,7 +50,7 @@ func main() {
 
 ### Greedy
 
-Greedy looks for the longest prefix and the longest suffix that are "on a list" (i.e. in the dicctionary, on the list of abbreviations, or on the stop list), so it requires the list to be passed as a parameter.
+Greedy looks for the longest prefix and the longest suffix that are "on a list" (i.e. in the dictionary, on the list of abbreviations, or on the stop list), so it requires the list to be passed as a parameter.
 We can build the list using the provider `ListBuilder`.
 
 Once we have our list, we can call the splitting function on Greedy, providing the token and the list of words: `greedy.Split(token, list)`.
@@ -67,7 +67,7 @@ import (
 
 func main() {
     listBuilder := greedy.NewListBuilder()
-    list := listBuilder.Dicctionary(lists.Dicctionary).
+    list := listBuilder.Dictionary(lists.Dictionary).
         KnownAbbreviations(lists.KnownAbbreviations).
         StopList(lists.Stop).Build()
 
@@ -133,7 +133,7 @@ import (
 func main() {
     var simCalculator gentest.SimilarityCalculator
     context := lists.NewBuilder().Add("http").Add("response").Build()
-    possibleExpansions := expansion.NewSetBuilder().AddList(lists.Dicctionary).Build()
+    possibleExpansions := expansion.NewSetBuilder().AddList(lists.Dictionary).Build()
 
     splitted := gentest.Split("httpResponse", simCalculator, context, possibleExpansions)
 

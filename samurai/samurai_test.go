@@ -14,9 +14,9 @@ func TestSplit_ShouldReturnValidSplits(t *testing.T) {
 		want  string
 	}{
 		{"no_split", "car", "car"},
-		{"by_lower_to_upper_case", "getString", "get String"},
-		{"by_upper_to_lower_case", "GPSstate", "GPS state"},
-		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", "AST Visitor"},
+		{"by_lower_to_upper_case", "getString", "get string"},
+		{"by_upper_to_lower_case", "GPSstate", "gps state"},
+		{"with_upper_case_and_softword_starting_with_upper_case", "ASTVisitor", "ast visitor"},
 		{"lowercase_softword", "notype", "no type"},
 		{"multiple_lowercase_softword", "astnotype", "ast no type"},
 	}

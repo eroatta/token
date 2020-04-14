@@ -24,9 +24,9 @@ func TestExpand_OnAmap_ShouldReturnExpansion(t *testing.T) {
 		token    string
 		expected []string
 	}{
-		{"long_form_found_using_prefix_pattern", "exp", []string{"expansion"}},
+		{"long_form_found_using_prefix_pattern", "exP", []string{"expansion"}},
 		{"long_form_found_using_dropped_letter_pattern", "expnsn", []string{"expansion"}},
-		{"long_form_found_using_acronym_pattern", "gui", []string{"graphical user interface"}},
+		{"long_form_found_using_acronym_pattern", "GUI", []string{"graphical user interface"}},
 		{"long_form_found_using_word_combination_pattern", "cdrdr", []string{"card reader"}},
 		{"long_form_found_handling_multiple_matches", "int", []string{"interface"}},
 		{"short_from_skipped_during_validation", "ex", []string{}},
